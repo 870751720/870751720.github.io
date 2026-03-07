@@ -330,33 +330,85 @@ export class Player {
         ctx.arc(this.x, this.y - s * 0.1, s * 0.2, 0, Math.PI * 2);
         ctx.fill();
         
-        // 多色渐变尾焰+星光粒子
-        const flameSize = inputState.mouseDown ? 25 : 15;
-        for (let i = 0; i < 3; i++) {
-            const offset = (i - 1) * s * 0.15;
+        // 多色渐变尾焰+星光粒子 - 动态流动效果
+        const flameIntensity = inputState.mouseDown ? 1.5 : 1.0;
+        const baseFlameSize = inputState.mouseDown ? 30 : 20;
+        
+        // 主尾焰 - 三层动态流动
+        for (let layer = 0; layer < 3; layer++) {
+            const layerOffset = (layer - 1) * s * 0.12;
+            const layerPhase = now / (200 + layer * 50);
+            const flicker = Math.sin(layerPhase) * 0.3 + Math.random() * 0.2;
+            const flameLength = baseFlameSize * (0.8 + flicker) * (1 - layer * 0.15);
+            const flameWidth = s * (0.12 - layer * 0.02);
+            
+            // 动态色相偏移
+            const hueShift = (now / 20) % 360;
+            const baseHue = layer * 60;
+            
             const fireGradient = ctx.createLinearGradient(
-                this.x + offset, this.y + s * 0.3,
-                this.x + offset, this.y + s * 0.3 + flameSize
+                this.x + layerOffset, this.y + s * 0.3,
+                this.x + layerOffset, this.y + s * 0.3 + flameLength
             );
-            fireGradient.addColorStop(0, `hsla(${i * 60 + now / 10}, 100%, 70%, 0.8)`);
-            fireGradient.addColorStop(0.5, `hsla(${i * 60 + now / 10 + 30}, 100%, 60%, 0.6)`);
+            fireGradient.addColorStop(0, `hsla(${(baseHue + hueShift) % 360}, 100%, 70%, ${0.9 - layer * 0.2})`);
+            fireGradient.addColorStop(0.3, `hsla(${(baseHue + hueShift + 40) % 360}, 100%, 60%, ${0.7 - layer * 0.15})`);
+            fireGradient.addColorStop(0.7, `hsla(${(baseHue + hueShift + 80) % 360}, 100%, 50%, ${0.5 - layer * 0.1})`);
             fireGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
             
             ctx.fillStyle = fireGradient;
+            ctx.shadowColor = `hsla(${(baseHue + hueShift) % 360}, 100%, 50%, 0.8)`;
+            ctx.shadowBlur = 10 + flicker * 5;
+            
             ctx.beginPath();
-            ctx.moveTo(this.x + offset - s * 0.1, this.y + s * 0.3);
-            ctx.lineTo(this.x + offset, this.y + s * 0.3 + flameSize * (0.8 + Math.random() * 0.4));
-            ctx.lineTo(this.x + offset + s * 0.1, this.y + s * 0.3);
+            ctx.moveTo(this.x + layerOffset - flameWidth, this.y + s * 0.3);
+            ctx.lineTo(this.x + layerOffset, this.y + s * 0.3 + flameLength);
+            ctx.lineTo(this.x + layerOffset + flameWidth, this.y + s * 0.3);
             ctx.closePath();
             ctx.fill();
         }
         
-        // 随机能量脉冲
-        if (Math.random() < 0.1) {
-            ctx.strokeStyle = `rgba(255, 255, 255, ${Math.random()})`;
-            ctx.lineWidth = 1;
+        // 动态粒子尾迹
+        const particleCount = inputState.mouseDown ? 5 : 3;
+        for (let i = 0; i < particleCount; i++) {
+            const particlePhase = (now / 100 + i * 0.5) % (Math.PI * 2);
+            const particleOffset = Math.sin(particlePhase) * s * 0.3;
+            const particleY = this.y + s * 0.4 + Math.random() * baseFlameSize * 0.8;
+            const particleSize = 2 + Math.random() * 3;
+            const hue = (now / 15 + i * 40) % 360;
+            
+            ctx.fillStyle = `hsla(${hue}, 100%, 70%, ${0.6 + Math.random() * 0.4})`;
+            ctx.shadowColor = `hsla(${hue}, 100%, 50%, 1)`;
+            ctx.shadowBlur = particleSize * 2;
             ctx.beginPath();
-            ctx.arc(this.x, this.y, s * (0.8 + Math.random() * 0.5), 0, Math.PI * 2);
+            ctx.arc(this.x + particleOffset, particleY, particleSize, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        
+        // 能量波纹扩散效果
+        const ripplePhase = (now % 800) / 800;
+        const rippleY = this.y + s * 0.3 + ripplePhase * baseFlameSize * 0.5;
+        const rippleWidth = s * (0.2 + ripplePhase * 0.3);
+        const rippleAlpha = (1 - ripplePhase) * 0.5;
+        
+        ctx.strokeStyle = `rgba(255, 255, 255, ${rippleAlpha})`;
+        ctx.lineWidth = 2;
+        ctx.shadowColor = '#ffffff';
+        ctx.shadowBlur = 5;
+        ctx.beginPath();
+        ctx.moveTo(this.x - rippleWidth, rippleY);
+        ctx.lineTo(this.x + rippleWidth, rippleY);
+        ctx.stroke();
+        
+        // 随机能量脉冲环
+        if (Math.random() < 0.15) {
+            const pulseRadius = s * (0.6 + Math.random() * 0.4);
+            const pulseAlpha = 0.3 + Math.random() * 0.4;
+            ctx.strokeStyle = `rgba(255, 255, 100, ${pulseAlpha})`;
+            ctx.lineWidth = 1;
+            ctx.shadowColor = '#ffff00';
+            ctx.shadowBlur = 10;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y + s * 0.4, pulseRadius, 0, Math.PI * 2);
             ctx.stroke();
         }
     }

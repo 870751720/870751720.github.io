@@ -101,13 +101,20 @@ function shoot() {
 
     InputState.lastShotTime = now;
 
+    // 获取当前飞机颜色
+    const shipColor = PlayerState.shipColor || '#00ffff';
+
     const count = PlayerState.stats.multiShot;
     if (count === 1) {
-        GameObjects.bullets.push(new Bullet(GameObjects.player.x, GameObjects.player.y - GameObjects.player.size/2));
+        const bullet = new Bullet(GameObjects.player.x, GameObjects.player.y - GameObjects.player.size/2);
+        bullet.color = shipColor;
+        GameObjects.bullets.push(bullet);
     } else {
         for (let i = 0; i < count; i++) {
             const angle = (i - (count - 1) / 2) * 0.3;
-            GameObjects.bullets.push(new Bullet(GameObjects.player.x, GameObjects.player.y - GameObjects.player.size/2, angle));
+            const bullet = new Bullet(GameObjects.player.x, GameObjects.player.y - GameObjects.player.size/2, angle);
+            bullet.color = shipColor;
+            GameObjects.bullets.push(bullet);
         }
     }
 
