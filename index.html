@@ -120,6 +120,32 @@
             box-shadow: 3px 3px 0 #1a1520;
         }
         
+        /* 开始游戏按钮 */
+        .start-game-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #6b5ce7;
+            color: #fff;
+            padding: 8px 16px;
+            font-size: 14px;
+            text-decoration: none;
+            border: 3px solid #9d8df7;
+            box-shadow: 3px 3px 0 #1a1520;
+            transition: all 0.2s ease;
+            font-family: 'VT323', 'Courier New', monospace;
+        }
+        
+        .start-game-btn:hover {
+            background: #9d8df7;
+            transform: translate(-2px, -2px);
+            box-shadow: 5px 5px 0 #1a1520;
+        }
+        
+        .start-game-btn::before {
+            content: '▶ ';
+        }
+        
         .info-section {
             flex: 1;
         }
@@ -358,6 +384,7 @@
     <div class="container">
         <!-- 角色卡 -->
         <div class="hero-card">
+            <a href="https://870751720.github.io/paper-kingdom/" class="start-game-btn" target="_blank">开始游戏</a>
             <div class="character-row">
                 <div class="avatar-container">
                     <div class="avatar"></div>
