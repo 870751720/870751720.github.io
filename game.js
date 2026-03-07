@@ -572,7 +572,7 @@ class Enemy {
                 this.size = 28;
                 this.vx = 0;
                 this.vy = 1;
-                this.color = '#00ff00';
+                this.color = '#4ade80'; // 史莱姆绿色
                 this.hp = this.maxHp = 3;
                 break;
             case 'splitter':
@@ -645,36 +645,82 @@ class Enemy {
                 break;
                 
             case 'shooter':
-                ctx.fillStyle = this.color;
+                // 绿色史莱姆 - 圆润弹性身体
+                const wobble = Math.sin(performance.now() / 200) * 2; // 呼吸动画
+                
+                // 史莱姆身体主体 - 椭圆形状，底部扁平
+                ctx.fillStyle = this.color; // 绿色主体
                 ctx.beginPath();
-                ctx.arc(this.x, this.y, half, 0, Math.PI * 2);
+                ctx.ellipse(this.x, this.y + 2, half + wobble, half - 2, 0, 0, Math.PI * 2);
                 ctx.closePath();
                 ctx.fill();
-                // 左眼白
+                
+                // 身体高光（半透明）
+                ctx.fillStyle = 'rgba(255,255,255,0.3)';
+                ctx.beginPath();
+                ctx.ellipse(this.x - 5, this.y - 3, 6, 4, -0.3, 0, Math.PI * 2);
+                ctx.closePath();
+                ctx.fill();
+                
+                // 小高光点
+                ctx.fillStyle = 'rgba(255,255,255,0.6)';
+                ctx.beginPath();
+                ctx.arc(this.x - 7, this.y - 5, 2, 0, Math.PI * 2);
+                ctx.closePath();
+                ctx.fill();
+                
+                // 左眼 - 萌系大眼
                 ctx.fillStyle = '#fff';
                 ctx.beginPath();
-                ctx.arc(this.x - 6, this.y - 2, 5, 0, Math.PI * 2);
+                ctx.ellipse(this.x - 7, this.y - 2, 5, 6, 0, 0, Math.PI * 2);
                 ctx.closePath();
                 ctx.fill();
-                // 右眼白
+                
+                // 右眼
                 ctx.beginPath();
-                ctx.arc(this.x + 6, this.y - 2, 5, 0, Math.PI * 2);
+                ctx.ellipse(this.x + 7, this.y - 2, 5, 6, 0, 0, Math.PI * 2);
                 ctx.closePath();
                 ctx.fill();
-                // 左瞳孔
-                ctx.fillStyle = '#ff0000';
+                
+                // 左瞳孔（随时间轻微移动，显得生动）
+                const eyeOffset = Math.sin(performance.now() / 500) * 1;
+                ctx.fillStyle = '#1a472a'; // 深绿色瞳孔
                 ctx.beginPath();
-                ctx.arc(this.x - 6, this.y - 2, 2, 0, Math.PI * 2);
+                ctx.arc(this.x - 6 + eyeOffset, this.y - 1, 2.5, 0, Math.PI * 2);
                 ctx.closePath();
                 ctx.fill();
+                
                 // 右瞳孔
                 ctx.beginPath();
-                ctx.arc(this.x + 6, this.y - 2, 2, 0, Math.PI * 2);
+                ctx.arc(this.x + 8 + eyeOffset, this.y - 1, 2.5, 0, Math.PI * 2);
                 ctx.closePath();
                 ctx.fill();
-                // 炮管
-                ctx.fillStyle = '#333';
-                ctx.fillRect(this.x - 2, this.y + 5, 4, 10);
+                
+                // 眼睛高光
+                ctx.fillStyle = '#fff';
+                ctx.beginPath();
+                ctx.arc(this.x - 7 + eyeOffset, this.y - 2, 1, 0, Math.PI * 2);
+                ctx.closePath();
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(this.x + 7 + eyeOffset, this.y - 2, 1, 0, Math.PI * 2);
+                ctx.closePath();
+                ctx.fill();
+                
+                // 嘴巴（小波浪线）
+                ctx.strokeStyle = '#1a472a';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(this.x - 3, this.y + 6);
+                ctx.quadraticCurveTo(this.x, this.y + 9, this.x + 3, this.y + 6);
+                ctx.stroke();
+                
+                // 发射口（史莱姆吐出子弹的位置）
+                ctx.fillStyle = '#0f2e1a';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y + half - 3, 4, 0, Math.PI * 2);
+                ctx.closePath();
+                ctx.fill();
                 break;
                 
             case 'splitter':
