@@ -78,36 +78,34 @@
             image-rendering: pixelated;
         }
         
-        /* 骰子点 - 中心1点 */
+        /* 骰子点 - 6点布局 左列3个 */
         .avatar::before {
             content: '';
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 20px;
-            height: 20px;
-            background: #333;
-            border-radius: 50%;
-        }
-        
-        /* 骰子角点 - 左上右下对角 */
-        .avatar::after {
-            content: '';
-            position: absolute;
             top: 15px;
-            left: 15px;
+            left: 22px;
             width: 14px;
             height: 14px;
             background: #333;
             border-radius: 50%;
             box-shadow: 
-                /* 右上 */
-                72px 0 0 #333,
-                /* 左下 */
-                0 72px 0 #333,
-                /* 右下 */
-                72px 72px 0 #333;
+                0 38px 0 #333,
+                0 76px 0 #333;
+        }
+        
+        /* 骰子右列3个点 */
+        .avatar::after {
+            content: '';
+            position: absolute;
+            top: 15px;
+            right: 22px;
+            width: 14px;
+            height: 14px;
+            background: #333;
+            border-radius: 50%;
+            box-shadow: 
+                0 38px 0 #333,
+                0 76px 0 #333;
         }
         
         .level-badge {
@@ -186,9 +184,9 @@
             transition: width 1s ease;
         }
         
-        .stat-fill.hp { width: 85%; background: linear-gradient(90deg, #c45c5c 0%, #e87e7e 100%); }
-        .stat-fill.mp { width: 92%; background: linear-gradient(90deg, #5c5cc4 0%, #7e7ee8 100%); }
-        .stat-fill.exp { width: 67%; background: linear-gradient(90deg, #6b5ce7 0%, #9d8df7 100%); }
+        .stat-fill.hp { width: 88%; background: linear-gradient(90deg, #c45c5c 0%, #e87e7e 100%); }
+        .stat-fill.mp { width: 99%; background: linear-gradient(90deg, #3a6b8b 0%, #5c9bc4 100%); }
+        .stat-fill.exp { width: 66%; background: linear-gradient(90deg, #6b5ce7 0%, #9d8df7 100%); }
         
         .stat-fill::after {
             content: '';
@@ -381,21 +379,21 @@
                     <div class="stat-bar">
                         <div class="stat-fill hp"></div>
                     </div>
-                    <span class="stat-value">85/100</span>
+                    <span class="stat-value">88/100</span>
                 </div>
                 <div class="stat-row">
                     <span class="stat-label">MP</span>
                     <div class="stat-bar">
                         <div class="stat-fill mp"></div>
                     </div>
-                    <span class="stat-value">92/100</span>
+                    <span class="stat-value">99/100</span>
                 </div>
                 <div class="stat-row">
                     <span class="stat-label">EXP</span>
                     <div class="stat-bar">
                         <div class="stat-fill exp"></div>
                     </div>
-                    <span class="stat-value">67%</span>
+                    <span class="stat-value">66%</span>
                 </div>
             </div>
         </div>
@@ -405,11 +403,11 @@
             <div class="info-header">► 角色档案</div>
             <div class="info-item">
                 <span class="info-icon heart">♥</span>
-                <span>西北大学毕业</span>
+                <span>西北大学</span>
             </div>
             <div class="info-item">
                 <span class="info-icon diamond">◆</span>
-                <span>现任网易游戏 · 游戏开发工程师</span>
+                <span>网易游戏 · 游戏开发工程师</span>
             </div>
             <div class="info-item">
                 <span class="info-icon star">★</span>
