@@ -61,7 +61,7 @@ function renderMaterialsGrid(mats) {
     ];
 
     return materials.map(mat => `
-        <div class="material-slot">
+        <div class="material-slot" data-tooltip="${mat.name}: ${mat.desc}">
             <div class="slot-icon" style="color: ${mat.color}">${mat.icon}</div>
             <div class="slot-count">${mats[mat.key] || 0}</div>
         </div>
