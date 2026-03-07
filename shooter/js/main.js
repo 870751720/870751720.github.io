@@ -6,7 +6,7 @@ import { DOM, setContext, GameState } from './state.js';
 import { startGame } from './game.js';
 import { InputState } from './state.js';
 import { loadProgress, renderUpgradeShop, updateCoinDisplays } from './upgrades.js';
-import { loadShipData, renderShipShop, updateShipCoinDisplay } from './ships.js';
+import { loadShipData, renderShipShop, updateShipCoinDisplay, updateMaterialDisplay } from './ships.js';
 
 /**
  * 初始化游戏
@@ -71,6 +71,7 @@ function initGame() {
             shipScreen.classList.remove('hidden');
             renderShipShop();
             updateShipCoinDisplay();
+            updateMaterialDisplay();
         });
     }
 

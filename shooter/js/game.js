@@ -10,7 +10,15 @@ import { collectItem, spawnItem, updateBuffs } from './items.js';
 import { Player, Wingman, Bullet, Enemy, Item, Particle } from './entities.js';
 import { Destroyer, FrostGiant, LightningRider, MechSpider, ShadowAssassin, ChaosEye } from './bosses.js';
 import { addCoins, updateCoinDisplays, applyUpgrades } from './upgrades.js';
-import { applyShipStats } from './ships.js';
+import { applyShipStats, addMaterial, MATERIAL_CONFIGS } from './ships.js';
+
+// 材料颜色映射
+const MATERIAL_COLORS = {
+    common: '#888888',
+    rare: '#4ade80',
+    epic: '#60a5fa',
+    legendary: '#fbbf24'
+};
 
 const bossClasses = { Destroyer, FrostGiant, LightningRider, MechSpider, ShadowAssassin, ChaosEye };
 
@@ -166,6 +174,29 @@ function handleEnemyDeath(enemy) {
     const coinAmount = enemy.type === 'boss' ? 50 : 5;
     const actualCoins = addCoins(coinAmount);
     showFloatingText(enemy.x, enemy.y, `+${actualCoins}💰`, '#ffd700');
+
+    // 材料掉落
+    if (enemy.type === 'boss') {
+        // Boss掉落史诗或传说材料
+        const matType = Math.random() < 0.7 ? 'epic' : 'legendary';
+        const matAmount = Math.random() < 0.7 ? 1 : 2;
+        addMaterial(matType, matAmount);
+        showFloatingText(enemy.x, enemy.y - 20, `+${matAmount}${matType === 'epic' ? '⚡' : '💎'}`, MATERIAL_COLORS[matType]);
+    } else if (enemy.type === 'shooter' || enemy.type === 'tank' || enemy.type === 'splitter') {
+        // 精英怪掉落稀有材料 (30%概率)
+        if (Math.random() < 0.3) {
+            addMaterial('rare', 1);
+            showFloatingText(enemy.x, enemy.y - 20, `+1🔩`, '#4ade80');
+        } else {
+            // 普通材料
+            addMaterial('common', 1);
+        }
+    } else {
+        // 普通怪掉落普通材料 (50%概率)
+        if (Math.random() < 0.5) {
+            addMaterial('common', 1);
+        }
+    }
 
     if (enemy.type !== 'boss') {
         GameState.killCount++;

@@ -1,5 +1,5 @@
 /**
- * 飞机系统 - 不同等级有不同美术表现
+ * 飞机系统 - 不同等级有不同美术表现 + 强化系统
  */
 
 import { PlayerState, GameState } from './state.js';
@@ -7,10 +7,18 @@ import { saveProgress } from './upgrades.js';
 
 // 等级配置
 export const RANK_CONFIGS = {
-    'C': { name: 'C', color: '#888888', glow: 0, priceMultiplier: 1 },
-    'B': { name: 'B', color: '#4ade80', glow: 10, priceMultiplier: 1.5 },
-    'A': { name: 'A', color: '#60a5fa', glow: 20, priceMultiplier: 2.5 },
-    'SSR': { name: 'SSR', color: '#fbbf24', glow: 30, priceMultiplier: 5 }
+    'C': { name: 'C', color: '#888888', glow: 0, priceMultiplier: 1, maxEnhance: 5 },
+    'B': { name: 'B', color: '#4ade80', glow: 10, priceMultiplier: 1.5, maxEnhance: 7 },
+    'A': { name: 'A', color: '#60a5fa', glow: 20, priceMultiplier: 2.5, maxEnhance: 10 },
+    'SSR': { name: 'SSR', color: '#fbbf24', glow: 30, priceMultiplier: 5, maxEnhance: 15 }
+};
+
+// 材料配置
+export const MATERIAL_CONFIGS = {
+    common: { name: '普通零件', icon: '⚙️', color: '#888888', desc: '普通敌机掉落的零件' },
+    rare: { name: '稀有合金', icon: '🔩', color: '#4ade80', desc: '精英敌机掉落的合金' },
+    epic: { name: '史诗核心', icon: '⚡', color: '#60a5fa', desc: 'Boss掉落的能量核心' },
+    legendary: { name: '传说碎片', icon: '💎', color: '#fbbf24', desc: '传说中的神秘碎片' }
 };
 
 // 飞机配置
@@ -111,6 +119,109 @@ export const SHIP_CONFIGS = [
     }
 ];
 
+// 获取飞机强化等级
+export function getShipEnhanceLevel(shipId) {
+    return (GameState.shipEnhancements || {})[shipId] || 0;
+}
+
+// 计算强化属性加成
+export function getEnhancedStats(config) {
+    const level = getShipEnhanceLevel(config.id);
+    const multiplier = 1 + (level * 0.05); // 每级+5%
+    
+    return {
+        maxHp: Math.floor(config.stats.maxHp * multiplier),
+        damage: config.stats.damage * multiplier,
+        fireRate: Math.max(30, config.stats.fireRate - (level * 3)),
+        multiShot: config.stats.multiShot,
+        bulletSize: config.stats.bulletSize * (1 + level * 0.02),
+        piercing: config.stats.piercing || false,
+        dodgeChance: (config.stats.dodgeChance || 0) + (level * 0.01),
+        startShield: (config.stats.startShield || 0) + Math.floor(level / 3),
+        revive: config.stats.revive || false
+    };
+}
+
+// 计算强化消耗
+export function getEnhanceCost(config, currentLevel) {
+    const rankCfg = RANK_CONFIGS[config.rank];
+    const baseMultiplier = { 'C': 1, 'B': 2, 'A': 3, 'SSR': 5 }[config.rank];
+    
+    // 材料需求
+    const materials = {};
+    const nextLevel = currentLevel + 1;
+    
+    // 每级都需要普通材料
+    materials.common = 5 * baseMultiplier * nextLevel;
+    
+    // 3级以上需要稀有材料
+    if (nextLevel >= 3) {
+        materials.rare = 2 * baseMultiplier * (nextLevel - 2);
+    }
+    
+    // 5级以上需要史诗材料
+    if (nextLevel >= 5) {
+        materials.epic = 1 * baseMultiplier * (nextLevel - 4);
+    }
+    
+    // 10级以上需要传说材料
+    if (nextLevel >= 10) {
+        materials.legendary = 1 * (nextLevel - 9);
+    }
+    
+    // 金币需求
+    const coins = 50 * baseMultiplier * Math.pow(1.5, currentLevel);
+    
+    return { materials, coins: Math.floor(coins) };
+}
+
+// 强化飞机
+export function enhanceShip(shipId) {
+    const config = SHIP_CONFIGS.find(s => s.id === shipId);
+    if (!config) return { success: false, message: '飞机不存在' };
+    if (!hasShip(shipId)) return { success: false, message: '未拥有该飞机' };
+    
+    const currentLevel = getShipEnhanceLevel(shipId);
+    const maxLevel = RANK_CONFIGS[config.rank].maxEnhance;
+    
+    if (currentLevel >= maxLevel) {
+        return { success: false, message: '已达到最大强化等级' };
+    }
+    
+    const cost = getEnhanceCost(config, currentLevel);
+    
+    // 检查材料
+    const mats = GameState.materials || {};
+    for (const [type, need] of Object.entries(cost.materials)) {
+        if ((mats[type] || 0) < need) {
+            return { success: false, message: `材料不足: ${MATERIAL_CONFIGS[type].name}` };
+        }
+    }
+    
+    // 检查金币
+    if ((GameState.coins || 0) < cost.coins) {
+        return { success: false, message: '金币不足' };
+    }
+    
+    // 扣除材料和金币
+    for (const [type, need] of Object.entries(cost.materials)) {
+        mats[type] -= need;
+    }
+    GameState.coins -= cost.coins;
+    
+    // 升级
+    if (!GameState.shipEnhancements) GameState.shipEnhancements = {};
+    GameState.shipEnhancements[shipId] = currentLevel + 1;
+    
+    saveShipData();
+    
+    return { 
+        success: true, 
+        message: '强化成功',
+        newLevel: currentLevel + 1
+    };
+}
+
 // 获取等级配置
 export function getRankConfig(rank) {
     return RANK_CONFIGS[rank] || RANK_CONFIGS['C'];
@@ -160,19 +271,23 @@ export function applyShipStats() {
     const config = SHIP_CONFIGS.find(s => s.id === shipId);
     if (!config) return;
     
-    PlayerState.maxHp = config.stats.maxHp;
-    PlayerState.stats.damage = config.stats.damage;
-    PlayerState.stats.fireRate = config.stats.fireRate;
-    PlayerState.stats.multiShot = config.stats.multiShot;
-    PlayerState.stats.bulletSize = config.stats.bulletSize;
-    PlayerState.stats.piercing = config.stats.piercing || false;
-    PlayerState.stats.dodgeChance = config.stats.dodgeChance || 0;
-    PlayerState.stats.startShield = config.stats.startShield || 0;
-    PlayerState.stats.revive = config.stats.revive || false;
+    // 获取强化后的属性
+    const enhanced = getEnhancedStats(config);
+    
+    PlayerState.maxHp = enhanced.maxHp;
+    PlayerState.stats.damage = enhanced.damage;
+    PlayerState.stats.fireRate = enhanced.fireRate;
+    PlayerState.stats.multiShot = enhanced.multiShot;
+    PlayerState.stats.bulletSize = enhanced.bulletSize;
+    PlayerState.stats.piercing = enhanced.piercing;
+    PlayerState.stats.dodgeChance = enhanced.dodgeChance;
+    PlayerState.stats.startShield = enhanced.startShield;
+    PlayerState.stats.revive = enhanced.revive;
     
     PlayerState.shipColor = config.color;
     PlayerState.shipId = config.id;
     PlayerState.shipRank = config.rank;
+    PlayerState.enhanceLevel = getShipEnhanceLevel(shipId);
 }
 
 // 保存数据
@@ -181,6 +296,8 @@ export function saveShipData() {
     data.ownedShips = GameState.ownedShips || ['basic'];
     data.currentShip = GameState.currentShip || 'basic';
     data.coins = GameState.coins || 0;
+    data.materials = GameState.materials || { common: 0, rare: 0, epic: 0, legendary: 0 };
+    data.shipEnhancements = GameState.shipEnhancements || {};
     localStorage.setItem('shooterProgress', JSON.stringify(data));
 }
 
@@ -191,11 +308,24 @@ export function loadShipData() {
         if (data) {
             GameState.ownedShips = data.ownedShips || ['basic'];
             GameState.currentShip = data.currentShip || 'basic';
+            GameState.materials = data.materials || { common: 0, rare: 0, epic: 0, legendary: 0 };
+            GameState.shipEnhancements = data.shipEnhancements || {};
         }
     } catch (e) {
         GameState.ownedShips = ['basic'];
         GameState.currentShip = 'basic';
+        GameState.materials = { common: 0, rare: 0, epic: 0, legendary: 0 };
+        GameState.shipEnhancements = {};
     }
+}
+
+// 添加材料
+export function addMaterial(type, amount) {
+    if (!GameState.materials) GameState.materials = { common: 0, rare: 0, epic: 0, legendary: 0 };
+    if (!GameState.materials[type]) GameState.materials[type] = 0;
+    GameState.materials[type] += amount;
+    saveShipData();
+    return amount;
 }
 
 // 渲染商店
@@ -226,7 +356,8 @@ export function renderShipShop() {
         groups[rank].forEach(config => {
             const owned = hasShip(config.id);
             const selected = getCurrentShip() === config.id;
-            const rankCfg = rankConfig;
+            const enhanceLevel = getShipEnhanceLevel(config.id);
+            const maxLevel = rankConfig.maxEnhance;
             
             const item = document.createElement('div');
             item.className = `ship-item rank-${config.rank.toLowerCase()} ${owned ? 'owned' : ''} ${selected ? 'selected' : ''}`;
@@ -246,6 +377,14 @@ export function renderShipShop() {
                 buttonDisabled = (GameState.coins || 0) < config.price;
             }
             
+            // 强化显示
+            const enhanceDisplay = owned ? `
+                <div class="ship-enhance-level">+${enhanceLevel}/${maxLevel}</div>
+                <button class="enhance-btn ${enhanceLevel >= maxLevel ? 'maxed' : ''}" data-ship-id="${config.id}">
+                    ${enhanceLevel >= maxLevel ? '已满级' : '强化'}
+                </button>
+            ` : '';
+            
             item.innerHTML = `
                 <div class="ship-rank rank-${config.rank.toLowerCase()}">${config.rank}</div>
                 <div class="ship-preview rank-${config.rank.toLowerCase()}" style="--ship-color: ${config.color}"></div>
@@ -259,8 +398,10 @@ export function renderShipShop() {
                 <button class="ship-btn ${buttonClass}" ${buttonDisabled ? 'disabled' : ''}>
                     ${buttonText}
                 </button>
+                ${enhanceDisplay}
             `;
             
+            // 装备按钮
             const btn = item.querySelector('.ship-btn');
             btn.addEventListener('click', () => {
                 if (owned && !selected) {
@@ -271,13 +412,130 @@ export function renderShipShop() {
                     if (result.success) {
                         renderShipShop();
                         updateShipCoinDisplay();
+                        updateMaterialDisplay();
                     }
                 }
             });
             
+            // 强化按钮
+            const enhanceBtn = item.querySelector('.enhance-btn');
+            if (enhanceBtn && enhanceLevel < maxLevel) {
+                enhanceBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    showEnhanceModal(config);
+                });
+            }
+            
             grid.appendChild(item);
         });
     });
+}
+
+// 显示强化弹窗
+function showEnhanceModal(config) {
+    const level = getShipEnhanceLevel(config.id);
+    const maxLevel = RANK_CONFIGS[config.rank].maxEnhance;
+    const cost = getEnhanceCost(config, level);
+    const mats = GameState.materials || {};
+    
+    // 创建弹窗
+    const modal = document.createElement('div');
+    modal.className = 'enhance-modal';
+    
+    // 材料列表
+    let materialsHtml = '';
+    for (const [type, need] of Object.entries(cost.materials)) {
+        const cfg = MATERIAL_CONFIGS[type];
+        const have = mats[type] || 0;
+        const enough = have >= need;
+        materialsHtml += `
+            <div class="material-item ${enough ? 'enough' : 'not-enough'}">
+                <span class="material-icon" style="color: ${cfg.color}">${cfg.icon}</span>
+                <span class="material-name">${cfg.name}</span>
+                <span class="material-need">${have}/${need}</span>
+            </div>
+        `;
+    }
+    
+    // 强化后属性预览
+    const currentStats = getEnhancedStats(config);
+    const nextStats = (() => {
+        // 模拟+1级
+        GameState.shipEnhancements[config.id] = level + 1;
+        const stats = getEnhancedStats(config);
+        delete GameState.shipEnhancements[config.id];
+        if (level > 0) GameState.shipEnhancements[config.id] = level;
+        return stats;
+    })();
+    
+    modal.innerHTML = `
+        <div class="enhance-modal-content">
+            <h3>${config.name} 强化</h3>
+            <div class="enhance-current">当前等级: +${level} / ${maxLevel}</div>
+            
+            <div class="enhance-stats-compare">
+                <div class="stats-column">
+                    <div class="stats-title">当前</div>
+                    <div>❤️ ${currentStats.maxHp}</div>
+                    <div>⚔️ ${currentStats.damage.toFixed(1)}</div>
+                    <div>⚡ ${(1000/currentStats.fireRate).toFixed(1)}/s</div>
+                </div>
+                <div class="stats-arrow">→</div>
+                <div class="stats-column next">
+                    <div class="stats-title">+${level + 1}</div>
+                    <div>❤️ ${nextStats.maxHp}</div>
+                    <div>⚔️ ${nextStats.damage.toFixed(1)}</div>
+                    <div>⚡ ${(1000/nextStats.fireRate).toFixed(1)}/s</div>
+                </div>
+            </div>
+            
+            <div class="enhance-materials">
+                <div class="materials-title">强化材料</div>
+                ${materialsHtml}
+            </div>
+            
+            <div class="enhance-coin-cost">
+                💰 ${cost.coins}
+            </div>
+            
+            <div class="enhance-buttons">
+                <button class="cancel-btn">取消</button>
+                <button class="confirm-btn ${GameState.coins < cost.coins ? 'disabled' : ''}">强化</button>
+            </div>
+        </div>
+    `;
+    
+    // 关闭弹窗
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.remove();
+        }
+    });
+    
+    modal.querySelector('.cancel-btn').addEventListener('click', () => {
+        modal.remove();
+    });
+    
+    // 确认强化
+    const confirmBtn = modal.querySelector('.confirm-btn');
+    confirmBtn.addEventListener('click', () => {
+        const result = enhanceShip(config.id);
+        if (result.success) {
+            modal.remove();
+            renderShipShop();
+            updateShipCoinDisplay();
+            updateMaterialDisplay();
+        } else {
+            confirmBtn.textContent = result.message;
+            confirmBtn.classList.add('error');
+            setTimeout(() => {
+                confirmBtn.textContent = '强化';
+                confirmBtn.classList.remove('error');
+            }, 1500);
+        }
+    });
+    
+    document.body.appendChild(modal);
 }
 
 // 更新金币显示
@@ -286,4 +544,26 @@ export function updateShipCoinDisplay() {
         const el = document.getElementById(id);
         if (el) el.textContent = GameState.coins || 0;
     });
+}
+
+// 更新材料显示
+export function updateMaterialDisplay() {
+    const container = document.getElementById('material-display');
+    if (!container) return;
+    
+    const mats = GameState.materials || {};
+    container.innerHTML = `
+        <div class="material-count" title="${MATERIAL_CONFIGS.common.name}">
+            <span style="color: ${MATERIAL_CONFIGS.common.color}">⚙️</span> ${mats.common || 0}
+        </div>
+        <div class="material-count" title="${MATERIAL_CONFIGS.rare.name}">
+            <span style="color: ${MATERIAL_CONFIGS.rare.color}">🔩</span> ${mats.rare || 0}
+        </div>
+        <div class="material-count" title="${MATERIAL_CONFIGS.epic.name}">
+            <span style="color: ${MATERIAL_CONFIGS.epic.color}">⚡</span> ${mats.epic || 0}
+        </div>
+        <div class="material-count" title="${MATERIAL_CONFIGS.legendary.name}">
+            <span style="color: ${MATERIAL_CONFIGS.legendary.color}">💎</span> ${mats.legendary || 0}
+        </div>
+    `;
 }

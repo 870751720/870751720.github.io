@@ -7,6 +7,7 @@
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="style-rank.css">
+    <link rel="stylesheet" href="style-enhance.css">
 </head>
 <body>
     <canvas id="game-canvas"></canvas>
@@ -46,7 +47,10 @@
     <!-- 飞机商店 -->
     <div class="ship-screen hidden" id="ship-screen">
         <h2>飞机商店</h2>
-        <div class="ship-coins">💰 <span id="ship-coin-display">0</span></div>
+        <div class="ship-header">
+            <div class="ship-coins">💰 <span id="ship-coin-display">0</span></div>
+            <div class="material-display" id="material-display"></div>
+        </div>
         <div class="ship-grid" id="ship-grid">
             <!-- 飞机由JS生成 -->
         </div>
