@@ -21,6 +21,8 @@ export const PlayerState = {
     hp: 3,
     maxHp: 3,
     shield: 0,
+    invincible: false,      // 是否无敌
+    invincibleEndTime: 0,   // 无敌结束时间
     stats: {
         fireRate: 150,
         bulletSize: 1,
@@ -82,6 +84,8 @@ export function resetPlayerState() {
     PlayerState.hp = 3;
     PlayerState.maxHp = 3;
     PlayerState.shield = 0;
+    PlayerState.invincible = false;
+    PlayerState.invincibleEndTime = 0;
     PlayerState.stats = {
         fireRate: 150,
         bulletSize: 1,

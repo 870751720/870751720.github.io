@@ -17,7 +17,6 @@ export const ITEM_TYPES = [
     { id: 'perm_dmg', name: '永久伤害+', color: '#ff4444', duration: 0, icon: '↑✦', permanent: true },
     { id: 'wingman', name: '僚机', color: '#00aaff', duration: 0, icon: '✈', permanent: true },
     { id: 'maxhp', name: '生命上限+', color: '#ff8888', duration: 0, icon: '↑♥', permanent: true },
-    { id: 'playersize', name: '机体变大', color: '#aaaaaa', duration: 0, icon: '↑□', permanent: true },
     
     // 即时效果
     { id: 'shield', name: '护盾', color: '#00ffaa', duration: 0, icon: '⛨', instant: true },

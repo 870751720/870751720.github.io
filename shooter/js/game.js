@@ -31,6 +31,11 @@ export function gameLoop(timestamp) {
     // 更新系统
     updateBuffs(dt);
     
+    // 更新无敌状态
+    if (PlayerState.invincible && performance.now() > PlayerState.invincibleEndTime) {
+        PlayerState.invincible = false;
+    }
+    
     // 玩家射击
     if (InputState.mouseDown && timestamp - InputState.lastShotTime > PlayerState.stats.fireRate) {
         shoot();
@@ -169,6 +174,9 @@ function handleEnemyDeath(enemy) {
  * 处理玩家被击中
  */
 function handlePlayerHit(obj) {
+    // 无敌状态下不受伤害
+    if (PlayerState.invincible) return;
+    
     if (obj.type !== 'boss') obj.active = false;
     
     if (PlayerState.shield > 0) {
@@ -177,6 +185,9 @@ function handlePlayerHit(obj) {
     } else {
         PlayerState.hp--;
         showFloatingText(GameObjects.player.x, GameObjects.player.y, '-1 HP', '#ff5555');
+        // 设置2秒无敌时间
+        PlayerState.invincible = true;
+        PlayerState.invincibleEndTime = performance.now() + 2000;
     }
     
     updateHpDisplay();

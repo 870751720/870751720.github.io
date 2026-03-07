@@ -56,6 +56,16 @@ export class Player {
         const s = this.size;
         const now = performance.now();
         
+        // 无敌状态 - 闪烁效果
+        if (PlayerState.invincible) {
+            const remaining = PlayerState.invincibleEndTime - now;
+            // 最后0.5秒闪烁加快
+            const flashSpeed = remaining < 500 ? 50 : 100;
+            if (Math.floor(now / flashSpeed) % 2 === 0) {
+                ctx.globalAlpha = 0.4;
+            }
+        }
+        
         // 护盾特效 - 多层旋转光环
         if (PlayerState.shield > 0) {
             const shieldRadius = s + 15 + Math.sin(now / 200) * 3;
@@ -118,6 +128,11 @@ export class Player {
         ctx.fill();
         
         ctx.shadowBlur = 0;
+        
+        // 恢复透明度（无敌闪烁效果）
+        if (PlayerState.invincible) {
+            ctx.globalAlpha = 1;
+        }
     }
 }
 
@@ -284,7 +299,6 @@ export class Item {
             if (type.id === 'perm_dmg') return stats.damage < 10;
             if (type.id === 'wingman') return stats.wingmanCount < 3;
             if (type.id === 'maxhp') return PlayerState.maxHp < 10;
-            if (type.id === 'playersize') return stats.sizeLevel < 3;
             return true;
         });
         

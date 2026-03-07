@@ -41,8 +41,7 @@ function handlePermanentItem(type, item) {
             PlayerState.hp++; 
             updateHpDisplay(); 
             return '生命上限+1'; 
-        },
-        playersize: () => { stats.sizeLevel++; return '机体变大!'; }
+        }
     };
     
     const text = effects[type.id]();
