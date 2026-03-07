@@ -5,6 +5,22 @@
 import { GameState } from './state.js';
 import { MATERIAL_CONFIGS } from './ships.js';
 
+// 品质颜色配置
+const TIER_COLORS = {
+    common: '#888888',
+    rare: '#4ade80',
+    epic: '#60a5fa',
+    legendary: '#fbbf24'
+};
+
+// 品质中文名
+const TIER_NAMES = {
+    common: '普通',
+    rare: '稀有',
+    epic: '史诗',
+    legendary: '传说'
+};
+
 // 全局 tooltip 元素
 let globalTooltip = null;
 
@@ -15,33 +31,22 @@ function createGlobalTooltip() {
     globalTooltip = document.createElement('div');
     globalTooltip.id = 'global-inventory-tooltip';
     globalTooltip.className = 'global-inventory-tooltip';
-    globalTooltip.style.cssText = `
-        position: fixed;
-        background: linear-gradient(135deg, rgba(30, 30, 50, 0.98), rgba(20, 20, 35, 0.98));
-        color: #fff;
-        padding: 10px 14px;
-        border-radius: 8px;
-        font-size: 13px;
-        white-space: nowrap;
-        z-index: 99999;
-        border: 1px solid rgba(157, 141, 247, 0.6);
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
-        pointer-events: none;
-        opacity: 0;
-        visibility: hidden;
-        transition: opacity 0.15s;
-    `;
     document.body.appendChild(globalTooltip);
 }
 
 // 显示 tooltip
-function showTooltip(e, text) {
+function showTooltip(e, mat, count) {
     if (!globalTooltip) createGlobalTooltip();
     
-    globalTooltip.textContent = text;
-    globalTooltip.style.opacity = '1';
-    globalTooltip.style.visibility = 'visible';
+    const tierColor = TIER_COLORS[mat.tier] || '#fff';
     
+    globalTooltip.innerHTML = `
+        <div class="tooltip-name" style="color: ${tierColor}">${mat.name}</div>
+        <div class="tooltip-count">${mat.icon} ${count} 个</div>
+        <div class="tooltip-desc">${mat.desc}</div>
+    `;
+    
+    globalTooltip.classList.add('show');
     updateTooltipPosition(e);
 }
 
@@ -54,14 +59,12 @@ function updateTooltipPosition(e) {
     
     globalTooltip.style.left = x + 'px';
     globalTooltip.style.top = y + 'px';
-    globalTooltip.style.transform = 'translate(-50%, -100%)';
 }
 
 // 隐藏 tooltip
 function hideTooltip() {
     if (!globalTooltip) return;
-    globalTooltip.style.opacity = '0';
-    globalTooltip.style.visibility = 'hidden';
+    globalTooltip.classList.remove('show');
 }
 
 // 渲染背包界面
@@ -118,9 +121,12 @@ function bindSlotEvents(container) {
     const slots = container.querySelectorAll('.material-slot');
     
     slots.forEach(slot => {
+        const matKey = slot.dataset.mat;
+        const mat = MATERIAL_CONFIGS[matKey];
+        const count = parseInt(slot.dataset.count) || 0;
+        
         slot.addEventListener('mouseenter', (e) => {
-            const tooltipText = slot.dataset.tooltip;
-            if (tooltipText) showTooltip(e, tooltipText);
+            if (mat) showTooltip(e, mat, count);
         });
         
         slot.addEventListener('mouseleave', () => {
@@ -143,11 +149,11 @@ function renderMaterialsGrid(mats) {
     ];
 
     return materials.map(mat => {
-        const tooltipText = `${mat.name}: ${mat.desc}`;
+        const count = mats[mat.key] || 0;
         return `
-            <div class="material-slot" data-tooltip="${tooltipText}">
+            <div class="material-slot tier-${mat.tier}" data-mat="${mat.key}" data-count="${count}">
                 <div class="slot-icon" style="color: ${mat.color}">${mat.icon}</div>
-                <div class="slot-count">${mats[mat.key] || 0}</div>
+                <div class="slot-count">${count}</div>
             </div>
         `;
     }).join('');
