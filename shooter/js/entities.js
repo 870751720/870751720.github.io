@@ -57,6 +57,7 @@ export class Player {
         const now = performance.now();
         
         // 护盾特效 - 多层旋转光环
+        console.log('Player.draw - shield:', PlayerState.shield);
         if (PlayerState.shield > 0) {
             const shieldRadius = s + 15 + Math.sin(now / 200) * 3;
             const rotation = now / 500;
