@@ -12,6 +12,9 @@ let selectedUpgradeShip = null;
 // 收藏的飞机列表
 let favoriteShips = [];
 
+// 品级权重
+const RANK_WEIGHT = { 'C': 1, 'B': 2, 'A': 3, 'SSR': 4 };
+
 // 加载收藏数据
 export function loadFavoriteShips() {
     try {
@@ -40,16 +43,13 @@ export function toggleFavoriteShip(shipId) {
         favoriteShips.push(shipId);
     }
     saveFavoriteShips();
-    return index === -1; // 返回是否已收藏
+    return index === -1;
 }
 
 // 检查是否收藏
 export function isFavoriteShip(shipId) {
     return favoriteShips.includes(shipId);
 }
-
-// 品级权重
-const RANK_WEIGHT = { 'SSR': 4, 'A': 3, 'B': 2, 'C': 1 };
 
 // 飞机专属强化项目配置
 export const SHIP_UPGRADE_CONFIGS = [
@@ -81,7 +81,7 @@ export const SHIP_UPGRADE_CONFIGS = [
         maxLevel: 10,
         baseCost: 100,
         costMultiplier: 1.45,
-        getEffect: (level, baseStat) => baseStat * (1 - level * 0.03)  // 射速是越小越快
+        getEffect: (level, baseStat) => baseStat * (1 - level * 0.03)
     },
     {
         id: 'critBonus',
@@ -129,10 +129,8 @@ export function buyShipUpgrade(shipId, upgradeId) {
     const cost = getShipUpgradeCost(config, level);
     if ((GameState.coins || 0) < cost) return { success: false, message: '金币不足' };
 
-    // 扣除金币
     GameState.coins -= cost;
 
-    // 提升等级
     if (!GameState.shipUpgrades) GameState.shipUpgrades = {};
     if (!GameState.shipUpgrades[shipId]) GameState.shipUpgrades[shipId] = {};
     GameState.shipUpgrades[shipId][upgradeId] = level + 1;
@@ -169,14 +167,12 @@ export function applyShipUpgradeEffects(shipId) {
 
     const upgrades = GameState.shipUpgrades?.[shipId] || {};
 
-    // 基础属性
     let hpMultiplier = 1;
     let damageMultiplier = 1;
     let fireRateMultiplier = 1;
     let critChance = 0;
     let shieldBonus = 0;
 
-    // 计算各项加成
     if (upgrades.hpBonus) {
         hpMultiplier = 1 + upgrades.hpBonus * 0.05;
     }
@@ -193,7 +189,6 @@ export function applyShipUpgradeEffects(shipId) {
         shieldBonus = upgrades.shieldBonus;
     }
 
-    // 应用到 PlayerState
     PlayerState.shipHpMultiplier = hpMultiplier;
     PlayerState.shipDamageMultiplier = damageMultiplier;
     PlayerState.shipFireRateMultiplier = fireRateMultiplier;
@@ -206,18 +201,12 @@ export function renderHangarUpgrade() {
     const container = document.getElementById('upgrade-screen');
     if (!container) return;
 
-    // 清空原有内容
     container.innerHTML = `
         <h2>机库升级</h2>
         <div class="hangar-coins">💰 <span id="hangar-coin-display">${GameState.coins || 0}</span></div>
 
         <div class="hangar-layout">
-            <!-- 左侧飞机列表 -->
-            <div class="hangar-ship-list" id="hangar-ship-list">
-                <!-- 飞机列表由JS生成 -->
-            </div>
-
-            <!-- 右侧强化面板 -->
+            <div class="hangar-ship-list" id="hangar-ship-list"></div>
             <div class="hangar-upgrade-panel" id="hangar-upgrade-panel">
                 <div class="no-ship-selected">请从左侧选择一架飞机</div>
             </div>
@@ -228,22 +217,18 @@ export function renderHangarUpgrade() {
         </div>
     `;
 
-    // 绑定返回按钮事件
     const backBtn = document.getElementById('back-btn');
     if (backBtn) {
         backBtn.addEventListener('click', () => {
             document.getElementById('upgrade-screen').classList.add('hidden');
             document.getElementById('start-screen').classList.remove('hidden');
-            // 更新金币显示
             const coinDisplay = document.getElementById('menu-coin-display');
             if (coinDisplay) coinDisplay.textContent = GameState.coins || 0;
         });
     }
 
-    // 渲染飞机列表
     renderShipList();
 
-    // 如果有默认选中，渲染强化面板
     if (selectedUpgradeShip) {
         renderUpgradePanel(selectedUpgradeShip);
     }
@@ -258,27 +243,22 @@ function renderShipList() {
     const currentShip = getCurrentShip();
     listEl.innerHTML = '';
 
-    // 排序：当前使用 > 收藏 > 品级
     const sortedShips = [...ownedShips].sort((a, b) => {
         const configA = SHIP_CONFIGS.find(s => s.id === a);
         const configB = SHIP_CONFIGS.find(s => s.id === b);
         if (!configA || !configB) return 0;
 
-        // 当前使用的飞机排最前
         if (a === currentShip) return -1;
         if (b === currentShip) return 1;
 
-        // 收藏的飞机排第二
         const aFav = isFavoriteShip(a);
         const bFav = isFavoriteShip(b);
         if (aFav && !bFav) return -1;
         if (!aFav && bFav) return 1;
 
-        // 按品级排序 (高品级在前)
         const rankDiff = RANK_WEIGHT[configB.rank] - RANK_WEIGHT[configA.rank];
         if (rankDiff !== 0) return rankDiff;
 
-        // 同品级按名称排序
         return configA.name.localeCompare(configB.name);
     });
 
@@ -311,7 +291,6 @@ function renderShipList() {
             </button>
         `;
 
-        // 绘制静态飞机预览
         requestAnimationFrame(() => {
             const canvas = document.getElementById(canvasId);
             if (canvas) {
@@ -320,29 +299,22 @@ function renderShipList() {
             }
         });
 
-        // 点击飞机项选中
         item.addEventListener('click', (e) => {
-            // 如果点击的是收藏按钮，不触发选中
             if (e.target.closest('.fav-btn')) return;
 
             selectedUpgradeShip = shipId;
-            // 更新选中状态
             listEl.querySelectorAll('.hangar-ship-item').forEach(el => {
                 el.classList.toggle('selected', el.dataset.shipId === shipId);
             });
-            // 渲染强化面板
             renderUpgradePanel(shipId);
         });
 
-        // 收藏按钮点击事件
         const favBtn = item.querySelector('.fav-btn');
         if (favBtn) {
             favBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 const nowFav = toggleFavoriteShip(shipId);
-                // 重新渲染列表以更新排序
                 renderShipList();
-                // 保持选中状态
                 if (selectedUpgradeShip) {
                     const selectedEl = listEl.querySelector(`[data-ship-id="${selectedUpgradeShip}"]`);
                     if (selectedEl) selectedEl.classList.add('selected');
@@ -353,7 +325,6 @@ function renderShipList() {
         listEl.appendChild(item);
     });
 
-    // 默认选中第一个
     if (!selectedUpgradeShip && sortedShips.length > 0) {
         selectedUpgradeShip = sortedShips[0];
         const firstItem = listEl.querySelector('.hangar-ship-item');
@@ -370,15 +341,9 @@ function renderUpgradePanel(shipId) {
     const config = SHIP_CONFIGS.find(s => s.id === shipId);
     if (!config) return;
 
-    // 获取等级强化信息
     const enhanceLevel = getShipEnhanceLevel(shipId);
     const maxEnhanceLevel = RANK_CONFIGS[config.rank].maxEnhance;
     const enhanceCost = getEnhanceCost(config, enhanceLevel);
-
-    // 计算总强化点数
-    const totalPoints = SHIP_UPGRADE_CONFIGS.reduce((sum, upgrade) => {
-        return sum + getShipUpgradeLevel(shipId, upgrade.id);
-    }, 0);
 
     const panelCanvasId = `panel-ship-preview-${shipId}-${Date.now()}`;
 
@@ -387,38 +352,22 @@ function renderUpgradePanel(shipId) {
             <canvas id="${panelCanvasId}" class="panel-ship-canvas" width="120" height="120"></canvas>
             <div class="panel-ship-info">
                 <div class="panel-ship-name">${config.name} <span class="panel-ship-level">Lv.${enhanceLevel}/${maxEnhanceLevel}</span></div>
+                <div class="panel-ship-stats">
+                    <span class="stat-item"><span class="stat-icon">❤️</span>${config.stats.maxHp}</span>
+                    <span class="stat-item"><span class="stat-icon">⚔️</span>${config.stats.damage}</span>
+                    <span class="stat-item"><span class="stat-icon">⚡</span>${(1000/config.stats.fireRate).toFixed(1)}/s</span>
+                </div>
                 <div class="panel-ship-rank rank-${config.rank.toLowerCase()}">${config.rank}</div>
             </div>
         </div>
 
-        <div class="upgrade-panel-stats">
-            <h4>当前属性</h4>
-            <div class="panel-stats-grid">
-                <div class="panel-stat">
-                    <span class="stat-label">❤️ 生命值</span>
-                    <span class="stat-value">${config.stats.maxHp}</span>
-                </div>
-                <div class="panel-stat">
-                    <span class="stat-label">⚔️ 伤害</span>
-                    <span class="stat-value">${config.stats.damage}</span>
-                </div>
-                <div class="panel-stat">
-                    <span class="stat-label">⚡ 射速</span>
-                    <span class="stat-value">${(1000/config.stats.fireRate).toFixed(1)}/s</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- 飞机等级强化区域 - 简化版 -->
         <div class="upgrade-panel-level">
             <div class="level-enhance-card ${enhanceLevel >= maxEnhanceLevel ? 'maxed' : ''}">
                 <div class="level-enhance-info">
                     <div class="level-enhance-title">✨ 进阶强化 (+5%全属性)</div>
                     <div class="level-enhance-desc">消耗材料提升飞机等级</div>
                 </div>
-                <div class="level-enhance-materials" id="level-enhance-materials">
-                    <!-- 材料需求显示 -->
-                </div>
+                <div class="level-enhance-materials" id="level-enhance-materials"></div>
                 <button class="level-enhance-btn ${enhanceLevel >= maxEnhanceLevel ? 'maxed' : ''}" id="level-enhance-btn">
                     ${enhanceLevel >= maxEnhanceLevel ? '已满级' : '进阶'}
                 </button>
@@ -427,16 +376,12 @@ function renderUpgradePanel(shipId) {
 
         <div class="upgrade-panel-list">
             <h4>专项强化</h4>
-            <div class="upgrade-items-grid" id="upgrade-items-grid">
-                <!-- 强化项目由JS生成 -->
-            </div>
+            <div class="upgrade-items-grid" id="upgrade-items-grid"></div>
         </div>
     `;
 
-    // 渲染等级强化材料
     renderLevelEnhanceMaterials(shipId, enhanceCost, enhanceLevel >= maxEnhanceLevel);
 
-    // 绑定等级强化按钮
     const levelBtn = document.getElementById('level-enhance-btn');
     if (levelBtn && enhanceLevel < maxEnhanceLevel) {
         levelBtn.addEventListener('click', () => {
@@ -453,10 +398,8 @@ function renderUpgradePanel(shipId) {
         });
     }
 
-    // 渲染专项强化项目
     renderUpgradeItems(shipId);
 
-    // 启动动态飞机预览
     requestAnimationFrame(() => {
         drawDynamicShip(panelCanvasId, config, { animateFloat: true, shootBullets: true });
     });
@@ -471,7 +414,6 @@ function renderLevelEnhanceMaterials(shipId, cost, isMaxed) {
 
     let html = '<div class="materials-row">';
 
-    // 金币
     const hasEnoughCoins = (GameState.coins || 0) >= cost.coins;
     html += `
         <div class="material-need ${hasEnoughCoins ? 'enough' : 'not-enough'}">
@@ -480,7 +422,6 @@ function renderLevelEnhanceMaterials(shipId, cost, isMaxed) {
         </div>
     `;
 
-    // 材料
     for (const [type, need] of Object.entries(cost.materials)) {
         const cfg = MATERIAL_CONFIGS[type];
         const have = mats[type] || 0;
@@ -532,7 +473,7 @@ function renderUpgradeItems(shipId) {
                 const result = buyShipUpgrade(shipId, upgrade.id);
                 if (result.success) {
                     renderUpgradeItems(shipId);
-                    renderUpgradePanel(shipId); // 刷新总点数
+                    renderUpgradePanel(shipId);
                     updateHangarCoinDisplay();
                 }
             });
