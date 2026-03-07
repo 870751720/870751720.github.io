@@ -15,7 +15,7 @@
         
         body {
             min-height: 100vh;
-            background: #1a1a2e;
+            background: #2d3326;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -31,11 +31,11 @@
         
         /* 顶部角色卡 */
         .hero-card {
-            background: #16213e;
-            border: 4px solid #0f3460;
+            background: #3d4534;
+            border: 4px solid #5a6b4e;
             box-shadow: 
-                0 0 0 4px #1a1a2e,
-                8px 8px 0 rgba(0,0,0,0.5);
+                0 0 0 4px #2d3326,
+                8px 8px 0 rgba(0,0,0,0.4);
             padding: 30px;
             margin-bottom: 20px;
             position: relative;
@@ -48,9 +48,9 @@
             left: -4px;
             right: -4px;
             bottom: -4px;
-            background: linear-gradient(135deg, #e94560 0%, transparent 50%, #0f3460 100%);
+            background: linear-gradient(135deg, #6b8c42 0%, transparent 50%, #5a6b4e 100%);
             z-index: -1;
-            opacity: 0.3;
+            opacity: 0.4;
         }
         
         .character-row {
@@ -68,73 +68,63 @@
         .avatar {
             width: 120px;
             height: 120px;
-            background: #F7E83C;
-            border: 4px solid #fff;
+            background: #C48E58;
+            border: 4px solid #5C4033;
             box-shadow: 
-                4px 4px 0 #000,
+                4px 4px 0 #2d2d2d,
                 inset -4px -4px 0 rgba(0,0,0,0.1);
             position: relative;
             image-rendering: pixelated;
         }
         
-        /* 海绵宝宝眼睛 */
+        /* 史蒂夫脸 */
         .avatar::before {
             content: '';
             position: absolute;
-            top: 25px;
-            left: 20px;
-            width: 28px;
-            height: 28px;
+            top: 28px;
+            left: 22px;
+            width: 14px;
+            height: 14px;
             background: #fff;
-            border-radius: 50%;
             box-shadow: 
+                /* 左眼白 */
                 40px 0 0 #fff,
-                12px 8px 0 -8px #87CEEB,
-                52px 8px 0 -8px #87CEEB,
-                12px 8px 0 -4px #000,
-                52px 8px 0 -4px #000,
-                14px 45px 0 -10px #000,
-                46px 45px 0 -10px #000,
-                30px 55px 0 -12px #000;
+                /* 左眼球 */
+                2px 2px 0 -2px #3d8c4a,
+                /* 右眼球 */
+                42px 2px 0 -2px #3d8c4a,
+                /* 左鼻孔 */
+                14px 28px 0 -5px #8B6914,
+                /* 右鼻孔 */
+                26px 28px 0 -5px #8B6914,
+                /* 嘴巴 */
+                10px 42px 0 4px #8B4513,
+                20px 42px 0 4px #8B4513,
+                30px 42px 0 4px #8B4513;
         }
         
-        /* 海绵宝宝身体细节 */
+        /* 史蒂夫头发 */
         .avatar::after {
             content: '';
             position: absolute;
-            bottom: 0;
+            top: 0;
             left: 0;
             right: 0;
-            height: 25px;
-            background: #8B4513;
-            border-top: 4px solid #000;
-        }
-        
-        /* 领带 */
-        .avatar-container::before {
-            content: '';
-            position: absolute;
-            bottom: 25px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0;
-            height: 0;
-            border-left: 10px solid transparent;
-            border-right: 10px solid transparent;
-            border-top: 20px solid #FF0000;
-            z-index: 1;
+            height: 22px;
+            background: #3d2817;
+            border-bottom: 2px solid #2d1f0f;
         }
         
         .level-badge {
             position: absolute;
             bottom: -10px;
             right: -10px;
-            background: #e94560;
+            background: #6b8c42;
             color: #fff;
             padding: 5px 12px;
             font-size: 18px;
-            border: 3px solid #fff;
-            box-shadow: 3px 3px 0 #000;
+            border: 3px solid #8fb85a;
+            box-shadow: 3px 3px 0 #1a1f15;
         }
         
         .info-section {
@@ -151,22 +141,22 @@
         
         .title {
             font-size: 20px;
-            color: #e94560;
+            color: #8fb85a;
             margin-bottom: 15px;
         }
         
         .title::before {
             content: '► ';
-            color: #ffd700;
+            color: #c4a35a;
         }
         
         .location {
             font-size: 16px;
-            color: #aaa;
+            color: #b8c4a8;
         }
         
         .location span {
-            color: #4ecca3;
+            color: #6b8c42;
         }
         
         /* 状态条区域 */
@@ -183,14 +173,14 @@
         
         .stat-label {
             width: 80px;
-            color: #ffd700;
+            color: #c4a35a;
         }
         
         .stat-bar {
             flex: 1;
             height: 24px;
-            background: #0a0a0a;
-            border: 2px solid #333;
+            background: #1a1f15;
+            border: 2px solid #4a5a3e;
             position: relative;
         }
         
@@ -201,9 +191,9 @@
             transition: width 1s ease;
         }
         
-        .stat-fill.hp { width: 85%; background: linear-gradient(90deg, #e94560 0%, #ff6b6b 100%); }
-        .stat-fill.mp { width: 92%; background: linear-gradient(90deg, #4ecca3 0%, #7ee8c7 100%); }
-        .stat-fill.exp { width: 67%; background: linear-gradient(90deg, #ffd700 0%, #ffed4e 100%); }
+        .stat-fill.hp { width: 85%; background: linear-gradient(90deg, #8b3a3a 0%, #c45c5c 100%); }
+        .stat-fill.mp { width: 92%; background: linear-gradient(90deg, #3a5a8b 0%, #5c8bc4 100%); }
+        .stat-fill.exp { width: 67%; background: linear-gradient(90deg, #6b8c42 0%, #8fb85a 100%); }
         
         .stat-fill::after {
             content: '';
@@ -230,18 +220,18 @@
         
         /* 信息框 */
         .info-box {
-            background: #0f3460;
-            border: 3px solid #e94560;
+            background: #3d4534;
+            border: 3px solid #6b8c42;
             padding: 20px;
             margin-bottom: 20px;
             box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
         }
         
         .info-header {
-            color: #ffd700;
+            color: #c4a35a;
             font-size: 20px;
             margin-bottom: 15px;
-            border-bottom: 2px dashed #e94560;
+            border-bottom: 2px dashed #6b8c42;
             padding-bottom: 10px;
         }
         
@@ -259,25 +249,25 @@
             margin-right: 12px;
         }
         
-        .heart { color: #e94560; }
-        .diamond { color: #4ecca3; }
-        .star { color: #ffd700; }
-        .sword { color: #c0c0c0; }
+        .heart { color: #c45c5c; }
+        .diamond { color: #6b8c42; }
+        .star { color: #c4a35a; }
+        .sword { color: #a8b8c4; }
         
         /* 技能列表 */
         .skills-box {
-            background: #16213e;
-            border: 3px solid #4ecca3;
+            background: #3d4534;
+            border: 3px solid #8fb85a;
             padding: 20px;
             margin-bottom: 20px;
             box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
         }
         
         .skills-header {
-            color: #4ecca3;
+            color: #8fb85a;
             font-size: 20px;
             margin-bottom: 15px;
-            border-bottom: 2px dashed #4ecca3;
+            border-bottom: 2px dashed #8fb85a;
             padding-bottom: 10px;
         }
         
@@ -306,35 +296,35 @@
         }
         
         .skill-dot.filled {
-            background: #ffd700;
-            border-color: #ffd700;
-            box-shadow: 0 0 5px #ffd700;
+            background: #c4a35a;
+            border-color: #c4a35a;
+            box-shadow: 0 0 5px #c4a35a;
         }
         
         /* 联系区域 */
         .contact-box {
-            background: #0f3460;
-            border: 3px solid #ffd700;
+            background: #3d4534;
+            border: 3px solid #c4a35a;
             padding: 20px;
             text-align: center;
             box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
         }
         
         .contact-header {
-            color: #ffd700;
+            color: #c4a35a;
             font-size: 20px;
             margin-bottom: 15px;
         }
         
         .contact-wechat {
             font-size: 24px;
-            color: #4ecca3;
-            text-shadow: 2px 2px 0 #000;
+            color: #8fb85a;
+            text-shadow: 2px 2px 0 #1a1f15;
         }
         
         .contact-hint {
             font-size: 14px;
-            color: #888;
+            color: #8a9a7a;
             margin-top: 10px;
         }
         
