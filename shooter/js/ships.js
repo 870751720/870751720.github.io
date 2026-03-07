@@ -376,11 +376,7 @@ export function renderShipShop() {
         }
         
         // 显示等级（仅显示，强化移到机库升级）
-        const levelDisplay = owned ? `
-            <div class="card-level-display">
-                <span class="level-badge">Lv.${enhanceLevel}/${maxLevel}</span>
-            </div>
-        ` : '';
+        const levelDisplay = '';
         
         card.innerHTML = `
             <div class="card-rank-badge rank-${config.rank.toLowerCase()}">${config.rank}</div>
