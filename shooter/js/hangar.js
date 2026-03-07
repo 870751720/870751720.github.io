@@ -442,7 +442,6 @@ function renderEnhanceContent(shipId, config, container) {
 
 // 渲染命座内容
 function renderConstellationContent(shipId, config, container) {
-    // 从 ships.js 导入 CONSTELLATION_CONFIGS
     import('./ships.js').then(shipModule => {
         const constellations = shipModule.CONSTELLATION_CONFIGS?.[shipId];
         const materialId = `constellation_${shipId}`;
@@ -454,48 +453,79 @@ function renderConstellationContent(shipId, config, container) {
             return;
         }
 
+        // 构建命座节点HTML - 使用六边形布局
         let nodesHtml = '';
-        constellations.constellations.forEach((c, i) => {
+        const configs = constellations.constellations;
+        
+        configs.forEach((c, i) => {
             const unlocked = i < level;
-            const canUnlock = i === level && materialCount > 0;
+            const isNext = i === level;
+            const canUnlock = isNext && materialCount > 0;
+            const locked = i > level;
+            
             nodesHtml += `
-                <div class="constellation-node-item ${unlocked ? 'unlocked' : ''} ${canUnlock ? 'can-unlock' : ''}">
-                    <div class="const-node-icon">${unlocked ? '★' : '☆'}</div>
-                    <div class="const-node-info">
-                        <div class="const-node-name">${c.level}命 · ${c.name}</div>
-                        <div class="const-node-desc">${c.desc}</div>
+                <div class="constellation-hex ${unlocked ? 'unlocked' : ''} ${canUnlock ? 'can-unlock' : ''} ${locked ? 'locked' : ''}">
+                    <div class="hex-inner">
+                        <div class="hex-icon">${unlocked ? '★' : (canUnlock ? '✦' : '☆')}</div>
+                        <div class="hex-level">${c.level}命</div>
                     </div>
-                    ${canUnlock ? `<button class="const-node-btn" data-level="${c.level}">激活</button>` : ''}
+                    <div class="hex-info">
+                        <div class="hex-name">${c.name}</div>
+                        <div class="hex-desc">${c.desc}</div>
+                        ${canUnlock ? `<button class="hex-unlock-btn" data-index="${i}">激活</button>` : ''}
+                    </div>
                 </div>
             `;
         });
 
         container.innerHTML = `
-            <div class="constellation-panel">
-                <div class="constellation-header-mini">
-                    <div class="const-material-info">
-                        <span class="const-material-icon">⭐</span>
-                        <span class="const-material-name">${config.name}·命星</span>
-                        <span class="const-material-count">x${materialCount}</span>
+            <div class="constellation-container">
+                <div class="constellation-header">
+                    <div class="constellation-material">
+                        <div class="material-icon-glow" style="background: ${config.color}"></div>
+                        <div class="material-info">
+                            <div class="material-label">命星材料</div>
+                            <div class="material-name">${config.name}·命星</div>
+                            <div class="material-count ${materialCount > 0 ? 'has' : ''}">× ${materialCount}</div>
+                        </div>
                     </div>
-                    <div class="constellation-progress">当前命座: ${level}/6</div>
+                    <div class="constellation-progress-ring">
+                        <div class="progress-text">
+                            <span class="current">${level}</span>
+                            <span class="total">/6</span>
+                        </div>
+                        <svg class="progress-svg" viewBox="0 0 100 100">
+                            <circle class="progress-bg" cx="50" cy="50" r="45"/>
+                            <circle class="progress-bar" cx="50" cy="50" r="45" 
+                                style="stroke-dasharray: 283; stroke-dashoffset: ${283 - (283 * level / 6)}"/>
+                        </svg>
+                    </div>
                 </div>
-                <div class="constellation-nodes-list">
+                
+                <div class="constellation-nodes">
                     ${nodesHtml}
                 </div>
+                
+                ${level >= 6 ? `
+                    <div class="constellation-complete">
+                        <div class="complete-icon">👑</div>
+                        <div class="complete-text">命座已满，觉醒达成</div>
+                    </div>
+                ` : ''}
             </div>
         `;
 
         // 绑定激活按钮
-        container.querySelectorAll('.const-node-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
+        container.querySelectorAll('.hex-unlock-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
                 if (materialCount > 0 && GameState.materials[materialId] > 0) {
                     GameState.materials[materialId]--;
                     if (!GameState.constellations) GameState.constellations = {};
                     if (!GameState.constellations[shipId]) GameState.constellations[shipId] = 0;
                     GameState.constellations[shipId]++;
                     saveShipData();
-                    renderPanel(shipId); // 刷新面板
+                    renderPanel(shipId);
                 }
             });
         });
