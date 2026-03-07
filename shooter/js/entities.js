@@ -57,7 +57,6 @@ export class Player {
         const now = performance.now();
         
         // 护盾特效 - 多层旋转光环
-        console.log('Player.draw - shield:', PlayerState.shield);
         if (PlayerState.shield > 0) {
             const shieldRadius = s + 15 + Math.sin(now / 200) * 3;
             const rotation = now / 500;
@@ -522,6 +521,17 @@ export class Boss extends Enemy {
         this.type = 'boss';
         this.bossType = bossType || BOSS_TYPES[Math.floor(Math.random() * BOSS_TYPES.length)];
         
+        // Boss 名称映射
+        const bossNames = {
+            'Destroyer': '毁灭者',
+            'FrostGiant': '冰霜巨人',
+            'LightningRider': '闪电行者',
+            'MechSpider': '机械蜘蛛',
+            'ShadowAssassin': '暗影刺客',
+            'ChaosEye': '混沌之眼'
+        };
+        this.name = bossNames[this.bossType] || this.bossType;
+        
         const scale = 1 + GameState.bossKillCount * 0.1;
         this.size = 80 * scale;
         this.hp = Math.floor(90 * scale);
@@ -585,7 +595,20 @@ export class Boss extends Enemy {
 
     draw() {
         this.drawBoss();
+        this.drawName();
         this.drawHpBar();
+    }
+
+    drawName() {
+        const h = this.size / 2;
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 16px monospace';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+        ctx.shadowColor = '#000';
+        ctx.shadowBlur = 4;
+        ctx.fillText(this.name, this.x, this.y - h - 35);
+        ctx.shadowBlur = 0;
     }
 
     drawHpBar() {

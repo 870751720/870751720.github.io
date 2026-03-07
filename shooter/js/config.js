@@ -20,7 +20,7 @@ export const ITEM_TYPES = [
     { id: 'playersize', name: '机体变大', color: '#aaaaaa', duration: 0, icon: '↑□', permanent: true },
     
     // 即时效果
-    { id: 'shield', name: '护盾', color: '#00ffaa', duration: 0, icon: '⛨' },
+    { id: 'shield', name: '护盾', color: '#00ffaa', duration: 0, icon: '⛨', instant: true },
     { id: 'heal', name: '回血', color: '#ff5555', duration: 0, icon: '♥', instant: true }
 ];
 

@@ -18,7 +18,6 @@ export function updateHpDisplay() {
     }
     
     if (PlayerState.shield > 0) {
-        console.log('updateHpDisplay - shield:', PlayerState.shield);
         const shield = document.createElement('span');
         shield.style.cssText = 'margin-left:10px;color:#00ffaa;font-size:20px;';
         shield.textContent = `⛨${PlayerState.shield}`;
