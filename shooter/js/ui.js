@@ -48,7 +48,7 @@ export function updateBuffDisplay() {
  */
 export function updateCombo(gameState, comboTimerRef) {
     const now = performance.now();
-    if (now - gameState.lastKillTime < 20000) { // 20秒内连击
+    if (now - gameState.lastKillTime < 20000) {
         gameState.combo++;
     } else {
         gameState.combo = 1;
@@ -56,6 +56,22 @@ export function updateCombo(gameState, comboTimerRef) {
     gameState.lastKillTime = now;
     
     DOM.comboCountEl.textContent = gameState.combo;
+    
+    // 根据连击数改变颜色
+    const comboColors = [
+        { min: 0, max: 4, color: '#ffffff' },    // 白
+        { min: 5, max: 9, color: '#00ff00' },    // 绿
+        { min: 10, max: 19, color: '#00ffff' },  // 青
+        { min: 20, max: 39, color: '#ffff00' },  // 黄
+        { min: 40, max: 69, color: '#ff8800' },  // 橙
+        { min: 70, max: 99, color: '#ff00ff' },  // 紫
+        { min: 100, max: 999, color: '#ff0000' } // 红
+    ];
+    
+    const colorConfig = comboColors.find(c => gameState.combo >= c.min && gameState.combo <= c.max);
+    DOM.comboCountEl.style.color = colorConfig ? colorConfig.color : '#ffffff';
+    DOM.comboCountEl.style.textShadow = `0 0 20px ${colorConfig ? colorConfig.color : '#ffffff'}`;
+    
     DOM.comboDisplay.classList.add('active', 'pop');
     setTimeout(() => DOM.comboDisplay.classList.remove('pop'), 100);
     
@@ -63,7 +79,9 @@ export function updateCombo(gameState, comboTimerRef) {
     comboTimerRef.timer = setTimeout(() => {
         gameState.combo = 0;
         DOM.comboDisplay.classList.remove('active');
-    }, 20000); // 20秒后重置
+        DOM.comboCountEl.style.color = '#ffffff';
+        DOM.comboCountEl.style.textShadow = 'none';
+    }, 20000);
 }
 
 /**

@@ -327,7 +327,7 @@ export class Enemy {
     }
 
     drawFast(half) {
-        const breathe = Math.sin(performance.now() / 150 + this.x * 0.2) * 3;
+        const breathe = Math.sin(performance.now() / 400 + this.x * 0.2) * 3;
         const h = half + breathe;
         
         ctx.fillStyle = this.color;
@@ -412,7 +412,7 @@ export class Enemy {
     }
 
     drawSplitter(half) {
-        const breathe = Math.sin(performance.now() / 250 + this.y * 0.1) * 3;
+        const breathe = Math.sin(performance.now() / 500 + this.y * 0.1) * 3;
         const h = half + breathe;
         
         ctx.fillStyle = this.color;
@@ -425,7 +425,7 @@ export class Enemy {
         ctx.fill();
         
         // 中心核心脉动
-        const coreSize = 6 + Math.sin(performance.now() / 150) * 2;
+        const coreSize = 6 + Math.sin(performance.now() / 400) * 2;
         ctx.fillStyle = '#fff';
         ctx.beginPath();
         ctx.arc(this.x, this.y, coreSize, 0, Math.PI * 2);
