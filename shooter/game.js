@@ -708,11 +708,6 @@ class Enemy {
                 ctx.closePath();
                 ctx.fill();
                 break;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y + half - 3, 4, 0, Math.PI * 2);
-                ctx.closePath();
-                ctx.fill();
-                break;
                 
             case 'splitter':
                 ctx.fillStyle = this.color;
