@@ -99,7 +99,6 @@ export class Destroyer extends Boss {
     drawBoss() {
         const h = this.size / 2;
         const phaseColors = ['#ff0000', '#ff6600', '#ff4444'];
-        const phaseColors = ['#ff0000', '#ff6600', '#ff4444'];
         const bodyColor = phaseColors[this.phase - 1] || '#ff4444';
         
         ctx.fillStyle = bodyColor;

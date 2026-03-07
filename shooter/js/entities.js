@@ -188,6 +188,7 @@ export class Bullet {
         this.size = (isEnemy ? 6 : 4) * (isEnemy ? 1 : PlayerState.stats.bulletSize * PlayerState.stats.bulletSizeBuff);
         this.damage = isEnemy ? 1 : PlayerState.stats.damage;
         this.active = true;
+        this.color = null; // 允许自定义颜色
     }
 
     update(enemies) {
@@ -231,11 +232,33 @@ export class Bullet {
     }
 
     draw() {
-        ctx.fillStyle = this.isEnemy ? COLORS.enemyBullet : COLORS.bullet;
         const s = this.size;
-        ctx.fillRect(this.x - s/2, this.y - s, s, s * 2);
         
-        if (!this.isEnemy) {
+        // 使用自定义颜色或默认颜色
+        const bulletColor = this.color || (this.isEnemy ? COLORS.enemyBullet : COLORS.bullet);
+        
+        if (this.isEnemy) {
+            // 敌方子弹 - 菱形/椭圆形状，带发光效果
+            ctx.shadowColor = bulletColor;
+            ctx.shadowBlur = 8;
+            
+            ctx.fillStyle = bulletColor;
+            ctx.beginPath();
+            ctx.ellipse(this.x, this.y, s, s * 1.2, this.angle, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 内部高光
+            ctx.fillStyle = 'rgba(255,255,255,0.5)';
+            ctx.beginPath();
+            ctx.arc(this.x - s*0.3, this.y - s*0.3, s * 0.3, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.shadowBlur = 0;
+        } else {
+            // 玩家子弹 - 细长条形
+            ctx.fillStyle = bulletColor;
+            ctx.fillRect(this.x - s/2, this.y - s, s, s * 2);
+            
             ctx.fillStyle = 'rgba(157, 141, 247, 0.5)';
             ctx.fillRect(this.x - s/4, this.y, s/2, s);
         }
