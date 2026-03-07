@@ -3,300 +3,468 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>贺加文 - 风格选择</title>
+    <title>贺加文 - 游戏开发工程师</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
-            width: 100vw;
-            height: 100vh;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            grid-template-rows: 1fr 1fr;
-            gap: 4px;
-            background: #1a1a1a;
-        }
-        .quadrant {
-            position: relative;
-            overflow: hidden;
-            cursor: pointer;
-            transition: transform 0.3s ease;
-        }
-        .quadrant:hover {
-            transform: scale(0.98);
-        }
-        .quadrant::after {
-            content: attr(data-label);
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 8px 20px;
-            background: rgba(0,0,0,0.7);
-            color: #fff;
-            border-radius: 20px;
-            font-size: 14px;
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-            pointer-events: none;
-        }
-
-        /* 左上：极简黑白 */
-        .minimal {
-            background: #fff;
+            min-height: 100vh;
+            background: #1a1a2e;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
-            color: #000;
-            font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
-        }
-        .minimal h1 {
-            font-size: 48px;
-            font-weight: 200;
-            letter-spacing: 0.3em;
-            margin-bottom: 30px;
-        }
-        .minimal .divider {
-            width: 60px;
-            height: 1px;
-            background: #000;
-            margin: 20px 0;
-        }
-        .minimal .info {
-            text-align: center;
-            font-size: 14px;
-            line-height: 2;
-            letter-spacing: 0.1em;
-            color: #666;
-        }
-        .minimal .contact {
-            margin-top: 40px;
-            font-size: 12px;
-            letter-spacing: 0.15em;
-            color: #999;
-        }
-
-        /* 右上：赛博朋克 */
-        .cyberpunk {
-            background: #0a0a0f;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: #0ff;
-            font-family: 'Courier New', monospace;
-            position: relative;
-        }
-        .cyberpunk::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: 
-                linear-gradient(90deg, transparent 98%, rgba(0,255,255,0.1) 98%),
-                linear-gradient(transparent 98%, rgba(0,255,255,0.1) 98%);
-            background-size: 40px 40px;
-            opacity: 0.5;
-        }
-        .cyberpunk h1 {
-            font-size: 42px;
-            text-transform: uppercase;
-            letter-spacing: 0.2em;
-            text-shadow: 0 0 20px #0ff, 0 0 40px #0ff;
-            margin-bottom: 20px;
-            z-index: 1;
-        }
-        .cyberpunk .glitch {
-            color: #f0f;
-            text-shadow: 0 0 10px #f0f;
-            font-size: 14px;
-            letter-spacing: 0.3em;
-            margin-bottom: 30px;
-            z-index: 1;
-        }
-        .cyberpunk .info {
-            text-align: center;
-            font-size: 12px;
-            line-height: 1.8;
-            color: #8aff8a;
-            z-index: 1;
-        }
-        .cyberpunk .scanline {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: rgba(0,255,255,0.3);
-            animation: scan 3s linear infinite;
-        }
-        @keyframes scan {
-            0% { top: 0; }
-            100% { top: 100%; }
-        }
-
-        /* 左下：像素风 */
-        .pixel {
-            background: #2d2d3a;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: #fff;
-            font-family: 'Courier New', monospace;
+            font-family: 'VT323', 'Courier New', monospace;
+            padding: 20px;
             image-rendering: pixelated;
         }
-        .pixel .avatar {
-            width: 80px;
-            height: 80px;
+        
+        .container {
+            max-width: 600px;
+            width: 100%;
+        }
+        
+        /* 顶部角色卡 */
+        .hero-card {
+            background: #16213e;
+            border: 4px solid #0f3460;
+            box-shadow: 
+                0 0 0 4px #1a1a2e,
+                8px 8px 0 rgba(0,0,0,0.5);
+            padding: 30px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .hero-card::before {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: -4px;
+            right: -4px;
+            bottom: -4px;
+            background: linear-gradient(135deg, #e94560 0%, transparent 50%, #0f3460 100%);
+            z-index: -1;
+            opacity: 0.3;
+        }
+        
+        .character-row {
+            display: flex;
+            gap: 25px;
+            align-items: flex-start;
+        }
+        
+        /* 像素头像 */
+        .avatar-container {
+            position: relative;
+            flex-shrink: 0;
+        }
+        
+        .avatar {
+            width: 120px;
+            height: 120px;
             background: #8b7355;
             border: 4px solid #fff;
             box-shadow: 
                 4px 4px 0 #000,
                 inset -4px -4px 0 rgba(0,0,0,0.3);
-            margin-bottom: 20px;
             position: relative;
+            image-rendering: pixelated;
         }
-        .pixel .avatar::after {
+        
+        /* 像素脸 */
+        .avatar::before {
+            content: '';
+            position: absolute;
+            top: 35px;
+            left: 25px;
+            width: 16px;
+            height: 16px;
+            background: #fff;
+            box-shadow: 
+                40px 0 0 #fff,
+                0 25px 0 4px #ffb6c1,
+                20px 30px 0 2px #5c4033;
+        }
+        
+        .avatar::after {
             content: '';
             position: absolute;
             top: 20px;
             left: 15px;
-            width: 12px;
-            height: 12px;
-            background: #fff;
-            box-shadow: 30px 0 0 #fff;
+            right: 15px;
+            height: 20px;
+            background: #5c4033;
         }
-        .pixel h1 {
-            font-size: 24px;
-            letter-spacing: 0.1em;
-            margin-bottom: 15px;
-            text-shadow: 2px 2px 0 #000;
-        }
-        .pixel .rpg-box {
-            background: #1a1a2e;
+        
+        .level-badge {
+            position: absolute;
+            bottom: -10px;
+            right: -10px;
+            background: #e94560;
+            color: #fff;
+            padding: 5px 12px;
+            font-size: 18px;
             border: 3px solid #fff;
-            padding: 15px 25px;
-            font-size: 11px;
-            line-height: 1.8;
-            color: #aaffaa;
-            box-shadow: 4px 4px 0 #000;
+            box-shadow: 3px 3px 0 #000;
         }
-        .pixel .heart {
-            color: #ff6b6b;
+        
+        .info-section {
+            flex: 1;
         }
-
-        /* 右下：纸张风 */
-        .paper {
-            background: #f5f0e6;
+        
+        .name {
+            font-size: 42px;
+            color: #fff;
+            text-shadow: 3px 3px 0 #000;
+            margin-bottom: 10px;
+            letter-spacing: 0.1em;
+        }
+        
+        .title {
+            font-size: 20px;
+            color: #e94560;
+            margin-bottom: 15px;
+        }
+        
+        .title::before {
+            content: '► ';
+            color: #ffd700;
+        }
+        
+        .location {
+            font-size: 16px;
+            color: #aaa;
+        }
+        
+        .location span {
+            color: #4ecca3;
+        }
+        
+        /* 状态条区域 */
+        .stats-section {
+            margin-top: 25px;
+        }
+        
+        .stat-row {
             display: flex;
-            flex-direction: column;
-            justify-content: center;
             align-items: center;
-            color: #3d3d3d;
-            font-family: 'Georgia', 'Times New Roman', serif;
+            margin-bottom: 12px;
+            font-size: 18px;
+        }
+        
+        .stat-label {
+            width: 80px;
+            color: #ffd700;
+        }
+        
+        .stat-bar {
+            flex: 1;
+            height: 24px;
+            background: #0a0a0a;
+            border: 2px solid #333;
             position: relative;
         }
-        .paper::before {
+        
+        .stat-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #e94560 0%, #ff6b6b 100%);
+            position: relative;
+            transition: width 1s ease;
+        }
+        
+        .stat-fill.hp { width: 85%; background: linear-gradient(90deg, #e94560 0%, #ff6b6b 100%); }
+        .stat-fill.mp { width: 92%; background: linear-gradient(90deg, #4ecca3 0%, #7ee8c7 100%); }
+        .stat-fill.exp { width: 67%; background: linear-gradient(90deg, #ffd700 0%, #ffed4e 100%); }
+        
+        .stat-fill::after {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: 
-                repeating-linear-gradient(
-                    transparent,
-                    transparent 31px,
-                    #e8e0d0 31px,
-                    #e8e0d0 32px
-                );
-            opacity: 0.5;
+            background: repeating-linear-gradient(
+                90deg,
+                transparent,
+                transparent 10px,
+                rgba(0,0,0,0.2) 10px,
+                rgba(0,0,0,0.2) 20px
+            );
         }
-        .paper .card {
-            background: #fff;
-            padding: 40px 50px;
-            box-shadow: 
-                0 1px 3px rgba(0,0,0,0.12),
-                0 1px 2px rgba(0,0,0,0.24);
-            transform: rotate(-1deg);
-            z-index: 1;
+        
+        .stat-value {
+            width: 60px;
+            text-align: right;
+            color: #fff;
+            margin-left: 10px;
         }
-        .paper h1 {
-            font-size: 36px;
-            font-weight: normal;
+        
+        /* 信息框 */
+        .info-box {
+            background: #0f3460;
+            border: 3px solid #e94560;
+            padding: 20px;
             margin-bottom: 20px;
-            color: #2c2c2c;
+            box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
         }
-        .paper .ink {
-            font-size: 14px;
-            line-height: 2;
-            color: #666;
+        
+        .info-header {
+            color: #ffd700;
+            font-size: 20px;
+            margin-bottom: 15px;
+            border-bottom: 2px dashed #e94560;
+            padding-bottom: 10px;
         }
-        .paper .ink span {
-            color: #c9a959;
-        }
-        .paper .stamp {
-            position: absolute;
-            bottom: 60px;
-            right: 60px;
-            width: 80px;
-            height: 80px;
-            border: 3px solid #c9a959;
-            border-radius: 50%;
+        
+        .info-item {
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-size: 10px;
-            color: #c9a959;
-            transform: rotate(15deg);
-            opacity: 0.6;
+            margin-bottom: 10px;
+            font-size: 18px;
+            color: #fff;
+        }
+        
+        .info-icon {
+            width: 24px;
+            text-align: center;
+            margin-right: 12px;
+        }
+        
+        .heart { color: #e94560; }
+        .diamond { color: #4ecca3; }
+        .star { color: #ffd700; }
+        .sword { color: #c0c0c0; }
+        
+        /* 技能列表 */
+        .skills-box {
+            background: #16213e;
+            border: 3px solid #4ecca3;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
+        }
+        
+        .skills-header {
+            color: #4ecca3;
+            font-size: 20px;
+            margin-bottom: 15px;
+            border-bottom: 2px dashed #4ecca3;
+            padding-bottom: 10px;
+        }
+        
+        .skill-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+        
+        .skill-name {
+            color: #fff;
+            width: 120px;
+        }
+        
+        .skill-level {
+            display: flex;
+            gap: 3px;
+        }
+        
+        .skill-dot {
+            width: 12px;
+            height: 12px;
+            background: #333;
+            border: 1px solid #666;
+        }
+        
+        .skill-dot.filled {
+            background: #ffd700;
+            border-color: #ffd700;
+            box-shadow: 0 0 5px #ffd700;
+        }
+        
+        /* 联系区域 */
+        .contact-box {
+            background: #0f3460;
+            border: 3px solid #ffd700;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
+        }
+        
+        .contact-header {
+            color: #ffd700;
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .contact-wechat {
+            font-size: 24px;
+            color: #4ecca3;
+            text-shadow: 2px 2px 0 #000;
+        }
+        
+        .contact-hint {
+            font-size: 14px;
+            color: #888;
+            margin-top: 10px;
+        }
+        
+        /* 闪烁动画 */
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.3; }
+        }
+        
+        .blink {
+            animation: blink 1s infinite;
+        }
+        
+        /* 光标效果 */
+        .cursor::after {
+            content: '_';
+            animation: blink 0.8s infinite;
+        }
+        
+        /* 响应式 */
+        @media (max-width: 500px) {
+            .character-row {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .name {
+                font-size: 32px;
+                text-align: center;
+            }
+            
+            .info-section {
+                text-align: center;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="quadrant minimal" data-label="极简黑白">
-        <h1>贺加文</h1>
-        <div class="divider"></div>
-        <div class="info">
-            西北大学毕业<br>
-            网易游戏 · 游戏开发工程师
-        </div>
-        <div class="contact">微信 17691083667</div>
-    </div>
-
-    <div class="quadrant cyberpunk" data-label="赛博朋克">
-        <div class="scanline"></div>
-        <h1>HE JIAWEN</h1>
-        <div class="glitch">[ 游戏开发工程师 ]</div>
-        <div class="info">
-            西北大学<br>
-            网易游戏<br>
-            微信: 17691083667
-        </div>
-    </div>
-
-    <div class="quadrant pixel" data-label="像素风">
-        <div class="avatar"></div>
-        <h1>贺加文</h1>
-        <div class="rpg-box">
-            <span class="heart">♥</span> 西北大学毕业<br>
-            <span class="heart">♥</span> 网易游戏<br>
-            <span class="heart">♥</span> 微信: 17691083667
-        </div>
-    </div>
-
-    <div class="quadrant paper" data-label="纸张风">
-        <div class="card">
-            <h1>贺加文</h1>
-            <div class="ink">
-                <span>◇</span> 西北大学毕业<br>
-                <span>◇</span> 网易游戏 · 游戏开发工程师<br>
-                <span>◇</span> 微信: 17691083667
+    <div class="container">
+        <!-- 角色卡 -->
+        <div class="hero-card">
+            <div class="character-row">
+                <div class="avatar-container">
+                    <div class="avatar"></div>
+                    <div class="level-badge">Lv.27</div>
+                </div>
+                <div class="info-section">
+                    <h1 class="name cursor">贺加文</h1>
+                    <div class="title">游戏开发工程师</div>
+                    <div class="location">
+                        <span>♦</span> 网易游戏
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 状态条 -->
+            <div class="stats-section">
+                <div class="stat-row">
+                    <span class="stat-label">HP</span>
+                    <div class="stat-bar">
+                        <div class="stat-fill hp"></div>
+                    </div>
+                    <span class="stat-value">85/100</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">MP</span>
+                    <div class="stat-bar">
+                        <div class="stat-fill mp"></div>
+                    </div>
+                    <span class="stat-value">92/100</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">EXP</span>
+                    <div class="stat-bar">
+                        <div class="stat-fill exp"></div>
+                    </div>
+                    <span class="stat-value">67%</span>
+                </div>
             </div>
         </div>
-        <div class="stamp">HELLO</div>
+        
+        <!-- 基本信息 -->
+        <div class="info-box">
+            <div class="info-header">► 角色档案</div>
+            <div class="info-item">
+                <span class="info-icon heart">♥</span>
+                <span>西北大学毕业</span>
+            </div>
+            <div class="info-item">
+                <span class="info-icon diamond">◆</span>
+                <span>现任网易游戏 · 游戏开发工程师</span>
+            </div>
+            <div class="info-item">
+                <span class="info-icon star">★</span>
+                <span>专注游戏客户端开发</span>
+            </div>
+            <div class="info-item">
+                <span class="info-icon sword">⚔</span>
+                <span>正在开发个人项目《纸王国》</span>
+            </div>
+        </div>
+        
+        <!-- 技能 -->
+        <div class="skills-box">
+            <div class="skills-header">► 技能树</div>
+            <div class="skill-item">
+                <span class="skill-name">Unity</span>
+                <div class="skill-level">
+                    <div class="skill-dot filled"></div>
+                    <div class="skill-dot filled"></div>
+                    <div class="skill-dot filled"></div>
+                    <div class="skill-dot filled"></div>
+                    <div class="skill-dot"></div>
+                </div>
+            </div>
+            <div class="skill-item">
+                <span class="skill-name">C#</span>
+                <div class="skill-level">
+                    <div class="skill-dot filled"></div>
+                    <div class="skill-dot filled"></div>
+                    <div class="skill-dot filled"></div>
+                    <div class="skill-dot filled"></div>
+                    <div class="skill-dot"></div>
+                </div>
+            </div>
+            <div class="skill-item">
+                <span class="skill-name">TypeScript</span>
+                <div class="skill-level">
+                    <div class="skill-dot filled"></div>
+                    <div class="skill-dot filled"></div>
+                    <div class="skill-dot filled"></div>
+                    <div class="skill-dot filled"></div>
+                    <div class="skill-dot filled"></div>
+                </div>
+            </div>
+            <div class="skill-item">
+                <span class="skill-name">游戏设计</span>
+                <div class="skill-level">
+                    <div class="skill-dot filled"></div>
+                    <div class="skill-dot filled"></div>
+                    <div class="skill-dot filled"></div>
+                    <div class="skill-dot filled"></div>
+                    <div class="skill-dot"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 联系方式 -->
+        <div class="contact-box">
+            <div class="contact-header">► 建立连接</div>
+            <div class="contact-wechat">微信: 17691083667</div>
+            <div class="contact-hint">按 [ENTER] 发起会话... <span class="blink">▋</span></div>
+        </div>
     </div>
 </body>
 </html>
