@@ -708,24 +708,32 @@ class Boss extends Enemy {
     constructor() {
         super();
         this.type = 'boss';
-        this.size = 80;
-        // 三管血，每管30点
-        this.hp = 90;
-        this.maxHp = 90;
-        this.phase = 3; // 当前阶段 3, 2, 1
-        this.hpPerPhase = 30;
+        // 体型随击杀数变大
+        this.size = 80 + bossKillCount * 5;
+        // 三管血，基础90点，每击杀一个boss增加30点
+        const baseHp = 90;
+        const bonusHp = bossKillCount * 30;
+        this.hp = baseHp + bonusHp;
+        this.maxHp = baseHp + bonusHp;
+        this.hpPerPhase = 30 + bossKillCount * 10;
+        this.phase = 3;
         this.x = gameCanvas.width / 2;
         this.y = -80;
-        this.vx = 2;
-        this.vy = 0.3;
+        // 速度和弹幕频率随boss击杀数增加
+        this.vx = 2 + bossKillCount * 0.3;
+        this.vy = 0.3 + bossKillCount * 0.1;
         this.color = '#ff6b6b';
         this.lastShot = 0;
         this.shotPattern = 0;
+        // 弹幕间隔缩短，最小500
+        this.shotInterval = Math.max(500, 1500 - bossKillCount * 150);
     }
     
     getCurrentPhase() {
-        if (this.hp > 60) return 3;
-        if (this.hp > 30) return 2;
+        const p1 = this.hpPerPhase;
+        const p2 = this.hpPerPhase * 2;
+        if (this.hp > p2) return 3;
+        if (this.hp > p1) return 2;
         return 1;
     }
     
@@ -749,10 +757,10 @@ class Boss extends Enemy {
             this.vx *= 1.2;
         }
         
-        // Boss弹幕攻击 - 根据阶段增加弹幕强度
-        const shotInterval = 1500 - (3 - this.phase) * 300; // 阶段越低，射击越快
+        // Boss弹幕攻击 - 根据阶段和击杀数增加弹幕强度
+        const currentShotInterval = this.shotInterval - (3 - this.phase) * 200;
         
-        if (now - this.lastShot > shotInterval) {
+        if (now - this.lastShot > currentShotInterval) {
             this.firePattern();
             this.lastShot = now;
         }
@@ -768,20 +776,21 @@ class Boss extends Enemy {
     }
     
     firePattern() {
-        // 根据当前阶段选择弹幕模式
+        // 弹幕数量随boss击杀增加
+        const bonusCount = bossKillCount;
         const patternCount = this.phase === 3 ? 3 : this.phase === 2 ? 4 : 5;
         this.shotPattern = (this.shotPattern + 1) % patternCount;
         
         if (this.shotPattern === 0) {
             // 散射
-            const count = 5 + (3 - this.phase) * 2;
+            const count = 5 + (3 - this.phase) * 2 + bonusCount;
             for (let i = 0; i < count; i++) {
                 const angle = (i - (count - 1) / 2) * 0.3;
                 enemyBullets.push(new Bullet(this.x, this.y + 30, angle, true));
             }
         } else if (this.shotPattern === 1) {
             // 追踪弹
-            const count = this.phase === 1 ? 5 : 3;
+            const count = this.phase === 1 ? 5 + bonusCount : 3 + bonusCount;
             for (let i = 0; i < count; i++) {
                 const offset = (i - (count - 1) / 2) * 15;
                 const angle = Math.atan2(player.x - (this.x + offset), -(player.y - this.y));
@@ -789,21 +798,21 @@ class Boss extends Enemy {
             }
         } else if (this.shotPattern === 2) {
             // 环形
-            const count = 6 + (3 - this.phase) * 2;
+            const count = 6 + (3 - this.phase) * 2 + bonusCount;
             for (let i = 0; i < count; i++) {
                 const angle = (i / count) * Math.PI * 2;
                 enemyBullets.push(new Bullet(this.x, this.y, angle, true));
             }
         } else if (this.shotPattern === 3) {
-            // 交叉弹幕 (2,3阶段)
-            for (let i = -3; i <= 3; i++) {
+            // 交叉弹幕
+            for (let i = -3 - bonusCount; i <= 3 + bonusCount; i++) {
                 enemyBullets.push(new Bullet(this.x - 40, this.y + 20, i * 0.25, true));
                 enemyBullets.push(new Bullet(this.x + 40, this.y + 20, -i * 0.25, true));
             }
         } else if (this.shotPattern === 4) {
-            // 全屏弹幕 (1阶段)
-            for (let i = 0; i < 12; i++) {
-                const angle = (i / 12) * Math.PI * 2;
+            // 全屏弹幕
+            for (let i = 0; i < 12 + bonusCount; i++) {
+                const angle = (i / (12 + bonusCount)) * Math.PI * 2;
                 enemyBullets.push(new Bullet(this.x, this.y, angle, true));
             }
             // 额外追踪
@@ -853,16 +862,24 @@ class Boss extends Enemy {
         // 三管血条显示
         const barWidth = this.size + 10;
         const barHeight = 6;
-        const barY = this.y - h - 20;
+        const barY = this.y - h - 25;
+        
+        // 显示boss击杀数
+        if (bossKillCount > 0) {
+            ctx.fillStyle = '#ffd700';
+            ctx.font = 'bold 12px monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText(`Lv.${bossKillCount}`, this.x, barY - 5);
+        }
         
         // 背景
         ctx.fillStyle = '#333';
         ctx.fillRect(this.x - barWidth/2, barY, barWidth, barHeight * 3 + 4);
         
         // 计算每管血的百分比
-        const phase1Hp = Math.max(0, Math.min(30, this.hp - 60));
-        const phase2Hp = Math.max(0, Math.min(30, this.hp - 30));
-        const phase3Hp = Math.max(0, Math.min(30, this.hp));
+        const phase1Hp = Math.max(0, Math.min(this.hpPerPhase, this.hp - this.hpPerPhase * 2));
+        const phase2Hp = Math.max(0, Math.min(this.hpPerPhase, this.hp - this.hpPerPhase));
+        const phase3Hp = Math.max(0, Math.min(this.hpPerPhase, this.hp));
         
         const hpColors = ['#00ff00', '#ffff00', '#ff0000'];
         const phaseHps = [phase3Hp, phase2Hp, phase1Hp];
@@ -968,9 +985,11 @@ function gameLoop(timestamp) {
             enemies.push(new Enemy());
         }
         lastEnemySpawn = timestamp;
-        // 出怪速度递增，最快150ms，击杀越多越快
+        // 出怪速度递增，最快150ms，击杀越多越快，boss击杀也会加速
         const minInterval = 150;
-        const decrement = 3 + Math.floor(killCount / 10); // 每击杀10个敌人，递减速度加快
+        const baseDecrement = 3 + Math.floor(killCount / 10);
+        const bossBonus = bossKillCount * 2; // 每个击杀的boss额外加速
+        const decrement = baseDecrement + bossBonus;
         enemySpawnInterval = Math.max(minInterval, enemySpawnInterval - decrement);
     }
     
