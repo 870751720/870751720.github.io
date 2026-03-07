@@ -1,5 +1,5 @@
 /**
- * 弹幕射击游戏 - 贺加文主页
+ * 弹幕射击游戏 - 贺加文主页 (增强版)
  */
 
 // ==================== 游戏配置 ====================
@@ -10,9 +10,13 @@ const ITEM_TYPES = [
     { id: 'slow', name: '时间缓速', color: '#00ffff', duration: 40000, icon: '❄' },
     { id: 'double', name: '分数翻倍', color: '#ffd700', duration: 80000, icon: '×2' },
     { id: 'magnet', name: '磁力吸引', color: '#ff69b4', duration: 60000, icon: '◎' },
+    { id: 'shield', name: '护盾', color: '#00ffaa', duration: 0, icon: '⛨' }, // 一次性护盾
+    { id: 'heal', name: '回血', color: '#ff5555', duration: 0, icon: '♥', instant: true },
     { id: 'perm_spd', name: '永久攻速+', color: '#ffffff', duration: 0, icon: '↑⚡', permanent: true },
     { id: 'perm_dmg', name: '永久伤害+', color: '#ff4444', duration: 0, icon: '↑✦', permanent: true },
-    { id: 'wingman', name: '僚机', color: '#00aaff', duration: 0, icon: '✈', permanent: true }
+    { id: 'wingman', name: '僚机', color: '#00aaff', duration: 0, icon: '✈', permanent: true },
+    { id: 'maxhp', name: '生命上限+', color: '#ff8888', duration: 0, icon: '↑♥', permanent: true },
+    { id: 'playersize', name: '机体变大', color: '#aaaaaa', duration: 0, icon: '↑□', permanent: true }
 ];
 
 // ==================== 游戏状态 ====================
@@ -24,7 +28,7 @@ let lastKillTime = 0;
 let comboTimer = null;
 let ctx = null;
 let animationId = null;
-let mouseX = 0;
+let mouseX = 0, mouseY = 0;
 let mouseDown = false;
 let lastShotTime = 0;
 
@@ -38,18 +42,25 @@ let playerStats = {
     multiShot: 1,
     magnetRange: 0,
     scoreMultiplier: 1,
-    wingmanCount: 0
+    wingmanCount: 0,
+    sizeLevel: 1
 };
 
-// 僚机数组
+// 生命系统
+let playerHp = 3;
+let playerMaxHp = 3;
+let playerShield = 0;
+
+// 僚机
 let wingmen = [];
 
-// 临时buff
+// 临时buff - 存储剩余时间而不是结束时间
 let activeBuffs = {};
 let timeScale = 1;
 
 // 游戏对象
 let bullets = [];
+let enemyBullets = [];
 let enemies = [];
 let particles = [];
 let items = [];
@@ -59,7 +70,7 @@ let lastEnemySpawn = 0;
 let enemySpawnInterval = 800;
 
 // DOM
-let startBtn, gameCanvas, gameScore, comboDisplay, comboCountEl;
+let startBtn, gameCanvas, gameScore, comboDisplay, comboCountEl, hpDisplay;
 let buffDisplay = null;
 
 // ==================== 初始化 ====================
@@ -70,6 +81,23 @@ function initGame() {
     comboDisplay = document.getElementById('combo-display');
     comboCountEl = comboDisplay.querySelector('.combo-count');
     
+    // 生命显示
+    hpDisplay = document.createElement('div');
+    hpDisplay.id = 'hp-display';
+    hpDisplay.style.cssText = `
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 24px;
+        color: #ff5555;
+        text-shadow: 2px 2px 0 #000;
+        z-index: 5;
+        display: none;
+    `;
+    document.body.appendChild(hpDisplay);
+    
+    // buff显示
     buffDisplay = document.createElement('div');
     buffDisplay.style.cssText = `
         position: fixed;
@@ -79,12 +107,17 @@ function initGame() {
         display: flex;
         gap: 10px;
         z-index: 5;
+        flex-wrap: wrap;
+        justify-content: center;
     `;
     document.body.appendChild(buffDisplay);
     
     startBtn.addEventListener('click', startGame);
     
-    window.addEventListener('mousemove', (e) => mouseX = e.clientX);
+    window.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+    });
     
     window.addEventListener('mousedown', (e) => {
         if (gameRunning && e.button === 0) {
@@ -101,6 +134,12 @@ function initGame() {
             gameCanvas.height = window.innerHeight;
         }
     });
+}
+
+function updateHpDisplay() {
+    let hearts = '♥'.repeat(playerHp) + '♡'.repeat(playerMaxHp - playerHp);
+    let shieldText = playerShield > 0 ? ` ⛨${playerShield}` : '';
+    hpDisplay.textContent = hearts + shieldText;
 }
 
 // ==================== 道具系统 ====================
@@ -156,7 +195,13 @@ function spawnItem(x, y) {
 function collectItem(item) {
     const type = item.type;
     
-    if (type.permanent) {
+    if (type.instant) {
+        if (type.id === 'heal' && playerHp < playerMaxHp) {
+            playerHp++;
+            updateHpDisplay();
+            showFloatingText(item.x, item.y, '+♥', '#ff5555');
+        }
+    } else if (type.permanent) {
         if (type.id === 'perm_spd') {
             playerStats.fireRate = Math.max(50, playerStats.fireRate - 10);
             showFloatingText(item.x, item.y, '攻速+!', '#00ff00');
@@ -165,18 +210,31 @@ function collectItem(item) {
             showFloatingText(item.x, item.y, '伤害+!', '#ff4444');
         } else if (type.id === 'wingman') {
             playerStats.wingmanCount++;
-            // 重新创建僚机
-            wingmen = [];
-            for (let i = 0; i < playerStats.wingmanCount; i++) {
-                wingmen.push(new Wingman(i, playerStats.wingmanCount));
-            }
-            showFloatingText(item.x, item.y, `僚机+1 (${playerStats.wingmanCount})`, '#00aaff');
+            updateWingmen();
+            showFloatingText(item.x, item.y, `僚机+1`, '#00aaff');
+        } else if (type.id === 'maxhp') {
+            playerMaxHp++;
+            playerHp++;
+            updateHpDisplay();
+            showFloatingText(item.x, item.y, '生命上限+1', '#ff8888');
+        } else if (type.id === 'playersize') {
+            playerStats.sizeLevel++;
+            showFloatingText(item.x, item.y, '机体变大!', '#aaaaaa');
         }
+    } else if (type.id === 'shield') {
+        playerShield++;
+        updateHpDisplay();
+        showFloatingText(item.x, item.y, '+⛨护盾', '#00ffaa');
     } else {
-        activeBuffs[type.id] = {
-            endTime: performance.now() + type.duration,
-            type: type
-        };
+        // 临时buff - 时间累加
+        if (activeBuffs[type.id]) {
+            activeBuffs[type.id].timeLeft += type.duration;
+        } else {
+            activeBuffs[type.id] = {
+                timeLeft: type.duration,
+                type: type
+            };
+        }
         updateBuffDisplay();
     }
     
@@ -187,7 +245,14 @@ function collectItem(item) {
     }
 }
 
-function updateBuffs(now) {
+function updateWingmen() {
+    wingmen = [];
+    for (let i = 0; i < playerStats.wingmanCount; i++) {
+        wingmen.push(new Wingman(i, playerStats.wingmanCount));
+    }
+}
+
+function updateBuffs(dt) {
     let changed = false;
     
     timeScale = 1;
@@ -198,29 +263,19 @@ function updateBuffs(now) {
     
     for (let id in activeBuffs) {
         const buff = activeBuffs[id];
-        if (now > buff.endTime) {
+        buff.timeLeft -= dt * 1000 / timeScale; // 时间缓速影响buff消耗
+        
+        if (buff.timeLeft <= 0) {
             delete activeBuffs[id];
             changed = true;
         } else {
             switch(id) {
-                case 'rapid':
-                    playerStats.fireRate = 75;
-                    break;
-                case 'spread':
-                    playerStats.multiShot = 3;
-                    break;
-                case 'big':
-                    playerStats.bulletSizeBuff = 2.5;
-                    break;
-                case 'slow':
-                    timeScale = 0.4;
-                    break;
-                case 'double':
-                    playerStats.scoreMultiplier = 2;
-                    break;
-                case 'magnet':
-                    playerStats.magnetRange = 200;
-                    break;
+                case 'rapid': playerStats.fireRate = 75; break;
+                case 'spread': playerStats.multiShot = 3; break;
+                case 'big': playerStats.bulletSizeBuff = 2.5; break;
+                case 'slow': timeScale = 0.4; break;
+                case 'double': playerStats.scoreMultiplier = 2; break;
+                case 'magnet': playerStats.magnetRange = 200; break;
             }
         }
     }
@@ -230,11 +285,10 @@ function updateBuffs(now) {
 
 function updateBuffDisplay() {
     buffDisplay.innerHTML = '';
-    const now = performance.now();
     
     for (let id in activeBuffs) {
         const buff = activeBuffs[id];
-        const remaining = Math.ceil((buff.endTime - now) / 1000);
+        const remaining = Math.ceil(buff.timeLeft / 1000);
         
         const badge = document.createElement('div');
         badge.style.cssText = `
@@ -245,6 +299,7 @@ function updateBuffDisplay() {
             font-size: 12px;
             font-weight: bold;
             box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+            white-space: nowrap;
         `;
         badge.textContent = `${buff.type.icon} ${remaining}s`;
         buffDisplay.appendChild(badge);
@@ -304,16 +359,16 @@ class Wingman {
         this.total = total;
         this.angle = (index / total) * Math.PI * 2;
         this.radius = 60;
-        this.size = 10;
     }
     
     update() {
         this.angle += 0.03;
         this.x = player.x + Math.cos(this.angle) * this.radius;
-        this.y = player.y + Math.sin(this.angle) * this.radius;
+        this.y = player.y + Math.sin(this.angle) * this.radius * 0.5;
     }
     
     draw() {
+        const size = 10 * Math.sqrt(playerStats.sizeLevel);
         ctx.fillStyle = '#00aaff';
         ctx.fillRect(this.x - 3, this.y - 6, 6, 12);
         ctx.fillRect(this.x - 8, this.y, 16, 4);
@@ -324,60 +379,83 @@ class Wingman {
     }
     
     shoot() {
-        const bullet = new Bullet(this.x, this.y - 10);
-        bullet.size = 3 * playerStats.bulletSize * playerStats.bulletSizeBuff;
-        return bullet;
+        return new Bullet(this.x, this.y - 10);
     }
 }
+
+// ==================== 玩家 ====================
 class Player {
     constructor() {
-        this.size = 16;
-        this.y = gameCanvas.height - 60;
+        this.baseSize = 16;
         this.x = gameCanvas.width / 2;
+        this.y = gameCanvas.height - 100;
         this.color = '#9d8df7';
     }
     
+    get size() {
+        return this.baseSize * Math.sqrt(playerStats.sizeLevel);
+    }
+    
     update() {
-        this.x = Math.max(this.size, Math.min(gameCanvas.width - this.size, mouseX));
-        this.y = gameCanvas.height - 60;
+        // 平滑跟随鼠标
+        const targetX = Math.max(this.size, Math.min(gameCanvas.width - this.size, mouseX));
+        const targetY = Math.max(this.size, Math.min(gameCanvas.height - this.size, mouseY));
+        
+        this.x += (targetX - this.x) * 0.15;
+        this.y += (targetY - this.y) * 0.15;
     }
     
     draw() {
+        const s = this.size;
         ctx.fillStyle = this.color;
-        ctx.fillRect(this.x - 4, this.y - 8, 8, 16);
-        ctx.fillRect(this.x - 12, this.y, 24, 6);
-        ctx.fillRect(this.x - 8, this.y + 4, 16, 4);
-        ctx.shadowColor = this.color;
-        ctx.shadowBlur = 15;
-        ctx.fillRect(this.x - 2, this.y - 12, 4, 6);
-        ctx.shadowBlur = 0;
+        ctx.fillRect(this.x - s/4, this.y - s/2, s/2, s);
+        ctx.fillRect(this.x - s*0.75, this.y, s*1.5, s*0.375);
+        ctx.fillRect(this.x - s/2, this.y + s/4, s, s/4);
+        
+        // 护盾效果
+        if (playerShield > 0) {
+            ctx.strokeStyle = '#00ffaa';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, s + 5, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.shadowColor = '#00ffaa';
+            ctx.shadowBlur = 10;
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+        }
     }
 }
 
 // ==================== 子弹 ====================
 class Bullet {
-    constructor(x, y, angle = 0) {
+    constructor(x, y, angle = 0, isEnemy = false) {
         this.x = x;
         this.y = y;
-        this.speed = 10;
-        this.size = 4 * playerStats.bulletSize * playerStats.bulletSizeBuff;
+        this.speed = isEnemy ? 4 : 10;
+        this.size = (isEnemy ? 6 : 4) * (isEnemy ? 1 : playerStats.bulletSize * playerStats.bulletSizeBuff);
         this.active = true;
         this.angle = angle;
-        this.damage = playerStats.damage;
+        this.damage = isEnemy ? 1 : playerStats.damage;
+        this.isEnemy = isEnemy;
     }
     
     update() {
         this.x += Math.sin(this.angle) * this.speed;
         this.y -= Math.cos(this.angle) * this.speed;
-        if (this.y < 0 || this.x < 0 || this.x > gameCanvas.width) this.active = false;
+        if (this.y < 0 || this.y > gameCanvas.height || this.x < 0 || this.x > gameCanvas.width) {
+            this.active = false;
+        }
     }
     
     draw() {
-        ctx.fillStyle = '#fff';
+        ctx.fillStyle = this.isEnemy ? '#ff6666' : '#fff';
         const s = this.size;
         ctx.fillRect(this.x - s/2, this.y - s, s, s * 2);
-        ctx.fillStyle = 'rgba(157, 141, 247, 0.5)';
-        ctx.fillRect(this.x - s/4, this.y, s/2, s);
+        if (!this.isEnemy) {
+            ctx.fillStyle = 'rgba(157, 141, 247, 0.5)';
+            ctx.fillRect(this.x - s/4, this.y, s/2, s);
+        }
     }
 }
 
@@ -387,21 +465,17 @@ function shoot() {
     
     lastShotTime = now;
     
-    // 主玩家射击
     const count = playerStats.multiShot;
     if (count === 1) {
-        bullets.push(new Bullet(player.x, player.y - 15));
+        bullets.push(new Bullet(player.x, player.y - player.size/2));
     } else {
         for (let i = 0; i < count; i++) {
             const angle = (i - (count - 1) / 2) * 0.3;
-            bullets.push(new Bullet(player.x, player.y - 15, angle));
+            bullets.push(new Bullet(player.x, player.y - player.size/2, angle));
         }
     }
     
-    // 僚机射击
-    wingmen.forEach(wingman => {
-        bullets.push(wingman.shoot());
-    });
+    wingmen.forEach(wingman => bullets.push(wingman.shoot()));
 }
 
 // ==================== 敌人类型 ====================
@@ -411,10 +485,11 @@ class Enemy {
     constructor() {
         this.type = ENEMY_TYPES[Math.floor(Math.random() * ENEMY_TYPES.length)];
         this.x = 30 + Math.random() * (gameCanvas.width - 60);
-        this.y = -30;
+        this.y = -40;
         this.active = true;
         this.hp = 2;
         this.maxHp = 2;
+        this.lastShot = 0;
         
         switch(this.type) {
             case 'basic':
@@ -432,16 +507,16 @@ class Enemy {
                 this.hp = this.maxHp = 1;
                 break;
             case 'tank':
-                this.size = 36;
-                this.vx = (Math.random() - 0.5) * 0.5;
-                this.vy = 0.8;
-                this.color = '#888888';
-                this.hp = this.maxHp = 5;
+                this.size = 40;
+                this.vx = 0;
+                this.vy = 0.6;
+                this.color = '#666666';
+                this.hp = this.maxHp = 8;
                 break;
             case 'shooter':
                 this.size = 28;
-                this.vx = Math.sin(Date.now() / 500) * 2;
-                this.vy = 1.2;
+                this.vx = 0;
+                this.vy = 1;
                 this.color = '#00ff00';
                 this.hp = this.maxHp = 3;
                 break;
@@ -455,16 +530,17 @@ class Enemy {
         }
     }
     
-    update() {
+    update(now) {
         this.y += this.vy * timeScale;
         this.x += this.vx * timeScale;
         
-        // 摆动效果
-        if (this.type === 'shooter') {
-            this.x += Math.sin(this.y / 50) * 0.5;
+        if (this.type === 'shooter' && now - this.lastShot > 2000) {
+            // 射击型敌人发射子弹
+            const angle = Math.atan2(player.x - this.x, -(player.y - this.y));
+            enemyBullets.push(new Bullet(this.x, this.y + this.size/2, angle, true));
+            this.lastShot = now;
         }
         
-        // 边界反弹
         if (this.x < this.size || this.x > gameCanvas.width - this.size) {
             this.vx = -this.vx;
         }
@@ -480,11 +556,11 @@ class Enemy {
                 ctx.fillStyle = this.color;
                 ctx.fillRect(this.x - half, this.y - half, this.size, this.size);
                 ctx.fillStyle = '#fff';
-                ctx.fillRect(this.x - half + 4, this.y - 4, 6, 6);
-                ctx.fillRect(this.x + 2, this.y - 4, 6, 6);
+                ctx.fillRect(this.x - 6, this.y - 4, 4, 4);
+                ctx.fillRect(this.x + 2, this.y - 4, 4, 4);
                 ctx.fillStyle = '#000';
-                ctx.fillRect(this.x - 2, this.y - 2, 2, 2);
-                ctx.fillRect(this.x + 2, this.y - 2, 2, 2);
+                ctx.fillRect(this.x - 4, this.y, 2, 4);
+                ctx.fillRect(this.x + 2, this.y, 2, 4);
                 break;
                 
             case 'fast':
@@ -496,18 +572,26 @@ class Enemy {
                 ctx.closePath();
                 ctx.fill();
                 ctx.fillStyle = '#ff6600';
-                ctx.fillRect(this.x - 2, this.y - 2, 4, 4);
+                ctx.fillRect(this.x - 2, this.y, 4, 4);
                 break;
                 
             case 'tank':
-                ctx.fillStyle = this.color;
+                // 重型坦克外观
+                ctx.fillStyle = '#444444';
                 ctx.fillRect(this.x - half, this.y - half, this.size, this.size);
-                ctx.strokeStyle = '#ff0000';
-                ctx.lineWidth = 2;
-                ctx.strokeRect(this.x - half + 3, this.y - half + 3, this.size - 6, this.size - 6);
-                ctx.fillStyle = '#fff';
-                ctx.fillRect(this.x - 6, this.y - 6, 4, 4);
-                ctx.fillRect(this.x + 2, this.y - 6, 4, 4);
+                // 装甲板
+                ctx.fillStyle = '#666666';
+                ctx.fillRect(this.x - half + 4, this.y - half + 4, this.size - 8, this.size - 8);
+                // 炮管
+                ctx.fillStyle = '#333333';
+                ctx.fillRect(this.x - 4, this.y + half - 8, 8, 12);
+                // 炮口
+                ctx.fillStyle = '#ff0000';
+                ctx.fillRect(this.x - 2, this.y + half - 2, 4, 4);
+                // 眼睛
+                ctx.fillStyle = '#ff6666';
+                ctx.fillRect(this.x - 8, this.y - 4, 6, 4);
+                ctx.fillRect(this.x + 2, this.y - 4, 6, 4);
                 break;
                 
             case 'shooter':
@@ -517,14 +601,17 @@ class Enemy {
                 ctx.fill();
                 ctx.fillStyle = '#fff';
                 ctx.beginPath();
-                ctx.arc(this.x - 5, this.y - 2, 4, 0, Math.PI * 2);
-                ctx.arc(this.x + 5, this.y - 2, 4, 0, Math.PI * 2);
+                ctx.arc(this.x - 6, this.y - 2, 5, 0, Math.PI * 2);
+                ctx.arc(this.x + 6, this.y - 2, 5, 0, Math.PI * 2);
                 ctx.fill();
-                ctx.fillStyle = '#000';
+                ctx.fillStyle = '#ff0000';
                 ctx.beginPath();
-                ctx.arc(this.x - 5, this.y - 2, 2, 0, Math.PI * 2);
-                ctx.arc(this.x + 5, this.y - 2, 2, 0, Math.PI * 2);
+                ctx.arc(this.x - 6, this.y - 2, 2, 0, Math.PI * 2);
+                ctx.arc(this.x + 6, this.y - 2, 2, 0, Math.PI * 2);
                 ctx.fill();
+                // 炮管
+                ctx.fillStyle = '#333';
+                ctx.fillRect(this.x - 2, this.y + 5, 4, 10);
                 break;
                 
             case 'splitter':
@@ -537,16 +624,18 @@ class Enemy {
                 ctx.closePath();
                 ctx.fill();
                 ctx.fillStyle = '#fff';
-                ctx.fillRect(this.x - 3, this.y - 3, 6, 6);
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 6, 0, Math.PI * 2);
+                ctx.fill();
                 break;
         }
         
         // 血条
         if (this.hp < this.maxHp) {
             ctx.fillStyle = '#333';
-            ctx.fillRect(this.x - half, this.y - half - 8, this.size, 4);
+            ctx.fillRect(this.x - half, this.y - half - 10, this.size, 5);
             ctx.fillStyle = '#ff0000';
-            ctx.fillRect(this.x - half + 1, this.y - half - 7, (this.size - 2) * (this.hp / this.maxHp), 2);
+            ctx.fillRect(this.x - half + 1, this.y - half - 9, (this.size - 2) * (this.hp / this.maxHp), 3);
         }
     }
     
@@ -568,17 +657,19 @@ class Boss extends Enemy {
     constructor() {
         super();
         this.type = 'boss';
-        this.size = 48;
-        this.hp = 15;
-        this.maxHp = 15;
+        this.size = 80;
+        this.hp = 30;
+        this.maxHp = 30;
         this.x = gameCanvas.width / 2;
-        this.y = -60;
-        this.vx = 1.5;
-        this.vy = 0.5;
+        this.y = -80;
+        this.vx = 2;
+        this.vy = 0.3;
         this.color = '#ff6b6b';
+        this.lastShot = 0;
+        this.shotPattern = 0;
     }
     
-    update() {
+    update(now) {
         this.x += this.vx * timeScale;
         this.y += this.vy * timeScale;
         
@@ -586,28 +677,80 @@ class Boss extends Enemy {
             this.vx = -this.vx;
         }
         
+        // Boss弹幕攻击
+        if (now - this.lastShot > 1500) {
+            this.shotPattern = (this.shotPattern + 1) % 3;
+            
+            if (this.shotPattern === 0) {
+                // 散射
+                for (let i = -2; i <= 2; i++) {
+                    const angle = i * 0.3;
+                    enemyBullets.push(new Bullet(this.x, this.y + 30, angle, true));
+                }
+            } else if (this.shotPattern === 1) {
+                // 追踪
+                const angle = Math.atan2(player.x - this.x, -(player.y - this.y));
+                enemyBullets.push(new Bullet(this.x, this.y + 30, angle, true));
+                enemyBullets.push(new Bullet(this.x - 20, this.y + 30, angle - 0.2, true));
+                enemyBullets.push(new Bullet(this.x + 20, this.y + 30, angle + 0.2, true));
+            } else {
+                // 环形
+                for (let i = 0; i < 8; i++) {
+                    const angle = (i / 8) * Math.PI * 2;
+                    enemyBullets.push(new Bullet(this.x, this.y, angle, true));
+                }
+            }
+            this.lastShot = now;
+        }
+        
         if (this.y > gameCanvas.height + 100) this.active = false;
     }
     
     draw() {
-        ctx.fillStyle = '#ff6b6b';
-        ctx.fillRect(this.x - 20, this.y - 20, 40, 40);
+        const h = this.size / 2;
+        
+        // 主体
+        ctx.fillStyle = '#ff4444';
+        ctx.fillRect(this.x - h, this.y - h, this.size, this.size);
+        
+        // 装甲
+        ctx.strokeStyle = '#ffd700';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(this.x - h + 5, this.y - h + 5, this.size - 10, this.size - 10);
+        
+        // 角
         ctx.fillStyle = '#ffd700';
-        ctx.fillRect(this.x - 24, this.y - 24, 8, 8);
-        ctx.fillRect(this.x + 16, this.y - 24, 8, 8);
+        ctx.beginPath();
+        ctx.moveTo(this.x - h, this.y - h);
+        ctx.lineTo(this.x - h - 10, this.y - h - 15);
+        ctx.lineTo(this.x - h + 10, this.y - h);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(this.x + h, this.y - h);
+        ctx.lineTo(this.x + h + 10, this.y - h - 15);
+        ctx.lineTo(this.x + h - 10, this.y - h);
+        ctx.fill();
+        
+        // 眼睛
         ctx.fillStyle = '#fff';
-        ctx.fillRect(this.x - 12, this.y - 8, 8, 8);
-        ctx.fillRect(this.x + 4, this.y - 8, 8, 8);
+        ctx.fillRect(this.x - 20, this.y - 15, 12, 12);
+        ctx.fillRect(this.x + 8, this.y - 15, 12, 12);
         ctx.fillStyle = '#ff0000';
-        ctx.fillRect(this.x - 10, this.y - 6, 4, 4);
-        ctx.fillRect(this.x + 6, this.y - 6, 4, 4);
+        ctx.fillRect(this.x - 17, this.y - 12, 6, 6);
+        ctx.fillRect(this.x + 11, this.y - 12, 6, 6);
+        
+        // 血条背景
         ctx.fillStyle = '#333';
-        ctx.fillRect(this.x - 22, this.y - 32, 44, 6);
-        ctx.fillStyle = '#ff0000';
-        ctx.fillRect(this.x - 20, this.y - 30, 40 * (this.hp / this.maxHp), 4);
-        ctx.fillStyle = '#fff';
-        ctx.fillRect(this.x - 8, this.y + 8, 4, 6);
-        ctx.fillRect(this.x + 4, this.y + 8, 4, 6);
+        ctx.fillRect(this.x - h - 5, this.y - h - 15, this.size + 10, 8);
+        // 血条
+        const hpPercent = this.hp / this.maxHp;
+        ctx.fillStyle = hpPercent > 0.5 ? '#00ff00' : hpPercent > 0.25 ? '#ffff00' : '#ff0000';
+        ctx.fillRect(this.x - h - 3, this.y - h - 13, (this.size + 6) * hpPercent, 4);
+        
+        // 炮管
+        ctx.fillStyle = '#333';
+        ctx.fillRect(this.x - 30, this.y + h - 10, 20, 15);
+        ctx.fillRect(this.x + 10, this.y + h - 10, 20, 15);
     }
 }
 
@@ -639,30 +782,34 @@ function updateCombo() {
 }
 
 // ==================== 游戏循环 ====================
+let lastTime = 0;
+
 function gameLoop(timestamp) {
     if (!gameRunning) return;
+    
+    const dt = (timestamp - lastTime) / 1000;
+    lastTime = timestamp;
     
     ctx.fillStyle = 'rgba(26, 26, 46, 0.25)';
     ctx.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
     
-    const now = performance.now();
-    
-    updateBuffs(now);
+    // 更新buff
+    updateBuffs(dt);
     
     // 连发
-    if (mouseDown && now - lastShotTime > playerStats.fireRate) {
+    if (mouseDown && timestamp - lastShotTime > playerStats.fireRate) {
         shoot();
     }
     
     // 生成敌人
-    if (now - lastEnemySpawn > enemySpawnInterval / timeScale) {
+    if (timestamp - lastEnemySpawn > enemySpawnInterval / timeScale) {
         if (killCount > 0 && killCount % 20 === 0) {
             enemies.push(new Boss());
             killCount++;
         } else {
             enemies.push(new Enemy());
         }
-        lastEnemySpawn = now;
+        lastEnemySpawn = timestamp;
         enemySpawnInterval = Math.max(300, enemySpawnInterval - 2);
     }
     
@@ -680,18 +827,50 @@ function gameLoop(timestamp) {
     items = items.filter(item => item.active);
     items.forEach(item => {
         item.update();
-        item.draw(now);
+        item.draw(timestamp);
         
         if (checkCollision(player, item)) {
             collectItem(item);
         }
     });
     
-    // 子弹
+    // 玩家子弹
     bullets = bullets.filter(b => b.active);
     bullets.forEach(b => {
         b.update();
         b.draw();
+    });
+    
+    // 敌人子弹
+    enemyBullets = enemyBullets.filter(b => b.active);
+    enemyBullets.forEach(b => {
+        b.update();
+        b.draw();
+        
+        // 检测击中玩家
+        if (checkCollision(b, player)) {
+            b.active = false;
+            
+            if (playerShield > 0) {
+                playerShield--;
+                showFloatingText(player.x, player.y - 30, '护盾抵消!', '#00ffaa');
+            } else {
+                playerHp--;
+                showFloatingText(player.x, player.y - 30, '-♥', '#ff0000');
+                
+                // 受伤闪烁
+                for (let i = 0; i < 10; i++) {
+                    particles.push(new Particle(player.x, player.y, '#ff0000'));
+                }
+            }
+            
+            updateHpDisplay();
+            
+            if (playerHp <= 0) {
+                gameOver();
+                return;
+            }
+        }
     });
     
     // 粒子
@@ -704,9 +883,34 @@ function gameLoop(timestamp) {
     // 敌人
     enemies = enemies.filter(e => e.active);
     enemies.forEach(e => {
-        e.update();
+        e.update(timestamp);
         e.draw();
         
+        // 检测敌人撞到玩家
+        if (checkCollision(e, player)) {
+            e.active = false;
+            
+            if (playerShield > 0) {
+                playerShield--;
+                showFloatingText(player.x, player.y - 30, '护盾抵消!', '#00ffaa');
+            } else {
+                playerHp--;
+                showFloatingText(player.x, player.y - 30, '-♥', '#ff0000');
+                
+                for (let i = 0; i < 10; i++) {
+                    particles.push(new Particle(player.x, player.y, '#ff0000'));
+                }
+            }
+            
+            updateHpDisplay();
+            
+            if (playerHp <= 0) {
+                gameOver();
+                return;
+            }
+        }
+        
+        // 检测子弹击中敌人
         bullets.forEach(b => {
             if (b.active && checkCollision(b, e)) {
                 if (!activeBuffs['big']) b.active = false;
@@ -725,7 +929,31 @@ function gameLoop(timestamp) {
         });
     });
     
+    // 更新buff显示
+    updateBuffDisplay();
+    
     animationId = requestAnimationFrame(gameLoop);
+}
+
+function gameOver() {
+    gameRunning = false;
+    cancelAnimationFrame(animationId);
+    
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+    ctx.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
+    
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 48px VT323';
+    ctx.textAlign = 'center';
+    ctx.fillText('GAME OVER', gameCanvas.width / 2, gameCanvas.height / 2 - 50);
+    
+    ctx.font = '24px VT323';
+    ctx.fillText(`最终得分: ${score}`, gameCanvas.width / 2, gameCanvas.height / 2 + 20);
+    ctx.fillText(`击杀数: ${killCount}`, gameCanvas.width / 2, gameCanvas.height / 2 + 50);
+    
+    setTimeout(() => {
+        location.reload();
+    }, 3000);
 }
 
 // ==================== 开始游戏 ====================
@@ -735,12 +963,20 @@ function startGame() {
     killCount = 0;
     combo = 0;
     bullets = [];
+    enemyBullets = [];
     enemies = [];
     particles = [];
     items = [];
     activeBuffs = {};
     timeScale = 1;
+    lastTime = performance.now();
     
+    // 重置生命
+    playerHp = 3;
+    playerMaxHp = 3;
+    playerShield = 0;
+    
+    // 重置属性
     playerStats = {
         fireRate: 150,
         bulletSize: 1,
@@ -749,13 +985,15 @@ function startGame() {
         multiShot: 1,
         magnetRange: 0,
         scoreMultiplier: 1,
-        wingmanCount: 0
+        wingmanCount: 0,
+        sizeLevel: 1
     };
     
     wingmen = [];
-    
     enemySpawnInterval = 800;
+    
     gameScore.textContent = 'SCORE: 0';
+    updateHpDisplay();
     updateBuffDisplay();
     
     gameCanvas.width = window.innerWidth;
@@ -764,11 +1002,13 @@ function startGame() {
     
     player = new Player();
     mouseX = gameCanvas.width / 2;
+    mouseY = gameCanvas.height - 100;
     
     document.body.classList.add('game-active');
     startBtn.classList.add('hidden');
     gameCanvas.classList.add('active');
     gameScore.classList.add('active');
+    hpDisplay.style.display = 'block';
     
     lastEnemySpawn = performance.now();
     animationId = requestAnimationFrame(gameLoop);
