@@ -574,12 +574,16 @@
         
         let gameRunning = false;
         let score = 0;
+        let killCount = 0; // 击杀计数
         let ctx = null;
         let animationId = null;
         let mouseX = 0;
+        let mouseDown = false; // 鼠标是否按住
+        let lastShotTime = 0;
         let player = null;
         let bullets = [];
         let enemies = [];
+        let particles = []; // 粒子效果
         let lastEnemySpawn = 0;
         let enemySpawnInterval = 800;
         
@@ -591,6 +595,33 @@
             const container = document.querySelector('.container');
             cardRect = card.getBoundingClientRect();
             containerRect = container.getBoundingClientRect();
+        }
+        
+        // 粒子效果类
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.vx = (Math.random() - 0.5) * 8;
+                this.vy = (Math.random() - 0.5) * 8;
+                this.life = 1;
+                this.decay = 0.05 + Math.random() * 0.05;
+                this.color = color;
+                this.size = 2 + Math.random() * 3;
+            }
+            
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.life -= this.decay;
+            }
+            
+            draw() {
+                ctx.globalAlpha = this.life;
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.x - this.size/2, this.y - this.size/2, this.size, this.size);
+                ctx.globalAlpha = 1;
+            }
         }
         
         class Player {
@@ -639,13 +670,16 @@
             }
         }
         
+        // 普通敌人
         class Enemy {
             constructor(side) {
-                this.size = 16;
+                this.size = 24; // 更大的怪物
                 this.active = true;
+                this.hp = 1;
+                this.isBoss = false;
                 
                 const minY = 50;
-                const maxY = gameCanvas.height - 150;
+                const maxY = gameCanvas.height - 200;
                 this.y = minY + Math.random() * (maxY - minY);
                 
                 if (side === 'left') {
@@ -670,16 +704,104 @@
             
             draw() {
                 ctx.fillStyle = '#e87e7e';
-                ctx.fillRect(this.x - 7, this.y - 7, 14, 14);
+                // 更大的像素怪物
+                ctx.fillRect(this.x - 10, this.y - 10, 20, 20);
                 ctx.fillStyle = '#fff';
-                ctx.fillRect(this.x - 5, this.y - 3, 4, 4);
-                ctx.fillRect(this.x + 1, this.y - 3, 4, 4);
+                ctx.fillRect(this.x - 7, this.y - 4, 5, 5);
+                ctx.fillRect(this.x + 2, this.y - 4, 5, 5);
                 ctx.fillStyle = '#000';
-                ctx.fillRect(this.x - 4, this.y - 2, 2, 2);
-                ctx.fillRect(this.x + 2, this.y - 2, 2, 2);
+                ctx.fillRect(this.x - 5, this.y - 2, 2, 2);
+                ctx.fillRect(this.x + 3, this.y - 2, 2, 2);
                 ctx.fillStyle = '#fff';
-                ctx.fillRect(this.x - 3, this.y + 3, 2, 3);
-                ctx.fillRect(this.x + 1, this.y + 3, 2, 3);
+                ctx.fillRect(this.x - 5, this.y + 4, 3, 4);
+                ctx.fillRect(this.x + 2, this.y + 4, 3, 4);
+            }
+            
+            onHit() {
+                this.hp--;
+                if (this.hp <= 0) {
+                    this.active = false;
+                    // 产生粒子爆炸
+                    for (let i = 0; i < 8; i++) {
+                        particles.push(new Particle(this.x, this.y, '#e87e7e'));
+                    }
+                    return true;
+                }
+                return false;
+            }
+        }
+        
+        // Boss敌人
+        class Boss extends Enemy {
+            constructor(side) {
+                super(side);
+                this.size = 48; // 超大
+                this.hp = 10; // 10点血
+                this.isBoss = true;
+                this.maxHp = 10;
+                
+                const minY = 80;
+                const maxY = gameCanvas.height - 250;
+                this.y = minY + Math.random() * (maxY - minY);
+                
+                if (side === 'left') {
+                    this.x = -this.size;
+                    this.vx = 1.5;
+                    this.vy = 0.3;
+                } else {
+                    this.x = gameCanvas.width + this.size;
+                    this.vx = -1.5;
+                    this.vy = 0.3;
+                }
+            }
+            
+            draw() {
+                // Boss身体
+                ctx.fillStyle = '#ff6b6b';
+                ctx.fillRect(this.x - 20, this.y - 20, 40, 40);
+                
+                // 角
+                ctx.fillStyle = '#ffd700';
+                ctx.fillRect(this.x - 24, this.y - 24, 8, 8);
+                ctx.fillRect(this.x + 16, this.y - 24, 8, 8);
+                
+                // 眼睛
+                ctx.fillStyle = '#fff';
+                ctx.fillRect(this.x - 12, this.y - 8, 8, 8);
+                ctx.fillRect(this.x + 4, this.y - 8, 8, 8);
+                ctx.fillStyle = '#ff0000';
+                ctx.fillRect(this.x - 10, this.y - 6, 4, 4);
+                ctx.fillRect(this.x + 6, this.y - 6, 4, 4);
+                
+                // 血条背景
+                ctx.fillStyle = '#333';
+                ctx.fillRect(this.x - 22, this.y - 32, 44, 6);
+                // 血条
+                ctx.fillStyle = '#ff0000';
+                ctx.fillRect(this.x - 20, this.y - 30, 40 * (this.hp / this.maxHp), 4);
+                
+                // 嘴巴
+                ctx.fillStyle = '#fff';
+                ctx.fillRect(this.x - 8, this.y + 8, 4, 6);
+                ctx.fillRect(this.x + 4, this.y + 8, 4, 6);
+            }
+            
+            onHit() {
+                this.hp--;
+                // 被击中闪烁效果
+                for (let i = 0; i < 3; i++) {
+                    particles.push(new Particle(this.x + (Math.random()-0.5)*30, this.y + (Math.random()-0.5)*30, '#ff6b6b'));
+                }
+                if (this.hp <= 0) {
+                    this.active = false;
+                    // Boss爆炸
+                    for (let i = 0; i < 20; i++) {
+                        particles.push(new Particle(this.x, this.y, '#ffd700'));
+                        particles.push(new Particle(this.x, this.y, '#ff6b6b'));
+                    }
+                    return true;
+                }
+                return false;
             }
         }
         
@@ -694,9 +816,22 @@
             ctx.fillStyle = 'rgba(26, 26, 46, 0.2)';
             ctx.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
             
+            // 连发子弹
+            if (mouseDown && timestamp - lastShotTime > 150) {
+                bullets.push(new Bullet(player.x, player.y - 15));
+                lastShotTime = timestamp;
+            }
+            
+            // 生成敌人
             if (timestamp - lastEnemySpawn > enemySpawnInterval) {
                 const side = Math.random() > 0.5 ? 'left' : 'right';
-                enemies.push(new Enemy(side));
+                // 每20只出一个Boss
+                if (killCount > 0 && killCount % 20 === 0) {
+                    enemies.push(new Boss(side));
+                    killCount++; // 防止连续出Boss
+                } else {
+                    enemies.push(new Enemy(side));
+                }
                 lastEnemySpawn = timestamp;
                 enemySpawnInterval = Math.max(300, enemySpawnInterval - 2);
             }
@@ -711,6 +846,13 @@
                 b.draw();
             });
             
+            // 更新粒子
+            particles = particles.filter(p => p.life > 0);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            
             enemies = enemies.filter(e => e.active);
             enemies.forEach(e => {
                 e.update();
@@ -719,9 +861,11 @@
                 bullets.forEach(b => {
                     if (b.active && checkCollision(b, e)) {
                         b.active = false;
-                        e.active = false;
-                        score += 100;
-                        gameScore.textContent = 'SCORE: ' + score;
+                        if (e.onHit()) {
+                            killCount++;
+                            score += e.isBoss ? 1000 : 100;
+                            gameScore.textContent = 'SCORE: ' + score;
+                        }
                     }
                 });
             });
@@ -732,8 +876,10 @@
         function startGame() {
             gameRunning = true;
             score = 0;
+            killCount = 0;
             bullets = [];
             enemies = [];
+            particles = [];
             enemySpawnInterval = 800;
             gameScore.textContent = 'SCORE: 0';
             
@@ -760,9 +906,15 @@
         });
         
         window.addEventListener('mousedown', (e) => {
-            if (gameRunning && e.button === 0 && player) {
+            if (gameRunning && e.button === 0) {
+                mouseDown = true;
                 bullets.push(new Bullet(player.x, player.y - 15));
+                lastShotTime = performance.now();
             }
+        });
+        
+        window.addEventListener('mouseup', () => {
+            mouseDown = false;
         });
         
         window.addEventListener('resize', () => {
