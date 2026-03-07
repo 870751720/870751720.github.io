@@ -10,7 +10,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 20px;
+    padding: 40px 20px;
     box-sizing: border-box;
     overflow-y: auto;
 }
@@ -18,319 +18,99 @@
 .inventory-screen h2 {
     font-size: 32px;
     color: #9d8df7;
-    margin: 0 0 20px 0;
+    margin: 0 0 30px 0;
     text-shadow: 0 0 20px rgba(157, 141, 247, 0.5);
 }
 
-.inventory-layout {
-    display: flex;
-    gap: 20px;
+.inventory-content {
     width: 100%;
-    max-width: 1200px;
-    flex: 1;
-    min-height: 0;
-}
-
-/* 左侧边栏 */
-.inventory-sidebar {
-    width: 280px;
+    max-width: 600px;
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 25px;
 }
 
 .inventory-section {
     background: rgba(0, 0, 0, 0.3);
     border-radius: 15px;
-    padding: 15px;
+    padding: 20px;
     border: 1px solid rgba(157, 141, 247, 0.2);
 }
 
 .inventory-section h3 {
-    font-size: 16px;
+    font-size: 18px;
     color: #9d8df7;
-    margin: 0 0 12px 0;
-    padding-bottom: 8px;
+    margin: 0 0 15px 0;
+    padding-bottom: 10px;
     border-bottom: 1px solid rgba(157, 141, 247, 0.3);
 }
 
 /* 金币显示 */
 .inventory-coins {
-    display: flex;
-    align-items: baseline;
-    gap: 8px;
+    text-align: center;
+    padding: 10px;
 }
 
 .coin-amount {
-    font-size: 28px;
+    font-size: 36px;
     font-weight: bold;
     color: #ffd700;
-    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    text-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
 }
 
-.coin-label {
-    font-size: 14px;
-    color: #888;
-}
-
-/* 材料列表 */
-.inventory-materials {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.inventory-material-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px;
-    background: rgba(107, 92, 231, 0.1);
-    border-radius: 10px;
-}
-
-.inventory-material-item .material-icon {
-    font-size: 24px;
-}
-
-.material-info {
-    flex: 1;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.material-name {
-    font-size: 13px;
-    color: #aaa;
-}
-
-.material-count {
-    font-size: 16px;
-    font-weight: bold;
-    color: #fff;
-}
-
-/* 统计信息 */
-.inventory-stats {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.stat-row {
-    display: flex;
-    justify-content: space-between;
-    font-size: 14px;
-    padding: 8px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.stat-row:last-child {
-    border-bottom: none;
-}
-
-.stat-row span:first-child {
-    color: #888;
-}
-
-.stat-row span:last-child {
-    color: #fff;
-    font-weight: bold;
-}
-
-/* 右侧主区域 */
-.inventory-main {
-    flex: 1;
-    min-width: 0;
-}
-
-.inventory-main .inventory-section {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-}
-
-.inventory-main h3 {
-    flex-shrink: 0;
-}
-
-/* 飞机网格 */
-.inventory-ships-grid {
+/* 材料格子网格 */
+.inventory-materials-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    grid-template-columns: repeat(4, 1fr);
     gap: 15px;
-    overflow-y: auto;
-    padding-right: 10px;
-    flex: 1;
 }
 
-/* 飞机卡片 */
-.inventory-ship-card {
+/* 材料格子 */
+.material-slot {
+    aspect-ratio: 1;
     background: rgba(107, 92, 231, 0.1);
-    border: 2px solid transparent;
-    border-radius: 15px;
-    padding: 15px;
+    border: 2px solid rgba(157, 141, 247, 0.3);
+    border-radius: 12px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px;
-    transition: all 0.2s;
+    justify-content: center;
+    gap: 5px;
     position: relative;
+    transition: all 0.2s;
 }
 
-.inventory-ship-card:hover {
+.material-slot:hover {
     background: rgba(107, 92, 231, 0.2);
+    border-color: rgba(157, 141, 247, 0.6);
     transform: translateY(-3px);
 }
 
-.inventory-ship-card.current {
-    border-color: #9d8df7;
-    box-shadow: 0 0 20px rgba(157, 141, 247, 0.3);
+.slot-icon {
+    font-size: 32px;
 }
 
-.inventory-ship-card.rank-ssr {
-    background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 140, 0, 0.05));
-    border-color: rgba(255, 215, 0, 0.3);
-}
-
-.inventory-ship-card.rank-ssr:hover {
-    border-color: #ffd700;
-}
-
-.inventory-ship-card.rank-a {
-    background: linear-gradient(135deg, rgba(96, 165, 250, 0.1), rgba(59, 130, 246, 0.05));
-    border-color: rgba(96, 165, 250, 0.3);
-}
-
-.inventory-ship-card.rank-a:hover {
-    border-color: #60a5fa;
-}
-
-.inventory-ship-card.rank-b {
-    background: linear-gradient(135deg, rgba(74, 222, 128, 0.1), rgba(34, 197, 94, 0.05));
-    border-color: rgba(74, 222, 128, 0.3);
-}
-
-.inventory-ship-card.rank-b:hover {
-    border-color: #4ade80;
-}
-
-/* 卡片头部 */
-.ship-card-header {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-}
-
-.ship-rank-badge {
-    font-size: 11px;
-    font-weight: bold;
-    padding: 3px 8px;
-    border-radius: 6px;
-}
-
-.ship-rank-badge.rank-ssr {
-    background: linear-gradient(135deg, #ffd700, #ff8c00);
-    color: #000;
-}
-
-.ship-rank-badge.rank-a {
-    background: linear-gradient(135deg, #60a5fa, #3b82f6);
-    color: #fff;
-}
-
-.ship-rank-badge.rank-b {
-    background: linear-gradient(135deg, #4ade80, #22c55e);
-    color: #000;
-}
-
-.ship-rank-badge.rank-c {
-    background: #888888;
-    color: #fff;
-}
-
-.ship-current-badge {
-    font-size: 10px;
-    color: #9d8df7;
-    background: rgba(157, 141, 247, 0.2);
-    padding: 2px 6px;
-    border-radius: 4px;
-}
-
-/* 飞机预览 */
-.ship-card-canvas {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.3);
-}
-
-/* 飞机信息 */
-.ship-card-info {
-    text-align: center;
-    width: 100%;
-}
-
-.ship-card-name {
-    font-size: 16px;
+.slot-count {
+    position: absolute;
+    bottom: 5px;
+    right: 8px;
+    font-size: 14px;
     font-weight: bold;
     color: #fff;
-    margin-bottom: 5px;
-}
-
-.ship-card-levels {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    font-size: 12px;
-    color: #888;
-}
-
-.ship-card-levels span {
-    background: rgba(0, 0, 0, 0.3);
+    background: rgba(0, 0, 0, 0.6);
     padding: 2px 8px;
-    border-radius: 4px;
-}
-
-/* 飞机属性 */
-.ship-card-stats {
-    display: flex;
-    gap: 10px;
-    font-size: 12px;
-    color: #aaa;
-}
-
-.ship-card-stats span {
-    background: rgba(0, 0, 0, 0.3);
-    padding: 4px 8px;
     border-radius: 6px;
+    min-width: 24px;
+    text-align: center;
 }
 
 /* 响应式 */
-@media (max-width: 900px) {
-    .inventory-layout {
-        flex-direction: column;
-    }
-
-    .inventory-sidebar {
-        width: 100%;
-        flex-direction: row;
-        flex-wrap: wrap;
-    }
-
-    .inventory-sidebar .inventory-section {
-        flex: 1;
-        min-width: 200px;
-    }
-
-    .inventory-ships-grid {
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    }
-}
-
 @media (max-width: 600px) {
-    .inventory-ships-grid {
+    .inventory-materials-grid {
         grid-template-columns: repeat(2, 1fr);
+    }
+
+    .coin-amount {
+        font-size: 28px;
     }
 }
