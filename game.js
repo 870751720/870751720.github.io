@@ -491,11 +491,26 @@ class Bullet {
             
             if (nearest && minDist < 400) {
                 const targetAngle = Math.atan2(nearest.x - this.x, -(nearest.y - this.y));
-                // 平滑转向
+                // 平滑转向 - 根据距离调整转向速度
                 let diff = targetAngle - this.angle;
                 while (diff > Math.PI) diff -= Math.PI * 2;
                 while (diff < -Math.PI) diff += Math.PI * 2;
-                this.angle += diff * 0.1;
+                
+                // 近距离时转向更快，避免绕圈
+                const turnSpeed = minDist < 50 ? 0.3 : 0.15;
+                // 限制最大转向角度
+                const maxTurn = Math.min(Math.abs(diff), turnSpeed);
+                this.angle += Math.sign(diff) * maxTurn;
+                
+                // 非常近时直接命中
+                if (minDist < nearest.size / 2 + this.size) {
+                    nearest.onHit(this.damage);
+                    this.active = false;
+                    for (let i = 0; i < 3; i++) {
+                        particles.push(new Particle(this.x, this.y, '#fff'));
+                    }
+                    return;
+                }
             }
         }
         
