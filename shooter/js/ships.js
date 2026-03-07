@@ -328,12 +328,12 @@ export function addMaterial(type, amount) {
     return amount;
 }
 
-// 渲染商店
+// 渲染商店 - 横版轮播
 export function renderShipShop() {
-    const grid = document.getElementById('ship-grid');
-    if (!grid) return;
+    const carousel = document.getElementById('ship-grid');
+    if (!carousel) return;
     
-    grid.innerHTML = '';
+    carousel.innerHTML = '';
     
     // 按等级分组
     const groups = { 'SSR': [], 'A': [], 'B': [], 'C': [] };
@@ -341,94 +341,248 @@ export function renderShipShop() {
         if (groups[config.rank]) groups[config.rank].push(config);
     });
     
-    // 按 SSR -> A -> B -> C 顺序渲染
-    ['SSR', 'A', 'B', 'C'].forEach(rank => {
-        const rankConfig = RANK_CONFIGS[rank];
-        
-        // 等级标题
-        const rankHeader = document.createElement('div');
-        rankHeader.className = 'rank-header';
-        rankHeader.innerHTML = `<span class="rank-badge rank-${rank}">${rankConfig.name}级</span>`;
-        rankHeader.style.gridColumn = '1 / -1';
-        grid.appendChild(rankHeader);
-        
-        // 该等级的飞机
-        groups[rank].forEach(config => {
-            const owned = hasShip(config.id);
-            const selected = getCurrentShip() === config.id;
-            const enhanceLevel = getShipEnhanceLevel(config.id);
-            const maxLevel = rankConfig.maxEnhance;
-            
-            const item = document.createElement('div');
-            item.className = `ship-item rank-${config.rank.toLowerCase()} ${owned ? 'owned' : ''} ${selected ? 'selected' : ''}`;
-            
-            let buttonText, buttonClass, buttonDisabled;
-            if (selected) {
-                buttonText = '当前使用';
-                buttonClass = 'selected';
-                buttonDisabled = true;
-            } else if (owned) {
-                buttonText = '装备';
-                buttonClass = 'equip';
-                buttonDisabled = false;
-            } else {
-                buttonText = `💰 ${config.price}`;
-                buttonClass = '';
-                buttonDisabled = (GameState.coins || 0) < config.price;
-            }
-            
-            // 强化显示
-            const enhanceDisplay = owned ? `
-                <div class="ship-enhance-level">+${enhanceLevel}/${maxLevel}</div>
-                <button class="enhance-btn ${enhanceLevel >= maxLevel ? 'maxed' : ''}" data-ship-id="${config.id}">
-                    ${enhanceLevel >= maxLevel ? '已满级' : '强化'}
-                </button>
-            ` : '';
-            
-            item.innerHTML = `
-                <div class="ship-rank rank-${config.rank.toLowerCase()}">${config.rank}</div>
-                <div class="ship-preview rank-${config.rank.toLowerCase()}" style="--ship-color: ${config.color}"></div>
-                <div class="ship-name">${config.name}</div>
-                <div class="ship-desc">${config.desc}</div>
-                <div class="ship-stats">
-                    <div>❤️${config.stats.maxHp}</div>
-                    <div>⚔️${config.stats.damage}</div>
-                    <div>⚡${(1000/config.stats.fireRate).toFixed(1)}/s</div>
-                </div>
-                <button class="ship-btn ${buttonClass}" ${buttonDisabled ? 'disabled' : ''}>
-                    ${buttonText}
-                </button>
-                ${enhanceDisplay}
-            `;
-            
-            // 装备按钮
-            const btn = item.querySelector('.ship-btn');
-            btn.addEventListener('click', () => {
-                if (owned && !selected) {
-                    selectShip(config.id);
-                    renderShipShop();
-                } else if (!owned) {
-                    const result = buyShip(config.id);
-                    if (result.success) {
-                        renderShipShop();
-                        updateShipCoinDisplay();
-                        updateMaterialDisplay();
-                    }
-                }
-            });
-            
-            // 强化按钮
-            const enhanceBtn = item.querySelector('.enhance-btn');
-            if (enhanceBtn && enhanceLevel < maxLevel) {
-                enhanceBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    showEnhanceModal(config);
-                });
-            }
-            
-            grid.appendChild(item);
-        });
+    const rankOrder = ['SSR', 'A', 'B', 'C'];
+    const allShips = [];
+    
+    // 合并所有飞机
+    rankOrder.forEach(rank => {
+        allShips.push(...groups[rank]);
     });
+    
+    // 渲染每个飞机卡片
+    allShips.forEach((config, index) => {
+        const owned = hasShip(config.id);
+        const selected = getCurrentShip() === config.id;
+        const enhanceLevel = getShipEnhanceLevel(config.id);
+        const maxLevel = RANK_CONFIGS[config.rank].maxEnhance;
+        
+        const card = document.createElement('div');
+        card.className = `ship-card rank-${config.rank.toLowerCase()} ${owned ? 'owned' : ''} ${selected ? 'selected' : ''}`;
+        card.dataset.index = index;
+        
+        let buttonText, buttonClass, buttonDisabled;
+        if (selected) {
+            buttonText = '当前使用';
+            buttonClass = 'selected';
+            buttonDisabled = true;
+        } else if (owned) {
+            buttonText = '装备';
+            buttonClass = 'equip';
+            buttonDisabled = false;
+        } else {
+            buttonText = `💰 ${config.price}`;
+            buttonClass = '';
+            buttonDisabled = (GameState.coins || 0) < config.price;
+        }
+        
+        // 强化显示
+        const enhanceDisplay = owned ? `
+            <div class="card-enhance">
+                <span class="enhance-level">+${enhanceLevel}/${maxLevel}</span>
+                <button class="enhance-btn-small ${enhanceLevel >= maxLevel ? 'maxed' : ''}" data-ship-id="${config.id}">
+                    ${enhanceLevel >= maxLevel ? 'MAX' : '强化'}
+                </button>
+            </div>
+        ` : '';
+        
+        card.innerHTML = `
+            <div class="card-rank-badge rank-${config.rank.toLowerCase()}">${config.rank}</div>
+            <div class="card-ship-preview rank-${config.rank.toLowerCase()}" style="--ship-color: ${config.color}"></div>
+            <div class="card-info">
+                <div class="card-name">${config.name}</div>
+                <div class="card-desc">${config.desc}</div>
+                <div class="card-stats">
+                    <span title="生命值">❤️ ${config.stats.maxHp}</span>
+                    <span title="伤害">⚔️ ${config.stats.damage}</span>
+                    <span title="射速">⚡ ${(1000/config.stats.fireRate).toFixed(1)}/s</span>
+                </div>
+            </div>
+            <button class="card-btn ${buttonClass}" ${buttonDisabled ? 'disabled' : ''}>
+                ${buttonText}
+            </button>
+            ${enhanceDisplay}
+        `;
+        
+        // 装备按钮
+        const btn = card.querySelector('.card-btn');
+        btn.addEventListener('click', () => {
+            if (owned && !selected) {
+                selectShip(config.id);
+                renderShipShop();
+                updateCarousel();
+            } else if (!owned) {
+                const result = buyShip(config.id);
+                if (result.success) {
+                    renderShipShop();
+                    updateShipCoinDisplay();
+                    updateMaterialDisplay();
+                }
+            }
+        });
+        
+        // 强化按钮
+        const enhanceBtn = card.querySelector('.enhance-btn-small');
+        if (enhanceBtn && enhanceLevel < maxLevel) {
+            enhanceBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                showEnhanceModal(config);
+            });
+        }
+        
+        carousel.appendChild(card);
+    });
+    
+    // 初始化轮播
+    initCarousel();
+}
+
+// 轮播状态
+let carouselState = {
+    currentIndex: 0,
+    cardWidth: 320,
+    gap: 20,
+    isDragging: false,
+    startX: 0,
+    scrollLeft: 0
+};
+
+// 初始化轮播
+function initCarousel() {
+    const carousel = document.getElementById('ship-grid');
+    const dots = document.getElementById('carousel-dots');
+    const prevBtn = document.getElementById('ship-prev');
+    const nextBtn = document.getElementById('ship-next');
+    
+    if (!carousel) return;
+    
+    const cards = carousel.querySelectorAll('.ship-card');
+    const totalCards = cards.length;
+    
+    // 创建指示点
+    if (dots) {
+        dots.innerHTML = '';
+        for (let i = 0; i < totalCards; i++) {
+            const dot = document.createElement('span');
+            dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
+            dot.addEventListener('click', () => goToSlide(i));
+            dots.appendChild(dot);
+        }
+    }
+    
+    // 按钮事件
+    if (prevBtn) {
+        prevBtn.addEventListener('click', () => {
+            carouselState.currentIndex = Math.max(0, carouselState.currentIndex - 1);
+            updateCarousel();
+        });
+    }
+    
+    if (nextBtn) {
+        nextBtn.addEventListener('click', () => {
+            carouselState.currentIndex = Math.min(totalCards - 1, carouselState.currentIndex + 1);
+            updateCarousel();
+        });
+    }
+    
+    // 触摸/鼠标拖动
+    carousel.addEventListener('mousedown', startDrag);
+    carousel.addEventListener('touchstart', startDrag, { passive: true });
+    
+    carousel.addEventListener('mousemove', onDrag);
+    carousel.addEventListener('touchmove', onDrag, { passive: true });
+    
+    carousel.addEventListener('mouseup', endDrag);
+    carousel.addEventListener('touchend', endDrag);
+    carousel.addEventListener('mouseleave', endDrag);
+    
+    // 滚轮滑动
+    carousel.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        if (e.deltaY > 0 || e.deltaX > 0) {
+            carouselState.currentIndex = Math.min(totalCards - 1, carouselState.currentIndex + 1);
+        } else {
+            carouselState.currentIndex = Math.max(0, carouselState.currentIndex - 1);
+        }
+        updateCarousel();
+    }, { passive: false });
+    
+    updateCarousel();
+}
+
+function startDrag(e) {
+    const carousel = document.getElementById('ship-grid');
+    carouselState.isDragging = true;
+    carouselState.startX = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
+    carouselState.scrollLeft = carouselState.currentIndex;
+    carousel.style.cursor = 'grabbing';
+}
+
+function onDrag(e) {
+    if (!carouselState.isDragging) return;
+    e.preventDefault();
+    
+    const x = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
+    const diff = carouselState.startX - x;
+    
+    if (Math.abs(diff) > 50) {
+        const carousel = document.getElementById('ship-grid');
+        const cards = carousel.querySelectorAll('.ship-card');
+        const totalCards = cards.length;
+        
+        if (diff > 0) {
+            carouselState.currentIndex = Math.min(totalCards - 1, carouselState.currentIndex + 1);
+        } else {
+            carouselState.currentIndex = Math.max(0, carouselState.currentIndex - 1);
+        }
+        
+        carouselState.startX = x;
+        updateCarousel();
+    }
+}
+
+function endDrag() {
+    const carousel = document.getElementById('ship-grid');
+    carouselState.isDragging = false;
+    carousel.style.cursor = 'grab';
+}
+
+function goToSlide(index) {
+    const carousel = document.getElementById('ship-grid');
+    const cards = carousel.querySelectorAll('.ship-card');
+    carouselState.currentIndex = Math.max(0, Math.min(cards.length - 1, index));
+    updateCarousel();
+}
+
+function updateCarousel() {
+    const carousel = document.getElementById('ship-grid');
+    if (!carousel) return;
+    
+    const cards = carousel.querySelectorAll('.ship-card');
+    const dots = document.getElementById('carousel-dots');
+    
+    cards.forEach((card, index) => {
+        const offset = index - carouselState.currentIndex;
+        const absOffset = Math.abs(offset);
+        
+        // 位置计算
+        const translateX = offset * (carouselState.cardWidth + carouselState.gap);
+        const scale = absOffset === 0 ? 1 : 0.85;
+        const opacity = absOffset > 2 ? 0 : (absOffset === 0 ? 1 : 0.6);
+        const zIndex = 100 - absOffset;
+        
+        card.style.transform = `translateX(${translateX}px) scale(${scale})`;
+        card.style.opacity = opacity;
+        card.style.zIndex = zIndex;
+        card.classList.toggle('active', index === carouselState.currentIndex);
+    });
+    
+    // 更新指示点
+    if (dots) {
+        const dotElements = dots.querySelectorAll('.carousel-dot');
+        dotElements.forEach((dot, index) => {
+            dot.classList.toggle('active', index === carouselState.currentIndex);
+        });
+    }
 }
 
 // 显示强化弹窗

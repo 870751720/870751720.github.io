@@ -1,0 +1,338 @@
+/* 飞机商店横版轮播样式 */
+
+/* 轮播容器 */
+.ship-carousel-container {
+    position: relative;
+    width: 100%;
+    max-width: 1200px;
+    height: 450px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    margin: 20px 0;
+}
+
+/* 轮播区域 */
+.ship-carousel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    perspective: 1000px;
+}
+
+/* 导航按钮 */
+.carousel-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(107, 92, 231, 0.8);
+    color: #fff;
+    font-size: 20px;
+    cursor: pointer;
+    z-index: 50;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.carousel-nav:hover {
+    background: #9d8df7;
+    transform: translateY(-50%) scale(1.1);
+}
+
+.carousel-nav.prev {
+    left: 20px;
+}
+
+.carousel-nav.next {
+    right: 20px;
+}
+
+/* 飞机卡片 */
+.ship-card {
+    position: absolute;
+    width: 300px;
+    height: 400px;
+    background: rgba(26, 26, 46, 0.95);
+    border: 3px solid #6b5ce7;
+    border-radius: 20px;
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: grab;
+    user-select: none;
+}
+
+.ship-card:active {
+    cursor: grabbing;
+}
+
+.ship-card.active {
+    box-shadow: 0 20px 60px rgba(107, 92, 231, 0.4);
+}
+
+/* 等级颜色 */
+.ship-card.rank-ssr {
+    border-color: #ffd700;
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(26, 26, 46, 0.95));
+}
+
+.ship-card.rank-ssr.active {
+    box-shadow: 0 20px 60px rgba(255, 215, 0, 0.3);
+}
+
+.ship-card.rank-a {
+    border-color: #60a5fa;
+    background: linear-gradient(135deg, rgba(96, 165, 250, 0.1), rgba(26, 26, 46, 0.95));
+}
+
+.ship-card.rank-a.active {
+    box-shadow: 0 20px 60px rgba(96, 165, 250, 0.3);
+}
+
+.ship-card.rank-b {
+    border-color: #4ade80;
+    background: linear-gradient(135deg, rgba(74, 222, 128, 0.1), rgba(26, 26, 46, 0.95));
+}
+
+.ship-card.rank-b.active {
+    box-shadow: 0 20px 60px rgba(74, 222, 128, 0.3);
+}
+
+.ship-card.rank-c {
+    border-color: #888888;
+}
+
+.ship-card.owned {
+    border-style: solid;
+}
+
+.ship-card.selected {
+    border-width: 4px;
+}
+
+/* 等级标签 */
+.card-rank-badge {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 5px 20px;
+    border-radius: 15px;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.card-rank-badge.rank-ssr {
+    background: linear-gradient(135deg, #ffd700, #ff8c00);
+    color: #000;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+}
+
+.card-rank-badge.rank-a {
+    background: linear-gradient(135deg, #60a5fa, #3b82f6);
+    color: #fff;
+}
+
+.card-rank-badge.rank-b {
+    background: linear-gradient(135deg, #4ade80, #22c55e);
+    color: #000;
+}
+
+.card-rank-badge.rank-c {
+    background: #888888;
+    color: #fff;
+}
+
+/* 飞机预览 */
+.card-ship-preview {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: var(--ship-color, #9d8df7);
+    margin-top: 10px;
+    position: relative;
+    box-shadow: 0 0 30px var(--ship-color, #9d8df7);
+}
+
+.card-ship-preview.rank-ssr::before {
+    content: '';
+    position: absolute;
+    inset: -8px;
+    border-radius: 50%;
+    border: 3px solid #ffd700;
+    animation: pulse-ring 2s infinite;
+}
+
+.card-ship-preview.rank-a::before {
+    content: '';
+    position: absolute;
+    inset: -5px;
+    border-radius: 50%;
+    border: 2px solid #60a5fa;
+}
+
+.card-ship-preview.rank-b::before {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    border: 2px solid #4ade80;
+}
+
+@keyframes pulse-ring {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.5; }
+}
+
+/* 信息区 */
+.card-info {
+    text-align: center;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.card-name {
+    font-size: 22px;
+    font-weight: bold;
+    color: #fff;
+}
+
+.card-desc {
+    font-size: 13px;
+    color: #aaa;
+    line-height: 1.4;
+}
+
+.card-stats {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    font-size: 14px;
+    color: #9d8df7;
+    margin-top: auto;
+}
+
+/* 按钮 */
+.card-btn {
+    padding: 12px 40px;
+    font-size: 16px;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: bold;
+    width: 100%;
+    background: linear-gradient(135deg, #6b5ce7 0%, #9d8df7 100%);
+    color: #fff;
+}
+
+.card-btn:hover:not(:disabled) {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(157, 141, 247, 0.5);
+}
+
+.card-btn:disabled {
+    background: #444;
+    cursor: not-allowed;
+}
+
+.card-btn.equip {
+    background: linear-gradient(135deg, #00ff88 0%, #00cc6a 100%);
+    color: #000;
+}
+
+.card-btn.selected {
+    background: linear-gradient(135deg, #ffd700 0%, #ffaa00 100%);
+    color: #000;
+}
+
+/* 强化区域 */
+.card-enhance {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.enhance-level {
+    font-size: 14px;
+    color: #ffd700;
+    font-weight: bold;
+}
+
+.enhance-btn-small {
+    padding: 5px 15px;
+    font-size: 12px;
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.enhance-btn-small:hover:not(.maxed) {
+    transform: scale(1.05);
+}
+
+.enhance-btn-small.maxed {
+    background: #22c55e;
+    cursor: default;
+}
+
+/* 指示点 */
+.carousel-dots {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin: 10px 0 20px;
+}
+
+.carousel-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.carousel-dot.active {
+    background: #9d8df7;
+    width: 30px;
+    border-radius: 5px;
+}
+
+.carousel-dot:hover {
+    background: rgba(157, 141, 247, 0.7);
+}
+
+/* 响应式 */
+@media (max-width: 900px) {
+    .ship-card {
+        width: 260px;
+        height: 360px;
+        padding: 20px;
+    }
+    
+    .card-ship-preview {
+        width: 80px;
+        height: 80px;
+    }
+}
