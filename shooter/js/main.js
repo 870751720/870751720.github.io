@@ -8,7 +8,7 @@ import { InputState } from './state.js';
 import { loadProgress, updateCoinDisplays } from './upgrades.js';
 import { loadShipData, renderShipShop, updateShipCoinDisplay } from './ships.js';
 import { renderGachaShop } from './gacha.js';
-import { loadShipUpgrades, renderHangarUpgrade, updateHangarCoinDisplay } from './hangar.js';
+import { loadShipUpgrades, renderHangarUpgrade, updateHangarCoinDisplay, loadFavoriteShips } from './hangar.js';
 
 /**
  * 初始化游戏
@@ -28,6 +28,7 @@ function initGame() {
     loadProgress();
     loadShipData();
     loadShipUpgrades();
+    loadFavoriteShips();
     updateCoinDisplays();
 
     // 设置 Canvas

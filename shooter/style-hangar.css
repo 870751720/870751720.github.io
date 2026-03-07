@@ -31,6 +31,46 @@
     scrollbar-color: #6b5ce7 rgba(0, 0, 0, 0.2);
 }
 
+/* 收藏按钮 */
+.fav-btn {
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #666;
+    padding: 5px;
+    transition: all 0.2s;
+    line-height: 1;
+}
+
+.fav-btn:hover {
+    color: #ffd700;
+    transform: scale(1.2);
+}
+
+.fav-btn.favorited {
+    color: #ffd700;
+}
+
+.fav-icon {
+    margin-right: 5px;
+    filter: drop-shadow(0 0 3px rgba(255, 215, 0, 0.5));
+}
+
+/* 飞机项添加相对定位以便放置收藏按钮 */
+.hangar-ship-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: rgba(107, 92, 231, 0.1);
+    border: 2px solid transparent;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+}
+
 /* 机库布局 */
 .hangar-layout {
     display: flex;

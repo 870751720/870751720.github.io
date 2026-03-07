@@ -8,6 +8,48 @@ import { getOwnedShips, getCurrentShip, SHIP_CONFIGS, RANK_CONFIGS, getShipEnhan
 // 当前选中的飞机
 let selectedUpgradeShip = null;
 
+// 收藏的飞机列表
+let favoriteShips = [];
+
+// 加载收藏数据
+export function loadFavoriteShips() {
+    try {
+        const data = JSON.parse(localStorage.getItem('shooterProgress'));
+        if (data && data.favoriteShips) {
+            favoriteShips = data.favoriteShips;
+        }
+    } catch (e) {
+        favoriteShips = [];
+    }
+}
+
+// 保存收藏数据
+export function saveFavoriteShips() {
+    const data = JSON.parse(localStorage.getItem('shooterProgress') || '{}');
+    data.favoriteShips = favoriteShips;
+    localStorage.setItem('shooterProgress', JSON.stringify(data));
+}
+
+// 切换收藏状态
+export function toggleFavoriteShip(shipId) {
+    const index = favoriteShips.indexOf(shipId);
+    if (index > -1) {
+        favoriteShips.splice(index, 1);
+    } else {
+        favoriteShips.push(shipId);
+    }
+    saveFavoriteShips();
+    return index === -1; // 返回是否已收藏
+}
+
+// 检查是否收藏
+export function isFavoriteShip(shipId) {
+    return favoriteShips.includes(shipId);
+}
+
+// 品级权重
+const RANK_WEIGHT = { 'SSR': 4, 'A': 3, 'B': 2, 'C': 1 };
+
 // 飞机专属强化项目配置
 export const SHIP_UPGRADE_CONFIGS = [
     {
@@ -212,14 +254,40 @@ function renderShipList() {
     if (!listEl) return;
 
     const ownedShips = getOwnedShips();
+    const currentShip = getCurrentShip();
     listEl.innerHTML = '';
 
-    ownedShips.forEach(shipId => {
+    // 排序：当前使用 > 收藏 > 品级
+    const sortedShips = [...ownedShips].sort((a, b) => {
+        const configA = SHIP_CONFIGS.find(s => s.id === a);
+        const configB = SHIP_CONFIGS.find(s => s.id === b);
+        if (!configA || !configB) return 0;
+
+        // 当前使用的飞机排最前
+        if (a === currentShip) return -1;
+        if (b === currentShip) return 1;
+
+        // 收藏的飞机排第二
+        const aFav = isFavoriteShip(a);
+        const bFav = isFavoriteShip(b);
+        if (aFav && !bFav) return -1;
+        if (!aFav && bFav) return 1;
+
+        // 按品级排序 (高品级在前)
+        const rankDiff = RANK_WEIGHT[configB.rank] - RANK_WEIGHT[configA.rank];
+        if (rankDiff !== 0) return rankDiff;
+
+        // 同品级按名称排序
+        return configA.name.localeCompare(configB.name);
+    });
+
+    sortedShips.forEach(shipId => {
         const config = SHIP_CONFIGS.find(s => s.id === shipId);
         if (!config) return;
 
         const isSelected = selectedUpgradeShip === shipId;
-        const isCurrent = getCurrentShip() === shipId;
+        const isCurrent = currentShip === shipId;
+        const isFav = isFavoriteShip(shipId);
 
         const item = document.createElement('div');
         item.className = `hangar-ship-item ${isSelected ? 'selected' : ''}`;
@@ -228,13 +296,23 @@ function renderShipList() {
         item.innerHTML = `
             <div class="hangar-ship-preview rank-${config.rank.toLowerCase()}" style="--ship-color: ${config.color}"></div>
             <div class="hangar-ship-info">
-                <div class="hangar-ship-name">${config.name}</div>
+                <div class="hangar-ship-name">
+                    ${isFav ? '<span class="fav-icon">⭐</span>' : ''}
+                    ${config.name}
+                </div>
                 <div class="hangar-ship-rank rank-${config.rank.toLowerCase()}">${config.rank}</div>
                 ${isCurrent ? '<div class="hangar-ship-current">当前使用</div>' : ''}
             </div>
+            <button class="fav-btn ${isFav ? 'favorited' : ''}" data-ship-id="${shipId}" title="${isFav ? '取消收藏' : '收藏'}">
+                ${isFav ? '★' : '☆'}
+            </button>
         `;
 
-        item.addEventListener('click', () => {
+        // 点击飞机项选中
+        item.addEventListener('click', (e) => {
+            // 如果点击的是收藏按钮，不触发选中
+            if (e.target.closest('.fav-btn')) return;
+
             selectedUpgradeShip = shipId;
             // 更新选中状态
             listEl.querySelectorAll('.hangar-ship-item').forEach(el => {
@@ -244,12 +322,28 @@ function renderShipList() {
             renderUpgradePanel(shipId);
         });
 
+        // 收藏按钮点击事件
+        const favBtn = item.querySelector('.fav-btn');
+        if (favBtn) {
+            favBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const nowFav = toggleFavoriteShip(shipId);
+                // 重新渲染列表以更新排序
+                renderShipList();
+                // 保持选中状态
+                if (selectedUpgradeShip) {
+                    const selectedEl = listEl.querySelector(`[data-ship-id="${selectedUpgradeShip}"]`);
+                    if (selectedEl) selectedEl.classList.add('selected');
+                }
+            });
+        }
+
         listEl.appendChild(item);
     });
 
     // 默认选中第一个
-    if (!selectedUpgradeShip && ownedShips.length > 0) {
-        selectedUpgradeShip = ownedShips[0];
+    if (!selectedUpgradeShip && sortedShips.length > 0) {
+        selectedUpgradeShip = sortedShips[0];
         const firstItem = listEl.querySelector('.hangar-ship-item');
         if (firstItem) firstItem.classList.add('selected');
         renderUpgradePanel(selectedUpgradeShip);
