@@ -9,6 +9,7 @@ import { loadProgress, updateCoinDisplays } from './upgrades.js';
 import { loadShipData, renderShipShop, updateShipCoinDisplay } from './ships.js';
 import { renderGachaShop } from './gacha.js';
 import { loadShipUpgrades, renderHangarUpgrade, updateHangarCoinDisplay, loadFavoriteShips } from './hangar.js';
+import { renderInventory } from './inventory.js';
 
 /**
  * 初始化游戏
@@ -60,6 +61,18 @@ function initGame() {
             upgradeScreen.classList.add('hidden');
             DOM.startScreen.classList.remove('hidden');
             updateCoinDisplays();
+        });
+    }
+
+    // 背包
+    const inventoryBtn = document.getElementById('inventory-btn');
+    const inventoryScreen = document.getElementById('inventory-screen');
+
+    if (inventoryBtn) {
+        inventoryBtn.addEventListener('click', () => {
+            DOM.startScreen.classList.add('hidden');
+            inventoryScreen.classList.remove('hidden');
+            renderInventory();
         });
     }
 

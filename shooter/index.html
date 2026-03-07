@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="style-carousel.css">
     <link rel="stylesheet" href="style-gacha.css">
     <link rel="stylesheet" href="style-hangar.css">
+    <link rel="stylesheet" href="style-inventory.css">
 </head>
 <body>
     <canvas id="game-canvas"></canvas>
@@ -28,6 +29,7 @@
         <div class="menu-coins">💰 <span id="menu-coin-display">0</span></div>
         <div class="menu-buttons">
             <button id="start-btn">开始游戏</button>
+            <button id="inventory-btn">🎒 背包</button>
             <button id="upgrade-btn">机库升级</button>
             <button id="ship-btn">飞机商店</button>
             <button id="gacha-btn">🎰 扭蛋机</button>
@@ -35,6 +37,11 @@
         <p class="menu-hint">鼠标移动控制 · 左键射击 · 收集道具变强</p>
     </div>
     
+    <!-- 背包界面 -->
+    <div class="inventory-screen hidden" id="inventory-screen">
+        <!-- 内容由JS生成 -->
+    </div>
+
     <!-- 升级商店 -->
     <div class="upgrade-screen hidden" id="upgrade-screen">
         <h2>机库升级</h2>
