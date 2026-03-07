@@ -168,6 +168,22 @@
     box-shadow: 0 0 25px rgba(251, 191, 36, 0.6);
 }
 
+/* 品质边框 - 命座材料 */
+.material-slot.tier-constellation {
+    border: 2px solid #ffd700;
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 140, 0, 0.05));
+    animation: constellation-glow 2s ease-in-out infinite;
+}
+.material-slot.tier-constellation:hover {
+    border-color: #ffec8b;
+    box-shadow: 0 0 25px rgba(255, 215, 0, 0.6);
+}
+
+@keyframes constellation-glow {
+    0%, 100% { box-shadow: 0 0 8px rgba(255, 215, 0, 0.4); }
+    50% { box-shadow: 0 0 16px rgba(255, 215, 0, 0.7); }
+}
+
 @keyframes legendary-glow {
     0%, 100% { box-shadow: 0 0 8px rgba(251, 191, 36, 0.3); }
     50% { box-shadow: 0 0 16px rgba(251, 191, 36, 0.6); }

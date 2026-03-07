@@ -275,6 +275,28 @@ export const SHIP_STORIES = {
         quote: '"我被选中，亦被赋予使命。"'
     }
 };
+
+// 命座材料配置 - 每个飞机专属
+export function getConstellationMaterialId(shipId) {
+    return `constellation_${shipId}`;
+}
+
+export function getConstellationMaterialConfig(shipId) {
+    const ship = SHIP_CONFIGS.find(s => s.id === shipId);
+    if (!ship) return null;
+    
+    return {
+        id: getConstellationMaterialId(shipId),
+        name: `${ship.name}·命星`,
+        icon: '⭐',
+        color: ship.color,
+        desc: `提升${ship.name}命座所需的专属材料`,
+        tier: 'constellation',
+        shipId: shipId,
+        stack: 999
+    };
+}
+
 export const MATERIAL_CONFIGS = {
     common: { name: '普通零件', icon: '⚙️', color: '#888888', desc: '普通敌机掉落的零件', tier: 'common', tierName: '普通', stack: 999 },
     rare: { name: '稀有合金', icon: '🔩', color: '#4ade80', desc: '精英敌机掉落的合金', tier: 'rare', tierName: '稀有', stack: 999 },
