@@ -9,7 +9,7 @@ const ITEM_TYPES = [
     { id: 'big', name: '巨型子弹', color: '#ff00ff', duration: 50000, icon: '●' },
     { id: 'slow', name: '时间缓速', color: '#00ffff', duration: 40000, icon: '❄' },
     { id: 'double', name: '分数翻倍', color: '#ffd700', duration: 80000, icon: '×2' },
-    { id: 'magnet', name: '磁力吸引', color: '#ff69b4', duration: 60000, icon: '◎' },
+    { id: 'homing', name: '追踪弹', color: '#ff8800', duration: 45000, icon: '➤' },
     { id: 'shield', name: '护盾', color: '#00ffaa', duration: 0, icon: '⛨' }, // 一次性护盾
     { id: 'heal', name: '回血', color: '#ff5555', duration: 0, icon: '♥', instant: true },
     { id: 'perm_spd', name: '永久攻速+', color: '#ffffff', duration: 0, icon: '↑⚡', permanent: true },
@@ -43,7 +43,8 @@ let playerStats = {
     magnetRange: 0,
     scoreMultiplier: 1,
     wingmanCount: 0,
-    sizeLevel: 1
+    sizeLevel: 1,
+    homing: false
 };
 
 // 生命系统
@@ -137,9 +138,32 @@ function initGame() {
 }
 
 function updateHpDisplay() {
-    let hearts = '♥'.repeat(playerHp) + '♡'.repeat(playerMaxHp - playerHp);
-    let shieldText = playerShield > 0 ? ` ⛨${playerShield}` : '';
-    hpDisplay.textContent = hearts + shieldText;
+    hpDisplay.innerHTML = '';
+    
+    for (let i = 0; i < playerMaxHp; i++) {
+        const heart = document.createElement('span');
+        heart.style.cssText = `
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            line-height: 24px;
+            text-align: center;
+            font-size: 20px;
+        `;
+        heart.textContent = i < playerHp ? '♥' : '♡';
+        hpDisplay.appendChild(heart);
+    }
+    
+    if (playerShield > 0) {
+        const shield = document.createElement('span');
+        shield.style.cssText = `
+            margin-left: 10px;
+            color: #00ffaa;
+            font-size: 20px;
+        `;
+        shield.textContent = `⛨${playerShield}`;
+        hpDisplay.appendChild(shield);
+    }
 }
 
 // ==================== 道具系统 ====================
@@ -260,6 +284,7 @@ function updateBuffs(dt) {
     playerStats.bulletSizeBuff = 1;
     playerStats.magnetRange = 0;
     playerStats.scoreMultiplier = 1;
+    playerStats.homing = false;
     
     for (let id in activeBuffs) {
         const buff = activeBuffs[id];
@@ -276,6 +301,7 @@ function updateBuffs(dt) {
                 case 'slow': timeScale = 0.4; break;
                 case 'double': playerStats.scoreMultiplier = 2; break;
                 case 'magnet': playerStats.magnetRange = 200; break;
+                case 'homing': playerStats.homing = true; break;
             }
         }
     }
@@ -441,6 +467,29 @@ class Bullet {
     }
     
     update() {
+        // 追踪弹逻辑
+        if (!this.isEnemy && playerStats.homing && enemies.length > 0) {
+            // 找最近的敌人
+            let nearest = null;
+            let minDist = Infinity;
+            enemies.forEach(e => {
+                const dist = Math.hypot(e.x - this.x, e.y - this.y);
+                if (dist < minDist) {
+                    minDist = dist;
+                    nearest = e;
+                }
+            });
+            
+            if (nearest && minDist < 400) {
+                const targetAngle = Math.atan2(nearest.x - this.x, -(nearest.y - this.y));
+                // 平滑转向
+                let diff = targetAngle - this.angle;
+                while (diff > Math.PI) diff -= Math.PI * 2;
+                while (diff < -Math.PI) diff += Math.PI * 2;
+                this.angle += diff * 0.1;
+            }
+        }
+        
         this.x += Math.sin(this.angle) * this.speed;
         this.y -= Math.cos(this.angle) * this.speed;
         if (this.y < 0 || this.y > gameCanvas.height || this.x < 0 || this.x > gameCanvas.width) {
@@ -703,7 +752,14 @@ class Boss extends Enemy {
             this.lastShot = now;
         }
         
-        if (this.y > gameCanvas.height + 100) this.active = false;
+        if (this.y > gameCanvas.height + 100) {
+            this.y = gameCanvas.height + 100;
+            this.vy = -Math.abs(this.vy);
+        }
+        if (this.y < -100) {
+            this.y = -100;
+            this.vy = Math.abs(this.vy);
+        }
     }
     
     draw() {
@@ -986,7 +1042,8 @@ function startGame() {
         magnetRange: 0,
         scoreMultiplier: 1,
         wingmanCount: 0,
-        sizeLevel: 1
+        sizeLevel: 1,
+        homing: false
     };
     
     wingmen = [];
