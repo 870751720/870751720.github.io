@@ -181,11 +181,21 @@ export function renderHangarUpgrade() {
         </div>
 
         <div class="menu-buttons-row">
-            <button id="to-ship-btn" class="secondary-btn">飞机商店</button>
-            <button id="to-gacha-btn" class="secondary-btn">🎰 扭蛋机</button>
             <button id="back-btn" class="back-btn">返回主菜单</button>
         </div>
     `;
+
+    // 绑定返回按钮事件
+    const backBtn = document.getElementById('back-btn');
+    if (backBtn) {
+        backBtn.addEventListener('click', () => {
+            document.getElementById('upgrade-screen').classList.add('hidden');
+            document.getElementById('start-screen').classList.remove('hidden');
+            // 更新金币显示
+            const coinDisplay = document.getElementById('menu-coin-display');
+            if (coinDisplay) coinDisplay.textContent = GameState.coins || 0;
+        });
+    }
 
     // 渲染飞机列表
     renderShipList();
