@@ -383,34 +383,6 @@ export class Player {
             ctx.arc(this.x + particleOffset, particleY, particleSize, 0, Math.PI * 2);
             ctx.fill();
         }
-        
-        // 能量波纹扩散效果
-        const ripplePhase = (now % 800) / 800;
-        const rippleY = this.y + s * 0.3 + ripplePhase * baseFlameSize * 0.5;
-        const rippleWidth = s * (0.2 + ripplePhase * 0.3);
-        const rippleAlpha = (1 - ripplePhase) * 0.5;
-        
-        ctx.strokeStyle = `rgba(255, 255, 255, ${rippleAlpha})`;
-        ctx.lineWidth = 2;
-        ctx.shadowColor = '#ffffff';
-        ctx.shadowBlur = 5;
-        ctx.beginPath();
-        ctx.moveTo(this.x - rippleWidth, rippleY);
-        ctx.lineTo(this.x + rippleWidth, rippleY);
-        ctx.stroke();
-        
-        // 随机能量脉冲环
-        if (Math.random() < 0.15) {
-            const pulseRadius = s * (0.6 + Math.random() * 0.4);
-            const pulseAlpha = 0.3 + Math.random() * 0.4;
-            ctx.strokeStyle = `rgba(255, 255, 100, ${pulseAlpha})`;
-            ctx.lineWidth = 1;
-            ctx.shadowColor = '#ffff00';
-            ctx.shadowBlur = 10;
-            ctx.beginPath();
-            ctx.arc(this.x, this.y + s * 0.4, pulseRadius, 0, Math.PI * 2);
-            ctx.stroke();
-        }
     }
 
     // 护盾特效

@@ -974,6 +974,8 @@ function drawAPreview(ctx, x, y, s, color) {
 
 // SSR级预览
 function drawSSRPreview(ctx, x, y, s, color) {
+    const now = Date.now();
+    
     // 双层能量光环
     ctx.strokeStyle = 'rgba(255, 215, 0, 0.6)';
     ctx.lineWidth = 2;
@@ -1058,15 +1060,36 @@ function drawSSRPreview(ctx, x, y, s, color) {
     ctx.arc(x, y - s * 0.1, s * 0.15, 0, Math.PI * 2);
     ctx.fill();
 
-    // 多色尾焰
-    for (let i = 0; i < 3; i++) {
-        const offset = (i - 1) * s * 0.12;
-        const hue = i * 60;
-        ctx.fillStyle = `hsla(${hue}, 100%, 70%, 0.8)`;
+    // 动态多色尾焰 - 三层流动效果
+    const baseFlameSize = 20;
+    
+    for (let layer = 0; layer < 3; layer++) {
+        const layerOffset = (layer - 1) * s * 0.12;
+        const layerPhase = now / (200 + layer * 50);
+        const flicker = Math.sin(layerPhase) * 0.3 + 0.7;
+        const flameLength = baseFlameSize * flicker * (1 - layer * 0.15);
+        const flameWidth = s * (0.1 - layer * 0.02);
+        
+        // 动态色相偏移
+        const hueShift = (now / 20) % 360;
+        const baseHue = layer * 60;
+        
+        const fireGradient = ctx.createLinearGradient(
+            x + layerOffset, y + s * 0.3,
+            x + layerOffset, y + s * 0.3 + flameLength
+        );
+        fireGradient.addColorStop(0, `hsla(${(baseHue + hueShift) % 360}, 100%, 70%, ${0.9 - layer * 0.2})`);
+        fireGradient.addColorStop(0.5, `hsla(${(baseHue + hueShift + 40) % 360}, 100%, 60%, ${0.6 - layer * 0.1})`);
+        fireGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        
+        ctx.fillStyle = fireGradient;
+        ctx.shadowColor = `hsla(${(baseHue + hueShift) % 360}, 100%, 50%, 0.8)`;
+        ctx.shadowBlur = 5;
+        
         ctx.beginPath();
-        ctx.moveTo(x + offset - s * 0.08, y + s * 0.3);
-        ctx.lineTo(x + offset, y + s * 0.3 + 12);
-        ctx.lineTo(x + offset + s * 0.08, y + s * 0.3);
+        ctx.moveTo(x + layerOffset - flameWidth, y + s * 0.3);
+        ctx.lineTo(x + layerOffset, y + s * 0.3 + flameLength);
+        ctx.lineTo(x + layerOffset + flameWidth, y + s * 0.3);
         ctx.closePath();
         ctx.fill();
     }
