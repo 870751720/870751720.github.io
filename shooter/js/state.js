@@ -1,0 +1,111 @@
+/**
+ * 游戏状态管理
+ */
+
+// 游戏状态
+export const GameState = {
+    running: false,
+    score: 0,
+    killCount: 0,
+    combo: 0,
+    lastKillTime: 0,
+    lastEnemySpawn: 0,
+    enemySpawnInterval: 800,
+    bossKillCount: 0,
+    timeScale: 1,
+    lastTime: 0
+};
+
+// 玩家状态
+export const PlayerState = {
+    hp: 3,
+    maxHp: 3,
+    shield: 0,
+    stats: {
+        fireRate: 150,
+        bulletSize: 1,
+        bulletSizeBuff: 1,
+        damage: 1,
+        multiShot: 1,
+        magnetRange: 0,
+        scoreMultiplier: 1,
+        wingmanCount: 0,
+        sizeLevel: 1,
+        homing: false
+    }
+};
+
+// 输入状态
+export const InputState = {
+    mouseX: 0,
+    mouseY: 0,
+    mouseDown: false,
+    lastShotTime: 0
+};
+
+// 游戏对象容器
+export const GameObjects = {
+    player: null,
+    wingmen: [],
+    bullets: [],
+    enemyBullets: [],
+    enemies: [],
+    particles: [],
+    items: [],
+    activeBuffs: {}
+};
+
+// DOM 引用
+export const DOM = {};
+
+// Canvas 上下文
+export let ctx = null;
+export let animationId = null;
+export let comboTimer = null;
+
+// 设置 Canvas 上下文
+export function setContext(context) {
+    ctx = context;
+}
+
+// 重置游戏状态
+export function resetGameState() {
+    GameState.running = true;
+    GameState.score = 0;
+    GameState.killCount = 0;
+    GameState.combo = 0;
+    GameState.enemySpawnInterval = 800;
+    GameState.timeScale = 1;
+    GameState.lastTime = performance.now();
+}
+
+// 重置玩家状态
+export function resetPlayerState() {
+    PlayerState.hp = 3;
+    PlayerState.maxHp = 3;
+    PlayerState.shield = 0;
+    PlayerState.stats = {
+        fireRate: 150,
+        bulletSize: 1,
+        bulletSizeBuff: 1,
+        damage: 1,
+        multiShot: 1,
+        magnetRange: 0,
+        scoreMultiplier: 1,
+        wingmanCount: 0,
+        sizeLevel: 1,
+        homing: false
+    };
+}
+
+// 清空游戏对象
+export function clearGameObjects() {
+    GameObjects.player = null;
+    GameObjects.wingmen = [];
+    GameObjects.bullets = [];
+    GameObjects.enemyBullets = [];
+    GameObjects.enemies = [];
+    GameObjects.particles = [];
+    GameObjects.items = [];
+    GameObjects.activeBuffs = {};
+}
