@@ -707,13 +707,6 @@ class Enemy {
                 ctx.arc(this.x + 7 + eyeOffset, this.y - 2, 1, 0, Math.PI * 2);
                 ctx.closePath();
                 ctx.fill();
-                
-                // 发射口 - 在身体表面，不是缺口
-                ctx.fillStyle = '#0f2e1a';
-                ctx.beginPath();
-                ctx.arc(this.x, this.y + half - 5, 3, 0, Math.PI * 2);
-                ctx.closePath();
-                ctx.fill();
                 break;
                 ctx.beginPath();
                 ctx.arc(this.x, this.y + half - 3, 4, 0, Math.PI * 2);
