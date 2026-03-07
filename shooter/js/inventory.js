@@ -70,18 +70,12 @@ export function renderInventory() {
         <h2>🎒 我的背包</h2>
 
         <div class="inventory-content">
-            <!-- 金币 -->
-            <div class="inventory-section">
-                <h3>💰 金币</h3>
-                <div class="inventory-coins">
-                    <span class="coin-icon">💰</span>
-                    <span class="coin-amount">${(GameState.coins || 0).toLocaleString()}</span>
-                </div>
-            </div>
-
             <!-- 材料格子 -->
             <div class="inventory-section">
-                <h3>📦 材料</h3>
+                <div class="inventory-header">
+                    <h3>📦 材料</h3>
+                    <div class="inventory-coins-inline">💰 ${(GameState.coins || 0).toLocaleString()}</div>
+                </div>
                 <div class="inventory-materials-container">
                     <div class="inventory-materials-grid">
                         ${renderMaterialsGrid(mats)}

@@ -40,47 +40,34 @@
     border: 1px solid rgba(157, 141, 247, 0.2);
 }
 
-.inventory-section h3 {
-    font-size: 14px;
-    color: #9d8df7;
-    margin: 0 0 12px 0;
+/* 头部布局 - 材料和金币同行 */
+.inventory-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
     padding-bottom: 8px;
     border-bottom: 1px solid rgba(157, 141, 247, 0.3);
 }
 
-/* 金币显示 */
-.inventory-coins {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 12px;
-    background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 140, 0, 0.08));
-    border-radius: 10px;
-    border: 1px solid rgba(255, 215, 0, 0.4);
+.inventory-header h3 {
+    margin: 0;
+    padding: 0;
+    border: none;
 }
 
-.coin-icon {
-    font-size: 24px;
-}
-
-.coin-amount {
-    font-size: 28px;
-    font-weight: bold;
+.inventory-coins-inline {
+    font-size: 14px;
     color: #ffd700;
-    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    font-weight: bold;
 }
 
 /* 材料区域 */
-.inventory-section:last-child {
+.inventory-section {
     flex: 1;
     display: flex;
     flex-direction: column;
     min-height: 0;
-}
-
-.inventory-section:last-child h3 {
-    flex-shrink: 0;
 }
 
 /* 材料格子容器 */
@@ -259,10 +246,6 @@
 
     .inventory-content {
         max-width: 100%;
-    }
-
-    .coin-amount {
-        font-size: 24px;
     }
 
     .slot-icon {
