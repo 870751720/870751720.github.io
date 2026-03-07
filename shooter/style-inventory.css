@@ -40,24 +40,18 @@
     border: 1px solid rgba(157, 141, 247, 0.2);
 }
 
-/* 头部布局 - 材料和金币同行 */
+/* 头部布局 - 金币居中 */
 .inventory-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     margin-bottom: 12px;
     padding-bottom: 8px;
     border-bottom: 1px solid rgba(157, 141, 247, 0.3);
 }
 
-.inventory-header h3 {
-    margin: 0;
-    padding: 0;
-    border: none;
-}
-
 .inventory-coins-inline {
-    font-size: 14px;
+    font-size: 16px;
     color: #ffd700;
     font-weight: bold;
 }

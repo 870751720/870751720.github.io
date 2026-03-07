@@ -73,7 +73,6 @@ export function renderInventory() {
             <!-- 材料格子 -->
             <div class="inventory-section">
                 <div class="inventory-header">
-                    <h3>📦 材料</h3>
                     <div class="inventory-coins-inline">💰 ${(GameState.coins || 0).toLocaleString()}</div>
                 </div>
                 <div class="inventory-materials-container">
