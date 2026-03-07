@@ -44,10 +44,31 @@ body {
 }
 
 .start-screen h1 {
-    font-size: 48px;
-    color: #9d8df7;
-    text-shadow: 0 0 20px rgba(157, 141, 247, 0.5);
-    margin-bottom: 20px;
+    font-size: 56px;
+    font-weight: 900;
+    letter-spacing: 8px;
+    margin-bottom: 10px;
+    background: linear-gradient(180deg, #e8e0ff 0%, #9d8df7 40%, #6b5ce7 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 30px rgba(157, 141, 247, 0.6)) 
+            drop-shadow(0 0 60px rgba(107, 92, 231, 0.4));
+    position: relative;
+}
+
+.start-screen h1::after {
+    content: 'AQUILA RIFT';
+    position: absolute;
+    left: 50%;
+    bottom: -12px;
+    transform: translateX(-50%);
+    font-size: 12px;
+    letter-spacing: 12px;
+    color: rgba(157, 141, 247, 0.5);
+    -webkit-text-fill-color: rgba(157, 141, 247, 0.5);
+    background: none;
+    filter: none;
 }
 
 .menu-coins {
