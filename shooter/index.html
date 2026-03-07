@@ -17,10 +17,25 @@
     <div class="buff-display" id="buff-display"></div>
     <div class="hp-display" id="hp-display"></div>
     
+    <!-- 主菜单 -->
     <div class="start-screen" id="start-screen">
         <h1>太空弹幕射击</h1>
-        <p>鼠标移动控制 · 左键射击 · 收集道具变强</p>
-        <button id="start-btn">开始游戏</button>
+        <div class="menu-coins">💰 <span id="menu-coin-display">0</span></div>
+        <div class="menu-buttons">
+            <button id="start-btn">开始游戏</button>
+            <button id="upgrade-btn">机库升级</button>
+        </div>
+        <p class="menu-hint">鼠标移动控制 · 左键射击 · 收集道具变强</p>
+    </div>
+    
+    <!-- 升级商店 -->
+    <div class="upgrade-screen hidden" id="upgrade-screen">
+        <h2>机库升级</h2>
+        <div class="upgrade-coins">💰 <span id="upgrade-coin-display">0</span></div>
+        <div class="upgrade-grid" id="upgrade-grid">
+            <!-- 升级项目由JS生成 -->
+        </div>
+        <button id="back-btn" class="back-btn">返回主菜单</button>
     </div>
     
     <script type="module" src="js/main.js"></script>

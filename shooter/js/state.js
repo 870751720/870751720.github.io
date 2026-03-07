@@ -13,7 +13,9 @@ export const GameState = {
     enemySpawnInterval: 800,
     bossKillCount: 0,
     timeScale: 1,
-    lastTime: 0
+    lastTime: 0,
+    coins: 0,           // 局外金币
+    upgrades: {}        // 升级等级记录
 };
 
 // 玩家状态

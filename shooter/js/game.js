@@ -9,6 +9,7 @@ import { updateHpDisplay, updateBuffDisplay, updateCombo } from './ui.js';
 import { collectItem, spawnItem, updateBuffs } from './items.js';
 import { Player, Wingman, Bullet, Enemy, Item, Particle } from './entities.js';
 import { Destroyer, FrostGiant, LightningRider, MechSpider, ShadowAssassin, ChaosEye } from './bosses.js';
+import { addCoins, updateCoinDisplays, applyUpgrades } from './upgrades.js';
 
 const bossClasses = { Destroyer, FrostGiant, LightningRider, MechSpider, ShadowAssassin, ChaosEye };
 
@@ -20,42 +21,42 @@ let comboTimerRef = { timer: null };
  */
 export function gameLoop(timestamp) {
     if (!GameState.running) return;
-    
+
     const dt = (timestamp - lastTime) / 1000;
     lastTime = timestamp;
-    
+
     // 背景拖尾
     ctx.fillStyle = 'rgba(26, 26, 46, 0.25)';
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    
+
     // 更新系统
     updateBuffs(dt);
-    
+
     // 更新无敌状态
     if (PlayerState.invincible && performance.now() > PlayerState.invincibleEndTime) {
         PlayerState.invincible = false;
     }
-    
+
     // 玩家射击
     if (InputState.mouseDown && timestamp - InputState.lastShotTime > PlayerState.stats.fireRate) {
         shoot();
     }
-    
+
     // 生成敌人
     spawnEnemies(timestamp);
-    
+
     // 更新游戏对象
     updateGameObjects(timestamp);
-    
+
     // 碰撞检测
     checkCollisions();
-    
+
     // 清理无效对象
     cleanupObjects();
-    
+
     // 绘制
     drawGameObjects();
-    
+
     requestAnimationFrame(gameLoop);
 }
 
@@ -71,9 +72,9 @@ function spawnEnemies(timestamp) {
         } else {
             GameObjects.enemies.push(new Enemy());
         }
-        
+
         GameState.lastEnemySpawn = timestamp;
-        
+
         // 加速出怪
         const minInterval = 150;
         const baseDecrement = 3 + Math.floor(GameState.killCount / 10);
@@ -88,9 +89,9 @@ function spawnEnemies(timestamp) {
 function shoot() {
     const now = performance.now();
     if (now - InputState.lastShotTime < PlayerState.stats.fireRate) return;
-    
+
     InputState.lastShotTime = now;
-    
+
     const count = PlayerState.stats.multiShot;
     if (count === 1) {
         GameObjects.bullets.push(new Bullet(GameObjects.player.x, GameObjects.player.y - GameObjects.player.size/2));
@@ -100,7 +101,7 @@ function shoot() {
             GameObjects.bullets.push(new Bullet(GameObjects.player.x, GameObjects.player.y - GameObjects.player.size/2, angle));
         }
     }
-    
+
     GameObjects.wingmen.forEach(wingman => GameObjects.bullets.push(wingman.shoot()));
 }
 
@@ -110,14 +111,14 @@ function shoot() {
 function updateGameObjects(timestamp) {
     GameObjects.player.update(InputState);
     GameObjects.wingmen.forEach(w => w.update(GameObjects.player));
-    
+
     GameObjects.items.forEach(item => {
         item.update(GameObjects.player);
         if (checkCollision(GameObjects.player, item)) {
             collectItem(item);
         }
     });
-    
+
     GameObjects.bullets.forEach(b => b.update(GameObjects.enemies));
     GameObjects.enemyBullets.forEach(b => b.update([]));
     GameObjects.enemies.forEach(e => e.update(timestamp));
@@ -131,7 +132,7 @@ function checkCollisions() {
     // 玩家子弹击中敌人
     GameObjects.bullets.forEach(bullet => {
         if (!bullet.active || bullet.isEnemy) return;
-        
+
         for (const enemy of GameObjects.enemies) {
             if (!enemy.active) continue;
             if (checkCollision(bullet, enemy)) {
@@ -143,7 +144,7 @@ function checkCollisions() {
             }
         }
     });
-    
+
     // 敌人/子弹击中玩家
     [...GameObjects.enemies, ...GameObjects.enemyBullets].forEach(obj => {
         if (!obj.active) return;
@@ -159,12 +160,17 @@ function checkCollisions() {
 function handleEnemyDeath(enemy) {
     GameState.score += enemy.type === 'boss' ? 500 : 10 * GameState.combo;
     DOM.gameScore.textContent = 'SCORE: ' + GameState.score;
-    
+
+    // 金币掉落
+    const coinAmount = enemy.type === 'boss' ? 50 : 5;
+    const actualCoins = addCoins(coinAmount);
+    showFloatingText(enemy.x, enemy.y, `+${actualCoins}💰`, '#ffd700');
+
     if (enemy.type !== 'boss') {
         GameState.killCount++;
         updateCombo(GameState, comboTimerRef);
     }
-    
+
     if (enemy.type === 'boss' || Math.random() < 0.15) {
         spawnItem(enemy.x, enemy.y, Item);
     }
@@ -176,9 +182,9 @@ function handleEnemyDeath(enemy) {
 function handlePlayerHit(obj) {
     // 无敌状态下不受伤害
     if (PlayerState.invincible) return;
-    
+
     if (obj.type !== 'boss') obj.active = false;
-    
+
     if (PlayerState.shield > 0) {
         PlayerState.shield--;
         showFloatingText(GameObjects.player.x, GameObjects.player.y, '护盾抵消!', '#00ffaa');
@@ -189,9 +195,9 @@ function handlePlayerHit(obj) {
         PlayerState.invincible = true;
         PlayerState.invincibleEndTime = performance.now() + 2000;
     }
-    
+
     updateHpDisplay();
-    
+
     if (PlayerState.hp <= 0) {
         gameOver();
     }
@@ -226,14 +232,33 @@ function drawGameObjects() {
  */
 function gameOver() {
     GameState.running = false;
-    
-    if (DOM.startScreen) {
-        DOM.startScreen.classList.remove('hidden');
-        DOM.startScreen.querySelector('h1').textContent = `游戏结束 - 得分: ${GameState.score}`;
-        DOM.startScreen.querySelector('p').textContent = `击杀: ${GameState.killCount} | Boss击杀: ${GameState.bossKillCount}`;
-        DOM.startBtn.textContent = '重新开始';
+
+    // 结算金币奖励
+    const scoreBonus = Math.floor(GameState.score / 100);
+    const totalCoins = addCoins(scoreBonus);
+
+    const startScreen = DOM.startScreen;
+    if (startScreen) {
+        startScreen.classList.remove('hidden');
+
+        // 更新标题
+        const title = startScreen.querySelector('h1');
+        if (title) title.textContent = `游戏结束 - 得分: ${GameState.score}`;
+
+        // 更新描述
+        const hint = startScreen.querySelector('.menu-hint');
+        if (hint) {
+            hint.innerHTML = `击杀: ${GameState.killCount} | Boss击杀: ${GameState.bossKillCount}<br>本局金币: ${totalCoins} | 总金币: ${GameState.coins || 0}`;
+        }
+
+        // 更新按钮文字
+        const startBtn = DOM.startBtn;
+        if (startBtn) startBtn.textContent = '重新开始';
+
+        // 更新菜单金币显示
+        updateCoinDisplays();
     }
-    
+
     document.body.classList.remove('game-active');
     DOM.hpDisplay.style.display = 'none';
 }
@@ -250,16 +275,16 @@ export function startGame() {
     GameState.enemySpawnInterval = 800;
     GameState.timeScale = 1;
     lastTime = performance.now();
-    
-    PlayerState.hp = 3;
-    PlayerState.maxHp = 3;
-    PlayerState.shield = 0;
-    PlayerState.stats = {
-        fireRate: 150, bulletSize: 1, bulletSizeBuff: 1, damage: 1,
-        multiShot: 1, magnetRange: 0, scoreMultiplier: 1,
-        wingmanCount: 0, sizeLevel: 1, homing: false
-    };
-    
+
+    // 应用升级效果
+    applyUpgrades();
+
+    PlayerState.hp = PlayerState.maxHp;
+    PlayerState.invincible = false;
+    PlayerState.invincibleEndTime = 0;
+    PlayerState.stats.wingmanCount = 0;
+    PlayerState.stats.homing = false;
+
     // 清空对象
     GameObjects.player = new Player();
     GameObjects.wingmen = [];
@@ -269,17 +294,17 @@ export function startGame() {
     GameObjects.particles = [];
     GameObjects.items = [];
     GameObjects.activeBuffs = {};
-    
+
     InputState.mouseX = ctx.canvas.width / 2;
     InputState.mouseY = ctx.canvas.height - 100;
-    
+
     DOM.gameScore.textContent = 'SCORE: 0';
     updateHpDisplay();
     updateBuffDisplay();
-    
+
     document.body.classList.add('game-active');
     if (DOM.startScreen) DOM.startScreen.classList.add('hidden');
     DOM.hpDisplay.style.display = 'block';
-    
+
     requestAnimationFrame(gameLoop);
 }
