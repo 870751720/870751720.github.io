@@ -341,10 +341,10 @@ export function renderShipShop() {
         if (groups[config.rank]) groups[config.rank].push(config);
     });
     
-    const rankOrder = ['SSR', 'A', 'B', 'C'];
+    const rankOrder = ['C', 'B', 'A', 'SSR'];
     const allShips = [];
     
-    // 合并所有飞机
+    // 合并所有飞机 (低等级到高等级从左到右)
     rankOrder.forEach(rank => {
         allShips.push(...groups[rank]);
     });
@@ -403,6 +403,17 @@ export function renderShipShop() {
             ${enhanceDisplay}
         `;
         
+        // 点击卡片切换 (如果不是当前激活的卡片)
+        card.addEventListener('click', (e) => {
+            // 如果点击的是按钮，不触发切换
+            if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+            
+            const cardIndex = parseInt(card.dataset.index);
+            if (cardIndex !== carouselState.currentIndex) {
+                goToSlide(cardIndex);
+            }
+        });
+        
         // 装备按钮
         const btn = card.querySelector('.card-btn');
         btn.addEventListener('click', () => {
@@ -443,7 +454,8 @@ let carouselState = {
     gap: 20,
     isDragging: false,
     startX: 0,
-    scrollLeft: 0
+    startIndex: 0,
+    dragOffset: 0
 };
 
 // 初始化轮播
@@ -513,7 +525,8 @@ function startDrag(e) {
     const carousel = document.getElementById('ship-grid');
     carouselState.isDragging = true;
     carouselState.startX = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
-    carouselState.scrollLeft = carouselState.currentIndex;
+    carouselState.startIndex = carouselState.currentIndex;
+    carouselState.dragOffset = 0;
     carousel.style.cursor = 'grabbing';
 }
 
@@ -523,18 +536,23 @@ function onDrag(e) {
     
     const x = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
     const diff = carouselState.startX - x;
+    carouselState.dragOffset = diff;
     
-    if (Math.abs(diff) > 50) {
+    // 增加阈值到120像素，降低拖动速度
+    if (Math.abs(diff) > 120) {
         const carousel = document.getElementById('ship-grid');
         const cards = carousel.querySelectorAll('.ship-card');
         const totalCards = cards.length;
         
         if (diff > 0) {
+            // 向左拖动，显示下一个
             carouselState.currentIndex = Math.min(totalCards - 1, carouselState.currentIndex + 1);
         } else {
+            // 向右拖动，显示上一个
             carouselState.currentIndex = Math.max(0, carouselState.currentIndex - 1);
         }
         
+        // 重置起始位置，避免连续触发
         carouselState.startX = x;
         updateCarousel();
     }
