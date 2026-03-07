@@ -152,7 +152,9 @@
     gap: 20px;
     width: 100%;
     max-width: 1200px;
-    height: 500px;
+    height: 70vh;
+    min-height: 600px;
+    max-height: 800px;
     margin: 20px 0;
 }
 

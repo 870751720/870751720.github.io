@@ -442,11 +442,12 @@ function renderEnhanceContent(shipId, config, container) {
 
 // 渲染命座内容
 function renderConstellationContent(shipId, config, container) {
-    import('./constellation.js').then(module => {
-        const constellations = module.CONSTELLATION_CONFIGS[shipId];
-        const level = module.getConstellationLevel ? module.getConstellationLevel(shipId) : 0;
+    // 从 ships.js 导入 CONSTELLATION_CONFIGS
+    import('./ships.js').then(shipModule => {
+        const constellations = shipModule.CONSTELLATION_CONFIGS?.[shipId];
         const materialId = `constellation_${shipId}`;
         const materialCount = GameState.materials?.[materialId] || 0;
+        const level = GameState.constellations?.[shipId] || 0;
 
         if (!constellations) {
             container.innerHTML = '<div class="empty-content">该飞机暂无需座系统</div>';
@@ -503,7 +504,8 @@ function renderConstellationContent(shipId, config, container) {
 
 // 渲染故事内容
 function renderStoryContent(shipId, config, container) {
-    import('./story.js').then(module => {
+    // SHIP_STORIES 在 ships.js 中，直接导入
+    import('./ships.js').then(module => {
         const story = module.SHIP_STORIES?.[shipId];
 
         if (!story) {
@@ -522,6 +524,15 @@ function renderStoryContent(shipId, config, container) {
             <div class="story-panel">
                 <div class="story-panel-subtitle">${story.subtitle}</div>
                 <div class="story-panel-content">
+                    ${formattedContent}
+                </div>
+                <div class="story-panel-quote">
+                    <span class="quote-mark">"</span>${story.quote.replace(/"/g, '')}<span class="quote-mark">"</span>
+                </div>
+            </div>
+        `;
+    });
+}
                     ${formattedContent}
                 </div>
                 <div class="story-panel-quote">
