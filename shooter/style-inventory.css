@@ -124,26 +124,26 @@
     position: relative;
     transition: all 0.2s;
     cursor: pointer;
+    overflow: hidden;
 }
 
 .material-slot:hover {
     background: rgba(107, 92, 231, 0.15);
     border-color: rgba(157, 141, 247, 0.5);
-    transform: scale(1.03);
-}
-
-.material-slot:hover .slot-tooltip {
-    opacity: 1;
-    visibility: visible;
 }
 
 .slot-icon {
     font-size: 24px;
+    transition: transform 0.2s;
+}
+
+.material-slot:hover .slot-icon {
+    transform: scale(0.8) translateY(-8px);
 }
 
 .slot-count {
     position: absolute;
-    bottom: 3px;
+    top: 3px;
     right: 4px;
     font-size: 11px;
     font-weight: bold;
@@ -153,37 +153,35 @@
     border-radius: 4px;
     min-width: 16px;
     text-align: center;
+    transition: opacity 0.2s;
 }
 
-/* Tooltip 提示框 */
+.material-slot:hover .slot-count {
+    opacity: 0;
+}
+
+/* Tooltip 提示框 - 显示在格子内部底部 */
 .slot-tooltip {
     position: absolute;
-    bottom: calc(100% + 6px);
-    left: 50%;
-    transform: translateX(-50%);
-    background: linear-gradient(135deg, rgba(30, 30, 50, 0.98), rgba(20, 20, 35, 0.98));
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.8));
     color: #fff;
-    padding: 8px 12px;
-    border-radius: 6px;
-    font-size: 12px;
-    white-space: nowrap;
-    z-index: 100;
-    border: 1px solid rgba(157, 141, 247, 0.6);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+    padding: 8px 4px 4px;
+    font-size: 9px;
+    text-align: center;
+    line-height: 1.2;
+    z-index: 10;
     opacity: 0;
     visibility: hidden;
     transition: all 0.2s;
     pointer-events: none;
 }
 
-.slot-tooltip::after {
-    content: '';
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    border: 5px solid transparent;
-    border-top-color: rgba(30, 30, 50, 0.98);
+.material-slot:hover .slot-tooltip {
+    opacity: 1;
+    visibility: visible;
 }
 
 /* 响应式 */
