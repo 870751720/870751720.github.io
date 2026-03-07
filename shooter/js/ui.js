@@ -48,7 +48,7 @@ export function updateBuffDisplay() {
  */
 export function updateCombo(gameState, comboTimerRef) {
     const now = performance.now();
-    if (now - gameState.lastKillTime < 2000) {
+    if (now - gameState.lastKillTime < 20000) { // 20秒内连击
         gameState.combo++;
     } else {
         gameState.combo = 1;
@@ -63,7 +63,7 @@ export function updateCombo(gameState, comboTimerRef) {
     comboTimerRef.timer = setTimeout(() => {
         gameState.combo = 0;
         DOM.comboDisplay.classList.remove('active');
-    }, 2000);
+    }, 20000); // 20秒后重置
 }
 
 /**

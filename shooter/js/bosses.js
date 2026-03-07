@@ -36,52 +36,59 @@ export class Destroyer extends Boss {
 
         const patterns = [
             () => {
-                const count = 5 + (3 - this.phase) * 2 + bonusCount;
+                // 散射 - 基础3发，每击杀1个Boss+1发
+                const count = 3 + (3 - this.phase) + bonusCount;
                 for (let i = 0; i < count; i++) {
                     const angle = (i - (count - 1) / 2) * 0.3;
                     const b = new Bullet(this.x, this.y + 30, angle, true);
-                    b.color = '#ffd700'; // 金色弹幕
+                    b.color = '#ffd700';
                     GameObjects.enemyBullets.push(b);
                 }
             },
             () => {
-                const count = this.phase === 1 ? 5 + bonusCount : 3 + bonusCount;
+                // 追踪弹 - 基础2发
+                const count = this.phase === 1 ? 3 + bonusCount : 2 + bonusCount;
                 for (let i = 0; i < count; i++) {
                     const offset = (i - (count - 1) / 2) * 15;
                     const angle = Math.atan2(GameObjects.player.x - (this.x + offset), -(GameObjects.player.y - this.y));
                     const b = new Bullet(this.x + offset, this.y + 30, angle, true);
-                    b.color = '#ffaa00'; // 橙色追踪弹
+                    b.color = '#ffaa00';
                     GameObjects.enemyBullets.push(b);
                 }
             },
             () => {
-                const count = 6 + (3 - this.phase) * 2 + bonusCount;
+                // 环形 - 基础4发
+                const count = 4 + (3 - this.phase) + bonusCount;
                 for (let i = 0; i < count; i++) {
                     const angle = (i / count) * Math.PI * 2;
                     const b = new Bullet(this.x, this.y, angle, true);
-                    b.color = '#ff6666'; // 红色环形弹
+                    b.color = '#ff6666';
                     GameObjects.enemyBullets.push(b);
                 }
             },
             () => {
-                for (let i = -3 - bonusCount; i <= 3 + bonusCount; i++) {
+                // 交叉弹幕 - 基础2排
+                for (let i = -2 - bonusCount; i <= 2 + bonusCount; i++) {
                     const b1 = new Bullet(this.x - 40, this.y + 20, i * 0.25, true);
                     const b2 = new Bullet(this.x + 40, this.y + 20, -i * 0.25, true);
-                    b1.color = b2.color = '#ff8c00'; // 深橙色交叉弹
+                    b1.color = b2.color = '#ff8c00';
                     GameObjects.enemyBullets.push(b1, b2);
                 }
             },
             () => {
-                for (let i = 0; i < 12 + bonusCount; i++) {
-                    const angle = (i / (12 + bonusCount)) * Math.PI * 2;
+                // 全屏弹幕 - 基础6发
+                for (let i = 0; i < 6 + bonusCount; i++) {
+                    const angle = (i / (6 + bonusCount)) * Math.PI * 2;
                     const b = new Bullet(this.x, this.y, angle, true);
-                    b.color = '#ff4500'; // 橙红色全屏弹
+                    b.color = '#ff4500';
                     GameObjects.enemyBullets.push(b);
                 }
                 const angle = Math.atan2(GameObjects.player.x - this.x, -(GameObjects.player.y - this.y));
                 const b = new Bullet(this.x, this.y + 30, angle, true);
-                b.color = '#ff0000'; // 纯红追踪弹
+                b.color = '#ff0000';
                 GameObjects.enemyBullets.push(b);
+            }
+        ];
             }
         ];
 
@@ -143,20 +150,19 @@ export class FrostGiant extends Boss {
         const pattern = (this.shotPattern++) % 3;
 
         if (pattern === 0) {
-            // 大型冰锥 - 慢速、大体积
-            const count = 5 + Math.floor(bonusCount / 2);
+            // 大型冰锥 - 慢速、大体积 - 基础3发
+            const count = 3 + Math.floor(bonusCount / 2);
             for (let i = 0; i < count; i++) {
                 const angle = (i / count) * Math.PI * 2;
                 const b = new Bullet(this.x, this.y, angle, true);
                 b.speed = 2;
-                b.size = 12; // 大体积
+                b.size = 12;
                 b.color = '#4dd0e1';
-                b.isIce = true; // 标记为冰弹
                 GameObjects.enemyBullets.push(b);
             }
         } else if (pattern === 1) {
-            // 追踪冰弹 - 中等速度
-            const count = 3 + bonusCount;
+            // 追踪冰弹 - 基础2发
+            const count = 2 + bonusCount;
             for (let i = 0; i < count; i++) {
                 const angle = Math.atan2(GameObjects.player.x - this.x, -(GameObjects.player.y - this.y)) + (i - 1) * 0.4;
                 const b = new Bullet(this.x, this.y, angle, true);
@@ -166,11 +172,11 @@ export class FrostGiant extends Boss {
                 GameObjects.enemyBullets.push(b);
             }
         } else {
-            // 霜冻新星 - 多层扩散，越外层越快
+            // 霜冻新星 - 基础4发
             const rings = 2 + Math.floor(bonusCount / 3);
             for (let r = 0; r < rings; r++) {
                 setTimeout(() => {
-                    const count = 6 + bonusCount;
+                    const count = 4 + bonusCount;
                     for (let i = 0; i < count; i++) {
                         const angle = (i / count) * Math.PI * 2;
                         const b = new Bullet(this.x, this.y, angle, true);
@@ -250,38 +256,38 @@ export class LightningRider extends Boss {
         const pattern = (this.shotPattern++) % 3;
 
         if (pattern === 0) {
-            // 闪电链 - 超高速、细长
-            const zigzags = 3 + bonusCount;
+            // 闪电链 - 超高速、细长 - 基础2条
+            const zigzags = 2 + Math.floor(bonusCount / 2);
             for (let i = 0; i < zigzags; i++) {
                 const startX = this.x + (i - 1) * 50;
-                for (let j = 0; j < 5; j++) {
+                for (let j = 0; j < 4; j++) {
                     const angle = Math.PI / 2 + (Math.random() - 0.5) * 0.3;
                     const b = new Bullet(startX + (Math.random() - 0.5) * 20, this.y + j * 25, angle, true);
-                    b.speed = 12; // 超高速
-                    b.size = 4; // 细长
+                    b.speed = 12;
+                    b.size = 4;
                     b.color = '#ffeb3b';
                     GameObjects.enemyBullets.push(b);
                 }
             }
         } else if (pattern === 1) {
-            // 雷电束 - 极速直线
-            const count = 8 + bonusCount * 2;
+            // 雷电束 - 极速直线 - 基础5发
+            const count = 5 + bonusCount * 2;
             for (let i = 0; i < count; i++) {
                 const angle = Math.PI / 2 + (i - count / 2) * 0.12;
                 const b = new Bullet(this.x, this.y, angle, true);
-                b.speed = 15; // 极快
+                b.speed = 15;
                 b.size = 5;
                 b.color = '#fff176';
                 GameObjects.enemyBullets.push(b);
             }
         } else {
-            // 雷电球 - 快速大球
-            const orbs = 2 + Math.floor(bonusCount / 2);
+            // 雷电球 - 快速大球 - 基础1个
+            const orbs = 1 + Math.floor(bonusCount / 2);
             for (let i = 0; i < orbs; i++) {
                 const angle = (i / orbs) * Math.PI * 2;
                 const b = new Bullet(this.x, this.y, angle, true);
                 b.speed = 6;
-                b.size = 16; // 大球
+                b.size = 16;
                 b.color = '#ffd54f';
                 GameObjects.enemyBullets.push(b);
             }
