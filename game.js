@@ -710,14 +710,6 @@ class Enemy {
                 ctx.closePath();
                 ctx.fill();
                 
-                // 嘴巴（小波浪线）
-                ctx.strokeStyle = '#1a472a';
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.moveTo(this.x - 3, this.y + 6);
-                ctx.quadraticCurveTo(this.x, this.y + 9, this.x + 3, this.y + 6);
-                ctx.stroke();
-                
                 // 发射口（史莱姆吐出子弹的位置）
                 ctx.fillStyle = '#0f2e1a';
                 ctx.beginPath();
