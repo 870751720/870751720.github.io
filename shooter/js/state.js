@@ -19,10 +19,10 @@ export const GameState = {
     ownedShips: ['basic'],  // 已拥有的飞机
     currentShip: 'basic',    // 当前选择的飞机
     materials: {        // 强化材料
-        common: 0,      // 普通材料
-        rare: 0,        // 稀有材料
-        epic: 0,        // 史诗材料
-        legendary: 0    // 传说材料
+        common: 50,     // 普通材料（测试数据）
+        rare: 20,       // 稀有材料（测试数据）
+        epic: 5,        // 史诗材料（测试数据）
+        legendary: 2    // 传说材料（测试数据）
     },
     shipEnhancements: {}    // 飞机强化等级 { shipId: level }
 };
