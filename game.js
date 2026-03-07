@@ -287,8 +287,7 @@ function updateBuffs(dt) {
     let changed = false;
     
     timeScale = 1;
-    playerStats.multiShot = 1;
-    playerStats.bulletSizeBuff = 1;
+    // 注意：multiShot 和 bulletSizeBuff 是永久升级，不在此处重置
     playerStats.magnetRange = 0;
     playerStats.scoreMultiplier = 1;
     playerStats.homing = false;
@@ -649,16 +648,29 @@ class Enemy {
                 ctx.fillStyle = this.color;
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, half, 0, Math.PI * 2);
+                ctx.closePath();
                 ctx.fill();
+                // 左眼白
                 ctx.fillStyle = '#fff';
                 ctx.beginPath();
                 ctx.arc(this.x - 6, this.y - 2, 5, 0, Math.PI * 2);
-                ctx.arc(this.x + 6, this.y - 2, 5, 0, Math.PI * 2);
+                ctx.closePath();
                 ctx.fill();
+                // 右眼白
+                ctx.beginPath();
+                ctx.arc(this.x + 6, this.y - 2, 5, 0, Math.PI * 2);
+                ctx.closePath();
+                ctx.fill();
+                // 左瞳孔
                 ctx.fillStyle = '#ff0000';
                 ctx.beginPath();
                 ctx.arc(this.x - 6, this.y - 2, 2, 0, Math.PI * 2);
+                ctx.closePath();
+                ctx.fill();
+                // 右瞳孔
+                ctx.beginPath();
                 ctx.arc(this.x + 6, this.y - 2, 2, 0, Math.PI * 2);
+                ctx.closePath();
                 ctx.fill();
                 // 炮管
                 ctx.fillStyle = '#333';
@@ -859,49 +871,52 @@ class Boss extends Enemy {
         ctx.fillRect(this.x - 17, this.y - 12, 6, 6);
         ctx.fillRect(this.x + 11, this.y - 12, 6, 6);
         
-        // 三管血条显示
-        const barWidth = this.size + 10;
-        const barHeight = 6;
-        const barY = this.y - h - 25;
+        // DNF风格血条 - 单一长条
+        const barWidth = this.size + 20;
+        const barHeight = 8;
+        const barY = this.y - h - 20;
         
         // 显示boss击杀数
         if (bossKillCount > 0) {
             ctx.fillStyle = '#ffd700';
             ctx.font = 'bold 12px monospace';
             ctx.textAlign = 'center';
-            ctx.fillText(`Lv.${bossKillCount}`, this.x, barY - 5);
+            ctx.fillText(`Lv.${bossKillCount}`, this.x, barY - 8);
         }
         
-        // 背景
+        // 血条背景（黑色边框）
+        ctx.fillStyle = '#000';
+        ctx.fillRect(this.x - barWidth/2 - 2, barY - 2, barWidth + 4, barHeight + 4);
+        
+        // 血条背景（深灰）
         ctx.fillStyle = '#333';
-        ctx.fillRect(this.x - barWidth/2, barY, barWidth, barHeight * 3 + 4);
+        ctx.fillRect(this.x - barWidth/2, barY, barWidth, barHeight);
         
-        // 计算每管血的百分比
-        const phase1Hp = Math.max(0, Math.min(this.hpPerPhase, this.hp - this.hpPerPhase * 2));
-        const phase2Hp = Math.max(0, Math.min(this.hpPerPhase, this.hp - this.hpPerPhase));
-        const phase3Hp = Math.max(0, Math.min(this.hpPerPhase, this.hp));
+        // 计算总血量百分比
+        const hpPercent = this.hp / this.maxHp;
         
-        const hpColors = ['#00ff00', '#ffff00', '#ff0000'];
-        const phaseHps = [phase3Hp, phase2Hp, phase1Hp];
+        // 根据阶段选择颜色 - DNF风格：绿->黄->红
+        let hpColor;
+        if (this.phase === 3) hpColor = '#00cc00';      // 绿色
+        else if (this.phase === 2) hpColor = '#ffcc00'; // 黄色
+        else hpColor = '#ff0000';                       // 红色
         
-        for (let i = 0; i < 3; i++) {
-            const y = barY + i * (barHeight + 2);
-            const percent = phaseHps[i] / 30;
-            
-            ctx.fillStyle = '#222';
-            ctx.fillRect(this.x - barWidth/2 + 1, y + 1, barWidth - 2, barHeight - 2);
-            
-            if (percent > 0) {
-                ctx.fillStyle = hpColors[i];
-                ctx.fillRect(this.x - barWidth/2 + 1, y + 1, (barWidth - 2) * percent, barHeight - 2);
-            }
-        }
+        // 绘制血条（带渐变效果）
+        const hpWidth = (barWidth - 2) * hpPercent;
         
-        // 显示当前阶段
+        // 血条主体
+        ctx.fillStyle = hpColor;
+        ctx.fillRect(this.x - barWidth/2 + 1, barY + 1, hpWidth, barHeight - 2);
+        
+        // 血条高光（顶部亮线）
+        ctx.fillStyle = 'rgba(255,255,255,0.4)';
+        ctx.fillRect(this.x - barWidth/2 + 1, barY + 1, hpWidth, 2);
+        
+        // 显示血量数值
         ctx.fillStyle = '#fff';
-        ctx.font = 'bold 14px monospace';
+        ctx.font = 'bold 10px monospace';
         ctx.textAlign = 'center';
-        ctx.fillText(`PHASE ${this.phase}`, this.x, this.y - h - 25);
+        ctx.fillText(`${this.hp}/${this.maxHp}`, this.x, barY + 6);
         
         // 炮管
         ctx.fillStyle = '#333';
