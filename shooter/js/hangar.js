@@ -386,9 +386,8 @@ function renderUpgradePanel(shipId) {
         <div class="upgrade-panel-header">
             <canvas id="${panelCanvasId}" class="panel-ship-canvas" width="120" height="120"></canvas>
             <div class="panel-ship-info">
-                <div class="panel-ship-name">${config.name}</div>
-                <div class="panel-ship-rank rank-${config.rank.toLowerCase()}">${config.rank}级</div>
-                <div class="panel-total-points">专项强化: ${totalPoints} | 等级: ${enhanceLevel}/${maxEnhanceLevel}</div>
+                <div class="panel-ship-name">${config.name} <span class="panel-ship-level">Lv.${enhanceLevel}/${maxEnhanceLevel}</span></div>
+                <div class="panel-ship-rank rank-${config.rank.toLowerCase()}">${config.rank}</div>
             </div>
         </div>
 
@@ -410,14 +409,12 @@ function renderUpgradePanel(shipId) {
             </div>
         </div>
 
-        <!-- 飞机等级强化区域 -->
+        <!-- 飞机等级强化区域 - 简化版 -->
         <div class="upgrade-panel-level">
-            <h4>飞机等级强化</h4>
             <div class="level-enhance-card ${enhanceLevel >= maxEnhanceLevel ? 'maxed' : ''}">
                 <div class="level-enhance-info">
-                    <div class="level-enhance-title">✨ 进阶强化</div>
-                    <div class="level-enhance-desc">全面提升飞机所有属性 (+5%)</div>
-                    <div class="level-enhance-current">当前: +${enhanceLevel} / ${maxEnhanceLevel}</div>
+                    <div class="level-enhance-title">✨ 进阶强化 (+5%全属性)</div>
+                    <div class="level-enhance-desc">消耗材料提升飞机等级</div>
                 </div>
                 <div class="level-enhance-materials" id="level-enhance-materials">
                     <!-- 材料需求显示 -->

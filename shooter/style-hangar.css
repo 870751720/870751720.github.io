@@ -268,6 +268,13 @@
     margin-bottom: 5px;
 }
 
+.panel-ship-level {
+    font-size: 16px;
+    color: #ffd700;
+    font-weight: normal;
+    margin-left: 10px;
+}
+
 .panel-ship-rank {
     display: inline-block;
     font-size: 14px;
@@ -583,4 +590,28 @@
     .upgrade-items-grid {
         grid-template-columns: 1fr;
     }
+}
+
+/* 隐藏旧的专项强化显示 */
+.panel-total-points,
+.level-enhance-current {
+    display: none;
+}
+
+/* 简化等级强化区域标题 */
+.upgrade-panel-level h4 {
+    display: none;
+}
+
+/* 优化等级强化卡片布局 */
+.level-enhance-card {
+    padding: 12px 15px;
+}
+
+.level-enhance-title {
+    font-size: 15px;
+}
+
+.level-enhance-desc {
+    font-size: 11px;
 }
