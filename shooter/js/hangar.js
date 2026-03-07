@@ -4,6 +4,7 @@
 
 import { PlayerState, GameState } from './state.js';
 import { getOwnedShips, getCurrentShip, SHIP_CONFIGS, RANK_CONFIGS, getShipEnhanceLevel, getEnhancedStats, getEnhanceCost, enhanceShip, MATERIAL_CONFIGS } from './ships.js';
+import { drawStaticShip, drawDynamicShip } from './ship-renderer.js';
 
 // 当前选中的飞机
 let selectedUpgradeShip = null;
@@ -293,8 +294,10 @@ function renderShipList() {
         item.className = `hangar-ship-item ${isSelected ? 'selected' : ''}`;
         item.dataset.shipId = shipId;
 
+        const canvasId = `hangar-ship-preview-${shipId}`;
+
         item.innerHTML = `
-            <div class="hangar-ship-preview rank-${config.rank.toLowerCase()}" style="--ship-color: ${config.color}"></div>
+            <canvas id="${canvasId}" class="hangar-ship-canvas" width="60" height="60"></canvas>
             <div class="hangar-ship-info">
                 <div class="hangar-ship-name">
                     ${isFav ? '<span class="fav-icon">⭐</span>' : ''}
@@ -307,6 +310,15 @@ function renderShipList() {
                 ${isFav ? '★' : '☆'}
             </button>
         `;
+
+        // 绘制静态飞机预览
+        requestAnimationFrame(() => {
+            const canvas = document.getElementById(canvasId);
+            if (canvas) {
+                const ctx = canvas.getContext('2d');
+                drawStaticShip(ctx, 30, 30, 20, config);
+            }
+        });
 
         // 点击飞机项选中
         item.addEventListener('click', (e) => {
@@ -368,9 +380,11 @@ function renderUpgradePanel(shipId) {
         return sum + getShipUpgradeLevel(shipId, upgrade.id);
     }, 0);
 
+    const panelCanvasId = `panel-ship-preview-${shipId}-${Date.now()}`;
+
     panelEl.innerHTML = `
         <div class="upgrade-panel-header">
-            <div class="panel-ship-preview rank-${config.rank.toLowerCase()}" style="--ship-color: ${config.color}"></div>
+            <canvas id="${panelCanvasId}" class="panel-ship-canvas" width="120" height="120"></canvas>
             <div class="panel-ship-info">
                 <div class="panel-ship-name">${config.name}</div>
                 <div class="panel-ship-rank rank-${config.rank.toLowerCase()}">${config.rank}级</div>
@@ -444,6 +458,11 @@ function renderUpgradePanel(shipId) {
 
     // 渲染专项强化项目
     renderUpgradeItems(shipId);
+
+    // 启动动态飞机预览
+    requestAnimationFrame(() => {
+        drawDynamicShip(panelCanvasId, config, { animateFloat: true, shootBullets: true });
+    });
 }
 
 // 渲染等级强化材料

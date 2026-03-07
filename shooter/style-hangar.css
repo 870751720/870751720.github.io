@@ -57,6 +57,20 @@
     filter: drop-shadow(0 0 3px rgba(255, 215, 0, 0.5));
 }
 
+/* Canvas 飞机预览 */
+.hangar-ship-canvas {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.panel-ship-canvas {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+}
+
 /* 飞机项添加相对定位以便放置收藏按钮 */
 .hangar-ship-item {
     display: flex;
@@ -69,6 +83,29 @@
     cursor: pointer;
     transition: all 0.2s;
     position: relative;
+}
+
+/* 飞机列表 Canvas 样式 */
+.hangar-ship-canvas {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.3);
+    flex-shrink: 0;
+}
+
+/* 右侧面板 Canvas 样式 */
+.panel-ship-canvas {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.3);
+}
+
+/* 移除旧的预览样式 */
+.hangar-ship-preview,
+.panel-ship-preview {
+    display: none;
 }
 
 /* 机库布局 */
