@@ -763,29 +763,78 @@ function drawShipPreview(canvasId, config) {
     const ctx = canvas.getContext('2d');
     const s = 35; // 飞机大小
     const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
     const color = config.color;
     const rank = config.rank;
 
-    // 清空画布
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // 动画状态
+    let startTime = Date.now();
+    let bullets = [];
+    let lastBulletTime = 0;
 
-    // 根据等级绘制
-    switch(rank) {
-        case 'SSR':
-            drawSSRPreview(ctx, centerX, centerY, s, color);
-            break;
-        case 'A':
-            drawAPreview(ctx, centerX, centerY, s, color);
-            break;
-        case 'B':
-            drawBPreview(ctx, centerX, centerY, s, color);
-            break;
-        case 'C':
-        default:
-            drawCPreview(ctx, centerX, centerY, s, color);
-            break;
+    // 动画循环
+    function animate() {
+        if (!document.getElementById(canvasId)) return;
+
+        const now = Date.now();
+        const elapsed = now - startTime;
+
+        // 上下浮动效果
+        const floatOffset = Math.sin(elapsed / 500) * 5;
+        const centerY = canvas.height / 2 + floatOffset;
+
+        // 清空画布
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // 更新和绘制子弹
+        if (now - lastBulletTime > 300) { // 每300ms发射一颗子弹
+            bullets.push({
+                x: centerX,
+                y: centerY - s,
+                speed: 3,
+                life: 60
+            });
+            lastBulletTime = now;
+        }
+
+        // 更新子弹
+        bullets = bullets.filter(b => {
+            b.y -= b.speed;
+            b.life--;
+            return b.life > 0 && b.y > -10;
+        });
+
+        // 绘制子弹
+        bullets.forEach(b => {
+            ctx.fillStyle = color;
+            ctx.shadowColor = color;
+            ctx.shadowBlur = 5;
+            ctx.beginPath();
+            ctx.arc(b.x, b.y, 3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+        });
+
+        // 根据等级绘制飞机
+        switch(rank) {
+            case 'SSR':
+                drawSSRPreview(ctx, centerX, centerY, s, color);
+                break;
+            case 'A':
+                drawAPreview(ctx, centerX, centerY, s, color);
+                break;
+            case 'B':
+                drawBPreview(ctx, centerX, centerY, s, color);
+                break;
+            case 'C':
+            default:
+                drawCPreview(ctx, centerX, centerY, s, color);
+                break;
+        }
+
+        requestAnimationFrame(animate);
     }
+
+    animate();
 }
 
 // C级预览
