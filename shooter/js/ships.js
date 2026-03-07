@@ -423,7 +423,6 @@ export function renderShipShop() {
                 if (result.success) {
                     renderShipShop();
                     updateShipCoinDisplay();
-                    updateMaterialDisplay();
                 }
             }
         });
@@ -440,24 +439,26 @@ export function renderShipShop() {
         carousel.appendChild(card);
     });
     
-    // 找到默认显示位置：未购买的最低等级飞机
-    const rankWeight = { 'C': 1, 'B': 2, 'A': 3, 'SSR': 4 };
-    let targetIndex = 0;
-    let minRankWeight = Infinity;
-    
-    allShips.forEach((config, index) => {
-        if (!hasShip(config.id)) {
-            const weight = rankWeight[config.rank];
-            if (weight < minRankWeight) {
-                minRankWeight = weight;
-                targetIndex = index;
+    // 只在首次进入商店时，跳转到未购买的最低等级飞机
+    if (!carouselState.initialized) {
+        const rankWeight = { 'C': 1, 'B': 2, 'A': 3, 'SSR': 4 };
+        let targetIndex = 0;
+        let minRankWeight = Infinity;
+        
+        allShips.forEach((config, index) => {
+            if (!hasShip(config.id)) {
+                const weight = rankWeight[config.rank];
+                if (weight < minRankWeight) {
+                    minRankWeight = weight;
+                    targetIndex = index;
+                }
             }
-        }
-    });
-    
-    // 设置默认索引
-    carouselState.currentIndex = targetIndex;
-    
+        });
+        
+        carouselState.currentIndex = targetIndex;
+        carouselState.initialized = true;
+    }
+
     // 初始化轮播
     initCarousel();
 }
@@ -470,7 +471,8 @@ let carouselState = {
     isDragging: false,
     startX: 0,
     startIndex: 0,
-    dragOffset: 0
+    dragOffset: 0,
+    initialized: false  // 是否已初始化默认位置
 };
 
 // 初始化轮播
