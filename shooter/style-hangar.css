@@ -1,0 +1,361 @@
+/* 机库升级系统样式 */
+
+/* 机库布局 */
+.hangar-layout {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+    max-width: 1200px;
+    height: 500px;
+    margin: 20px 0;
+}
+
+/* 左侧飞机列表 */
+.hangar-ship-list {
+    width: 280px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 15px;
+    padding: 15px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.hangar-ship-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: rgba(107, 92, 231, 0.1);
+    border: 2px solid transparent;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.hangar-ship-item:hover {
+    background: rgba(107, 92, 231, 0.2);
+    border-color: rgba(107, 92, 231, 0.5);
+}
+
+.hangar-ship-item.selected {
+    background: rgba(107, 92, 231, 0.3);
+    border-color: #9d8df7;
+    box-shadow: 0 0 20px rgba(157, 141, 247, 0.3);
+}
+
+.hangar-ship-preview {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: var(--ship-color, #9d8df7);
+    flex-shrink: 0;
+    box-shadow: 0 0 15px var(--ship-color, #9d8df7);
+}
+
+.hangar-ship-preview.rank-ssr::after {
+    content: '';
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 2px solid #ffd700;
+    animation: pulse-ring 2s infinite;
+}
+
+.hangar-ship-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.hangar-ship-name {
+    font-size: 16px;
+    font-weight: bold;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.hangar-ship-rank {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: bold;
+    padding: 2px 8px;
+    border-radius: 8px;
+    margin-top: 4px;
+}
+
+.hangar-ship-rank.rank-ssr {
+    background: linear-gradient(135deg, #ffd700, #ff8c00);
+    color: #000;
+}
+
+.hangar-ship-rank.rank-a {
+    background: linear-gradient(135deg, #60a5fa, #3b82f6);
+    color: #fff;
+}
+
+.hangar-ship-rank.rank-b {
+    background: linear-gradient(135deg, #4ade80, #22c55e);
+    color: #000;
+}
+
+.hangar-ship-rank.rank-c {
+    background: #888888;
+    color: #fff;
+}
+
+.hangar-ship-current {
+    font-size: 10px;
+    color: #00ff88;
+    margin-top: 2px;
+}
+
+/* 右侧强化面板 */
+.hangar-upgrade-panel {
+    flex: 1;
+    background: rgba(0,0,0,0.3);
+    border-radius: 15px;
+    padding: 25px;
+    overflow-y: auto;
+}
+
+.no-ship-selected {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #888;
+    font-size: 18px;
+}
+
+/* 面板头部 */
+.upgrade-panel-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 20px;
+}
+
+.panel-ship-preview {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: var(--ship-color, #9d8df7);
+    box-shadow: 0 0 30px var(--ship-color, #9d8df7);
+}
+
+.panel-ship-info {
+    flex: 1;
+}
+
+.panel-ship-name {
+    font-size: 28px;
+    font-weight: bold;
+    color: #fff;
+    margin-bottom: 5px;
+}
+
+.panel-ship-rank {
+    display: inline-block;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 4px 12px;
+    border-radius: 10px;
+    margin-bottom: 8px;
+}
+
+.panel-ship-rank.rank-ssr {
+    background: linear-gradient(135deg, #ffd700, #ff8c00);
+    color: #000;
+}
+
+.panel-ship-rank.rank-a {
+    background: linear-gradient(135deg, #60a5fa, #3b82f6);
+    color: #fff;
+}
+
+.panel-ship-rank.rank-b {
+    background: linear-gradient(135deg, #4ade80, #22c55e);
+    color: #000;
+}
+
+.panel-ship-rank.rank-c {
+    background: #888888;
+    color: #fff;
+}
+
+.panel-total-points {
+    font-size: 14px;
+    color: #ffd700;
+}
+
+/* 属性面板 */
+.upgrade-panel-stats {
+    margin-bottom: 25px;
+}
+
+.upgrade-panel-stats h4 {
+    font-size: 16px;
+    color: #9d8df7;
+    margin-bottom: 15px;
+}
+
+.panel-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+}
+
+.panel-stat {
+    background: rgba(107, 92, 231, 0.1);
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+}
+
+.stat-label {
+    display: block;
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 5px;
+}
+
+.stat-value {
+    display: block;
+    font-size: 20px;
+    color: #fff;
+    font-weight: bold;
+}
+
+/* 强化项目列表 */
+.upgrade-panel-list h4 {
+    font-size: 16px;
+    color: #9d8df7;
+    margin-bottom: 15px;
+}
+
+.upgrade-items-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.hangar-upgrade-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(107, 92, 231, 0.1);
+    border: 1px solid rgba(107, 92, 231, 0.3);
+    border-radius: 12px;
+    padding: 15px;
+    transition: all 0.2s;
+}
+
+.hangar-upgrade-item:hover {
+    background: rgba(107, 92, 231, 0.2);
+    border-color: rgba(107, 92, 231, 0.6);
+}
+
+.hangar-upgrade-item.maxed {
+    background: rgba(34, 197, 94, 0.1);
+    border-color: #22c55e;
+}
+
+.upgrade-item-icon {
+    width: 45px;
+    height: 45px;
+    border-radius: 10px;
+    background: rgba(0,0,0,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.upgrade-item-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.upgrade-item-name {
+    font-size: 14px;
+    font-weight: bold;
+    color: #fff;
+    margin-bottom: 3px;
+}
+
+.upgrade-item-desc {
+    font-size: 11px;
+    color: #888;
+    margin-bottom: 5px;
+}
+
+.upgrade-item-level {
+    font-size: 12px;
+    color: #ffd700;
+}
+
+.upgrade-item-btn {
+    padding: 8px 16px;
+    font-size: 13px;
+    background: linear-gradient(135deg, #6b5ce7 0%, #9d8df7 100%);
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.upgrade-item-btn:hover:not(:disabled) {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(157, 141, 247, 0.5);
+}
+
+.upgrade-item-btn:disabled {
+    background: #444;
+    cursor: not-allowed;
+}
+
+.upgrade-item-btn.maxed {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: #fff;
+}
+
+/* 金币显示 */
+.hangar-coins {
+    font-size: 24px;
+    color: #ffd700;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+/* 响应式 */
+@media (max-width: 900px) {
+    .hangar-layout {
+        flex-direction: column;
+        height: auto;
+    }
+    
+    .hangar-ship-list {
+        width: 100%;
+        max-height: 200px;
+        flex-direction: row;
+        overflow-x: auto;
+    }
+    
+    .hangar-ship-item {
+        min-width: 200px;
+    }
+    
+    .upgrade-items-grid {
+        grid-template-columns: 1fr;
+    }
+}

@@ -5,9 +5,10 @@
 import { DOM, setContext, GameState } from './state.js';
 import { startGame } from './game.js';
 import { InputState } from './state.js';
-import { loadProgress, renderUpgradeShop, updateCoinDisplays } from './upgrades.js';
+import { loadProgress, updateCoinDisplays } from './upgrades.js';
 import { loadShipData, renderShipShop, updateShipCoinDisplay, updateMaterialDisplay } from './ships.js';
 import { renderGachaShop } from './gacha.js';
+import { loadShipUpgrades, renderHangarUpgrade, updateHangarCoinDisplay } from './hangar.js';
 
 /**
  * 初始化游戏
@@ -26,6 +27,7 @@ function initGame() {
     // 加载存档
     loadProgress();
     loadShipData();
+    loadShipUpgrades();
     updateCoinDisplays();
 
     // 设置 Canvas
@@ -47,8 +49,8 @@ function initGame() {
         upgradeBtn.addEventListener('click', () => {
             DOM.startScreen.classList.add('hidden');
             upgradeScreen.classList.remove('hidden');
-            renderUpgradeShop();
-            updateCoinDisplays();
+            renderHangarUpgrade();
+            updateHangarCoinDisplay();
         });
     }
 
@@ -97,8 +99,8 @@ function initGame() {
         toUpgradeBtn.addEventListener('click', () => {
             shipScreen.classList.add('hidden');
             upgradeScreen.classList.remove('hidden');
-            renderUpgradeShop();
-            updateCoinDisplays();
+            renderHangarUpgrade();
+            updateHangarCoinDisplay();
         });
     }
 
@@ -140,8 +142,8 @@ function initGame() {
         gachaToUpgradeBtn.addEventListener('click', () => {
             gachaScreen.classList.add('hidden');
             upgradeScreen.classList.remove('hidden');
-            renderUpgradeShop();
-            updateCoinDisplays();
+            renderHangarUpgrade();
+            updateHangarCoinDisplay();
         });
     }
 
