@@ -189,6 +189,17 @@ export function renderHangarUpgrade() {
     container.innerHTML = `
         <h2>机库升级</h2>
 
+        <div class="upgrade-entries">
+            <button id="constellation-entry" class="upgrade-entry-btn">
+                <span class="entry-icon">⭐</span>
+                <span class="entry-text">命座提升</span>
+            </button>
+            <button id="story-entry" class="upgrade-entry-btn">
+                <span class="entry-icon">📖</span>
+                <span class="entry-text">飞机故事</span>
+            </button>
+        </div>
+
         <div class="hangar-layout">
             <div class="hangar-ship-list" id="hangar-ship-list"></div>
             <div class="hangar-upgrade-panel" id="hangar-upgrade-panel">
@@ -201,6 +212,7 @@ export function renderHangarUpgrade() {
         </div>
     `;
 
+    // 绑定返回按钮
     const backBtn = document.getElementById('back-btn');
     if (backBtn) {
         backBtn.addEventListener('click', () => {
@@ -208,6 +220,32 @@ export function renderHangarUpgrade() {
             document.getElementById('start-screen').classList.remove('hidden');
             const coinDisplay = document.getElementById('menu-coin-display');
             if (coinDisplay) coinDisplay.textContent = GameState.coins || 0;
+        });
+    }
+
+    // 绑定命座入口
+    const constellationEntry = document.getElementById('constellation-entry');
+    if (constellationEntry) {
+        constellationEntry.addEventListener('click', () => {
+            document.getElementById('upgrade-screen').classList.add('hidden');
+            document.getElementById('constellation-screen').classList.remove('hidden');
+            // 动态导入并渲染命座界面
+            import('./constellation.js').then(module => {
+                module.renderConstellationScreen();
+            });
+        });
+    }
+
+    // 绑定故事入口
+    const storyEntry = document.getElementById('story-entry');
+    if (storyEntry) {
+        storyEntry.addEventListener('click', () => {
+            document.getElementById('upgrade-screen').classList.add('hidden');
+            document.getElementById('story-screen').classList.remove('hidden');
+            // 动态导入并渲染故事界面
+            import('./story.js').then(module => {
+                module.renderStoryScreen();
+            });
         });
     }
 
