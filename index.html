@@ -68,38 +68,61 @@
         .avatar {
             width: 120px;
             height: 120px;
-            background: #8b7355;
+            background: #F7E83C;
             border: 4px solid #fff;
             box-shadow: 
                 4px 4px 0 #000,
-                inset -4px -4px 0 rgba(0,0,0,0.3);
+                inset -4px -4px 0 rgba(0,0,0,0.1);
             position: relative;
             image-rendering: pixelated;
         }
         
-        /* 像素脸 */
+        /* 海绵宝宝眼睛 */
         .avatar::before {
             content: '';
             position: absolute;
-            top: 35px;
-            left: 25px;
-            width: 16px;
-            height: 16px;
+            top: 25px;
+            left: 20px;
+            width: 28px;
+            height: 28px;
             background: #fff;
+            border-radius: 50%;
             box-shadow: 
                 40px 0 0 #fff,
-                0 25px 0 4px #ffb6c1,
-                20px 30px 0 2px #5c4033;
+                12px 8px 0 -8px #87CEEB,
+                52px 8px 0 -8px #87CEEB,
+                12px 8px 0 -4px #000,
+                52px 8px 0 -4px #000,
+                14px 45px 0 -10px #000,
+                46px 45px 0 -10px #000,
+                30px 55px 0 -12px #000;
         }
         
+        /* 海绵宝宝身体细节 */
         .avatar::after {
             content: '';
             position: absolute;
-            top: 20px;
-            left: 15px;
-            right: 15px;
-            height: 20px;
-            background: #5c4033;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 25px;
+            background: #8B4513;
+            border-top: 4px solid #000;
+        }
+        
+        /* 领带 */
+        .avatar-container::before {
+            content: '';
+            position: absolute;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 20px solid #FF0000;
+            z-index: 1;
         }
         
         .level-badge {
@@ -424,7 +447,17 @@
                     <div class="skill-dot filled"></div>
                     <div class="skill-dot filled"></div>
                     <div class="skill-dot filled"></div>
+                    <div class="skill-dot"></div>
+                </div>
+            </div>
+            <div class="skill-item">
+                <span class="skill-name">C++</span>
+                <div class="skill-level">
                     <div class="skill-dot filled"></div>
+                    <div class="skill-dot filled"></div>
+                    <div class="skill-dot filled"></div>
+                    <div class="skill-dot filled"></div>
+                    <div class="skill-dot"></div>
                 </div>
             </div>
             <div class="skill-item">
@@ -444,17 +477,7 @@
                     <div class="skill-dot filled"></div>
                     <div class="skill-dot filled"></div>
                     <div class="skill-dot filled"></div>
-                    <div class="skill-dot"></div>
-                </div>
-            </div>
-            <div class="skill-item">
-                <span class="skill-name">C++</span>
-                <div class="skill-level">
                     <div class="skill-dot filled"></div>
-                    <div class="skill-dot filled"></div>
-                    <div class="skill-dot filled"></div>
-                    <div class="skill-dot"></div>
-                    <div class="skill-dot"></div>
                 </div>
             </div>
         </div>
