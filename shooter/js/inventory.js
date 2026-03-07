@@ -13,14 +13,6 @@ const TIER_COLORS = {
     legendary: '#fbbf24'
 };
 
-// 品质中文名
-const TIER_NAMES = {
-    common: '普通',
-    rare: '稀有',
-    epic: '史诗',
-    legendary: '传说'
-};
-
 // 全局 tooltip 元素
 let globalTooltip = null;
 
@@ -126,7 +118,7 @@ function bindSlotEvents(container) {
         const count = parseInt(slot.dataset.count) || 0;
         
         slot.addEventListener('mouseenter', (e) => {
-            if (mat) showTooltip(e, mat, count);
+            if (mat && count > 0) showTooltip(e, mat, count);
         });
         
         slot.addEventListener('mouseleave', () => {
@@ -139,7 +131,7 @@ function bindSlotEvents(container) {
     });
 }
 
-// 渲染材料格子
+// 渲染材料格子 - 支持展开显示（无堆叠上限的材料每个占一个格子）
 function renderMaterialsGrid(mats) {
     const materials = [
         { key: 'common', ...MATERIAL_CONFIGS.common },
@@ -148,13 +140,32 @@ function renderMaterialsGrid(mats) {
         { key: 'legendary', ...MATERIAL_CONFIGS.legendary }
     ];
 
-    return materials.map(mat => {
+    let html = '';
+    
+    materials.forEach(mat => {
         const count = mats[mat.key] || 0;
-        return `
-            <div class="material-slot tier-${mat.tier}" data-mat="${mat.key}" data-count="${count}">
-                <div class="slot-icon" style="color: ${mat.color}">${mat.icon}</div>
-                <div class="slot-count">${count}</div>
-            </div>
-        `;
-    }).join('');
+        const stackLimit = mat.stack || 999;
+        
+        // 如果堆叠上限为1，且数量大于0，展开显示每个物品
+        if (stackLimit === 1 && count > 0) {
+            // 生成 count 个单独的格子
+            for (let i = 0; i < count; i++) {
+                html += `
+                    <div class="material-slot tier-${mat.tier}" data-mat="${mat.key}" data-count="1">
+                        <div class="slot-icon" style="color: ${mat.color}">${mat.icon}</div>
+                    </div>
+                `;
+            }
+        } else if (count > 0) {
+            // 普通堆叠显示（一个格子显示数量）
+            html += `
+                <div class="material-slot tier-${mat.tier}" data-mat="${mat.key}" data-count="${count}">
+                    <div class="slot-icon" style="color: ${mat.color}">${mat.icon}</div>
+                    <div class="slot-count">${count}</div>
+                </div>
+            `;
+        }
+    });
+    
+    return html;
 }
