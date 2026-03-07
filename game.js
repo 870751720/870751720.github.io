@@ -899,6 +899,7 @@ class Boss extends Enemy {
         }
         if (this.hp <= 0) {
             this.active = false;
+            bossKillCount++; // Boss击杀计数+1
             // Boss死亡大爆炸
             for (let i = 0; i < 30; i++) {
                 particles.push(new Particle(this.x, this.y, '#ffd700'));
@@ -967,7 +968,10 @@ function gameLoop(timestamp) {
             enemies.push(new Enemy());
         }
         lastEnemySpawn = timestamp;
-        enemySpawnInterval = Math.max(300, enemySpawnInterval - 2);
+        // 出怪速度递增，最快150ms，击杀越多越快
+        const minInterval = 150;
+        const decrement = 3 + Math.floor(killCount / 10); // 每击杀10个敌人，递减速度加快
+        enemySpawnInterval = Math.max(minInterval, enemySpawnInterval - decrement);
     }
     
     // 玩家
