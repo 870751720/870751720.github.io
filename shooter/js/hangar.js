@@ -188,7 +188,6 @@ export function renderHangarUpgrade() {
 
     container.innerHTML = `
         <h2>机库升级</h2>
-        <div class="hangar-coins">💰 <span id="hangar-coin-display">${GameState.coins || 0}</span></div>
 
         <div class="hangar-layout">
             <div class="hangar-ship-list" id="hangar-ship-list"></div>
