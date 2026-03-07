@@ -2,7 +2,7 @@
  * 游戏实体类
  */
 
-import { ITEM_TYPES, ENEMY_CONFIGS, COLORS } from './config.js';
+import { ITEM_TYPES, ENEMY_CONFIGS, COLORS, BOSS_TYPES } from './config.js';
 import { GameState, PlayerState, GameObjects, ctx } from './state.js';
 import { normalizeAngle } from './utils.js';
 
@@ -393,9 +393,7 @@ export class Enemy {
         this.hp -= damage;
         if (this.hp <= 0) {
             this.active = false;
-            for (let i = 0; i < 6; i++) {
-                GameObjects.particles.push(new Particle(this.x, this.y, this.color));
-            }
+            // 小怪死亡不生成白色弹幕粒子
             return true;
         }
         return false;
