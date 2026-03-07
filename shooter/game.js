@@ -637,9 +637,6 @@ class Enemy {
                 // 炮管
                 ctx.fillStyle = '#333333';
                 ctx.fillRect(this.x - 4, this.y + half - 8, 8, 12);
-                // 炮口
-                ctx.fillStyle = '#ff0000';
-                ctx.fillRect(this.x - 2, this.y + half - 2, 4, 4);
                 // 眼睛
                 ctx.fillStyle = '#ff6666';
                 ctx.fillRect(this.x - 8, this.y - 4, 6, 4);
