@@ -366,23 +366,6 @@ export class Player {
             ctx.closePath();
             ctx.fill();
         }
-        
-        // 动态粒子尾迹
-        const particleCount = inputState.mouseDown ? 5 : 3;
-        for (let i = 0; i < particleCount; i++) {
-            const particlePhase = (now / 100 + i * 0.5) % (Math.PI * 2);
-            const particleOffset = Math.sin(particlePhase) * s * 0.3;
-            const particleY = this.y + s * 0.4 + Math.random() * baseFlameSize * 0.8;
-            const particleSize = 2 + Math.random() * 3;
-            const hue = (now / 15 + i * 40) % 360;
-            
-            ctx.fillStyle = `hsla(${hue}, 100%, 70%, ${0.6 + Math.random() * 0.4})`;
-            ctx.shadowColor = `hsla(${hue}, 100%, 50%, 1)`;
-            ctx.shadowBlur = particleSize * 2;
-            ctx.beginPath();
-            ctx.arc(this.x + particleOffset, particleY, particleSize, 0, Math.PI * 2);
-            ctx.fill();
-        }
     }
 
     // 护盾特效
