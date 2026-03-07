@@ -1,0 +1,435 @@
+@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    min-height: 100vh;
+    background: #1a1a2e;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'VT323', 'Courier New', monospace;
+    padding: 20px;
+    image-rendering: pixelated;
+    position: relative;
+    overflow-x: hidden;
+}
+
+body.game-active {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+/* 游戏画布 */
+#game-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    display: none;
+    cursor: crosshair;
+}
+
+#game-canvas.active {
+    display: block;
+}
+
+/* 游戏分数 */
+.game-score {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    color: #fff;
+    font-size: 24px;
+    text-shadow: 2px 2px 0 #000;
+    z-index: 1;
+    display: none;
+}
+
+.game-score.active {
+    display: block;
+}
+
+/* 连击显示 */
+.combo-display {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    color: #ffd700;
+    font-size: 28px;
+    text-shadow: 2px 2px 0 #000;
+    z-index: 1;
+    display: none;
+    transition: transform 0.1s ease;
+}
+
+.combo-display.active {
+    display: block;
+}
+
+.combo-display.pop {
+    transform: scale(1.3);
+}
+
+.combo-display .combo-text {
+    font-size: 14px;
+    color: #fff;
+}
+
+/* 主容器 */
+.container {
+    max-width: 600px;
+    width: 100%;
+    position: relative;
+    z-index: 2;
+}
+
+/* 角色卡 */
+.hero-card {
+    background: #252542;
+    border: 4px solid #3d3d6b;
+    box-shadow: 
+        0 0 0 4px #1a1a2e,
+        8px 8px 0 rgba(0,0,0,0.4);
+    padding: 30px;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.hero-card::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
+    background: linear-gradient(135deg, #6b5ce7 0%, transparent 50%, #3d3d6b 100%);
+    z-index: -1;
+    opacity: 0.3;
+}
+
+.character-row {
+    display: flex;
+    gap: 25px;
+    align-items: flex-start;
+}
+
+/* 骰子头像 */
+.avatar-container {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.avatar {
+    width: 120px;
+    height: 120px;
+    background: #f5f5f0;
+    border: 4px solid #d4d4d0;
+    box-shadow: 
+        4px 4px 0 #999,
+        inset -4px -4px 0 rgba(255,255,255,0.8),
+        inset 4px 4px 0 rgba(0,0,0,0.1);
+    position: relative;
+    image-rendering: pixelated;
+}
+
+.avatar::before {
+    content: '';
+    position: absolute;
+    top: 15px;
+    left: 22px;
+    width: 14px;
+    height: 14px;
+    background: #333;
+    border-radius: 50%;
+    box-shadow: 
+        0 38px 0 #333,
+        0 76px 0 #333;
+}
+
+.avatar::after {
+    content: '';
+    position: absolute;
+    top: 15px;
+    right: 22px;
+    width: 14px;
+    height: 14px;
+    background: #333;
+    border-radius: 50%;
+    box-shadow: 
+        0 38px 0 #333,
+        0 76px 0 #333;
+}
+
+.level-badge {
+    position: absolute;
+    bottom: -10px;
+    right: -10px;
+    background: #6b5ce7;
+    color: #fff;
+    padding: 5px 12px;
+    font-size: 18px;
+    border: 3px solid #9d8df7;
+    box-shadow: 3px 3px 0 #1a1520;
+}
+
+/* 开始游戏按钮 */
+.start-game-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: #6b5ce7;
+    color: #fff;
+    padding: 8px 16px;
+    font-size: 14px;
+    border: 3px solid #9d8df7;
+    box-shadow: 3px 3px 0 #1a1520;
+    transition: all 0.2s ease;
+    font-family: 'VT323', 'Courier New', monospace;
+    cursor: pointer;
+    z-index: 10;
+}
+
+.start-game-btn:hover {
+    background: #9d8df7;
+    transform: translate(-2px, -2px);
+    box-shadow: 5px 5px 0 #1a1520;
+}
+
+.start-game-btn::before {
+    content: '▶ ';
+}
+
+.start-game-btn.hidden {
+    display: none;
+}
+
+/* 角色信息 */
+.info-section {
+    flex: 1;
+}
+
+.name {
+    font-size: 42px;
+    color: #fff;
+    text-shadow: 3px 3px 0 #000;
+    margin-bottom: 10px;
+    letter-spacing: 0.1em;
+}
+
+.title {
+    font-size: 20px;
+    color: #9d8df7;
+    margin-bottom: 15px;
+}
+
+.title::before {
+    content: '► ';
+    color: #6b5ce7;
+}
+
+.location {
+    font-size: 16px;
+    color: #a8a8c4;
+}
+
+.location span {
+    color: #6b5ce7;
+}
+
+/* 状态条 */
+.stats-section {
+    margin-top: 25px;
+}
+
+.stat-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+    font-size: 18px;
+}
+
+.stat-label {
+    width: 80px;
+    color: #9d8df7;
+}
+
+.stat-bar {
+    flex: 1;
+    height: 24px;
+    background: #151525;
+    border: 2px solid #3d3d5c;
+    position: relative;
+}
+
+.stat-fill {
+    height: 100%;
+    position: relative;
+    transition: width 1s ease;
+}
+
+.stat-fill.hp { width: 88%; background: linear-gradient(90deg, #c45c5c 0%, #e87e7e 100%); }
+.stat-fill.mp { width: 99%; background: linear-gradient(90deg, #3a6b8b 0%, #5c9bc4 100%); }
+.stat-fill.exp { width: 66%; background: linear-gradient(90deg, #6b5ce7 0%, #9d8df7 100%); }
+
+.stat-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 10px,
+        rgba(0,0,0,0.2) 10px,
+        rgba(0,0,0,0.2) 20px
+    );
+}
+
+.stat-value {
+    width: 60px;
+    text-align: right;
+    color: #fff;
+    margin-left: 10px;
+}
+
+/* 信息框 */
+.info-box {
+    background: #252542;
+    border: 3px solid #6b5ce7;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
+}
+
+.info-header {
+    color: #9d8df7;
+    font-size: 20px;
+    margin-bottom: 15px;
+    border-bottom: 2px dashed #6b5ce7;
+    padding-bottom: 10px;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    font-size: 18px;
+    color: #fff;
+}
+
+/* 技能列表 */
+.skills-box {
+    background: #252542;
+    border: 3px solid #9d8df7;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
+}
+
+.skills-header {
+    color: #9d8df7;
+    font-size: 20px;
+    margin-bottom: 15px;
+    border-bottom: 2px dashed #9d8df7;
+    padding-bottom: 10px;
+}
+
+.skill-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 16px;
+}
+
+.skill-name {
+    color: #fff;
+    width: 120px;
+}
+
+.skill-level {
+    display: flex;
+    gap: 3px;
+}
+
+.skill-dot {
+    width: 12px;
+    height: 12px;
+    background: #333;
+    border: 1px solid #666;
+}
+
+.skill-dot.filled {
+    background: #9d8df7;
+    border-color: #9d8df7;
+    box-shadow: 0 0 5px #9d8df7;
+}
+
+/* 联系区域 */
+.contact-box {
+    background: #252542;
+    border: 3px solid #9d8df7;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
+}
+
+.contact-header {
+    color: #9d8df7;
+    font-size: 20px;
+    margin-bottom: 15px;
+}
+
+.contact-wechat {
+    font-size: 24px;
+    color: #9d8df7;
+    text-shadow: 2px 2px 0 #151525;
+}
+
+.contact-hint {
+    font-size: 14px;
+    color: #7a7a9a;
+    margin-top: 10px;
+}
+
+/* 动画 */
+@keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0.3; }
+}
+
+.blink {
+    animation: blink 1s infinite;
+}
+
+.cursor::after {
+    content: '_';
+    animation: blink 0.8s infinite;
+}
+
+/* 响应式 */
+@media (max-width: 500px) {
+    .character-row {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .name {
+        font-size: 32px;
+        text-align: center;
+    }
+    
+    .info-section {
+        text-align: center;
+    }
+}
