@@ -5,8 +5,8 @@
 // ==================== 游戏配置 ====================
 const ITEM_TYPES = [
     { id: 'rapid', name: '疾速射击', color: '#00ff00', duration: 50000, icon: '⚡' },
-    { id: 'spread', name: '散弹枪', color: '#ff6600', duration: 60000, icon: '✦' },
-    { id: 'big', name: '巨型子弹', color: '#ff00ff', duration: 50000, icon: '●' },
+    { id: 'spread', name: '散弹枪', color: '#ff6600', duration: 0, icon: '✦', permanent: true },
+    { id: 'big', name: '巨型子弹', color: '#ff00ff', duration: 0, icon: '●', permanent: true },
     { id: 'slow', name: '时间缓速', color: '#00ffff', duration: 40000, icon: '❄' },
     { id: 'double', name: '分数翻倍', color: '#ffd700', duration: 80000, icon: '×2' },
     { id: 'homing', name: '追踪弹', color: '#ff8800', duration: 45000, icon: '➤' },
@@ -244,6 +244,12 @@ function collectItem(item) {
         } else if (type.id === 'playersize') {
             playerStats.sizeLevel++;
             showFloatingText(item.x, item.y, '机体变大!', '#aaaaaa');
+        } else if (type.id === 'spread') {
+            playerStats.multiShot = 3;
+            showFloatingText(item.x, item.y, '永久散弹!', '#ff6600');
+        } else if (type.id === 'big') {
+            playerStats.bulletSizeBuff = 2.5;
+            showFloatingText(item.x, item.y, '永久巨弹!', '#ff00ff');
         }
     } else if (type.id === 'shield') {
         playerShield++;
@@ -583,12 +589,7 @@ class Enemy {
         this.y += this.vy * timeScale;
         this.x += this.vx * timeScale;
         
-        if (this.type === 'shooter' && now - this.lastShot > 2000) {
-            // 射击型敌人发射子弹
-            const angle = Math.atan2(player.x - this.x, -(player.y - this.y));
-            enemyBullets.push(new Bullet(this.x, this.y + this.size/2, angle, true));
-            this.lastShot = now;
-        }
+        // 只有Boss发射弹幕，普通敌人不发射
         
         if (this.x < this.size || this.x > gameCanvas.width - this.size) {
             this.vx = -this.vx;
@@ -707,8 +708,11 @@ class Boss extends Enemy {
         super();
         this.type = 'boss';
         this.size = 80;
-        this.hp = 30;
-        this.maxHp = 30;
+        // 三管血，每管30点
+        this.hp = 90;
+        this.maxHp = 90;
+        this.phase = 3; // 当前阶段 3, 2, 1
+        this.hpPerPhase = 30;
         this.x = gameCanvas.width / 2;
         this.y = -80;
         this.vx = 2;
@@ -716,6 +720,12 @@ class Boss extends Enemy {
         this.color = '#ff6b6b';
         this.lastShot = 0;
         this.shotPattern = 0;
+    }
+    
+    getCurrentPhase() {
+        if (this.hp > 60) return 3;
+        if (this.hp > 30) return 2;
+        return 1;
     }
     
     update(now) {
@@ -726,29 +736,23 @@ class Boss extends Enemy {
             this.vx = -this.vx;
         }
         
-        // Boss弹幕攻击
-        if (now - this.lastShot > 1500) {
-            this.shotPattern = (this.shotPattern + 1) % 3;
-            
-            if (this.shotPattern === 0) {
-                // 散射
-                for (let i = -2; i <= 2; i++) {
-                    const angle = i * 0.3;
-                    enemyBullets.push(new Bullet(this.x, this.y + 30, angle, true));
-                }
-            } else if (this.shotPattern === 1) {
-                // 追踪
-                const angle = Math.atan2(player.x - this.x, -(player.y - this.y));
-                enemyBullets.push(new Bullet(this.x, this.y + 30, angle, true));
-                enemyBullets.push(new Bullet(this.x - 20, this.y + 30, angle - 0.2, true));
-                enemyBullets.push(new Bullet(this.x + 20, this.y + 30, angle + 0.2, true));
-            } else {
-                // 环形
-                for (let i = 0; i < 8; i++) {
-                    const angle = (i / 8) * Math.PI * 2;
-                    enemyBullets.push(new Bullet(this.x, this.y, angle, true));
-                }
+        // 检查阶段变化
+        const newPhase = this.getCurrentPhase();
+        if (newPhase !== this.phase) {
+            this.phase = newPhase;
+            // 阶段变化特效
+            for (let i = 0; i < 20; i++) {
+                particles.push(new Particle(this.x, this.y, '#ffd700'));
             }
+            // 阶段变化时加快弹幕
+            this.vx *= 1.2;
+        }
+        
+        // Boss弹幕攻击 - 根据阶段增加弹幕强度
+        const shotInterval = 1500 - (3 - this.phase) * 300; // 阶段越低，射击越快
+        
+        if (now - this.lastShot > shotInterval) {
+            this.firePattern();
             this.lastShot = now;
         }
         
@@ -762,11 +766,60 @@ class Boss extends Enemy {
         }
     }
     
+    firePattern() {
+        // 根据当前阶段选择弹幕模式
+        const patternCount = this.phase === 3 ? 3 : this.phase === 2 ? 4 : 5;
+        this.shotPattern = (this.shotPattern + 1) % patternCount;
+        
+        if (this.shotPattern === 0) {
+            // 散射
+            const count = 5 + (3 - this.phase) * 2;
+            for (let i = 0; i < count; i++) {
+                const angle = (i - (count - 1) / 2) * 0.3;
+                enemyBullets.push(new Bullet(this.x, this.y + 30, angle, true));
+            }
+        } else if (this.shotPattern === 1) {
+            // 追踪弹
+            const count = this.phase === 1 ? 5 : 3;
+            for (let i = 0; i < count; i++) {
+                const offset = (i - (count - 1) / 2) * 15;
+                const angle = Math.atan2(player.x - (this.x + offset), -(player.y - this.y));
+                enemyBullets.push(new Bullet(this.x + offset, this.y + 30, angle, true));
+            }
+        } else if (this.shotPattern === 2) {
+            // 环形
+            const count = 6 + (3 - this.phase) * 2;
+            for (let i = 0; i < count; i++) {
+                const angle = (i / count) * Math.PI * 2;
+                enemyBullets.push(new Bullet(this.x, this.y, angle, true));
+            }
+        } else if (this.shotPattern === 3) {
+            // 交叉弹幕 (2,3阶段)
+            for (let i = -3; i <= 3; i++) {
+                enemyBullets.push(new Bullet(this.x - 40, this.y + 20, i * 0.25, true));
+                enemyBullets.push(new Bullet(this.x + 40, this.y + 20, -i * 0.25, true));
+            }
+        } else if (this.shotPattern === 4) {
+            // 全屏弹幕 (1阶段)
+            for (let i = 0; i < 12; i++) {
+                const angle = (i / 12) * Math.PI * 2;
+                enemyBullets.push(new Bullet(this.x, this.y, angle, true));
+            }
+            // 额外追踪
+            const angle = Math.atan2(player.x - this.x, -(player.y - this.y));
+            enemyBullets.push(new Bullet(this.x, this.y + 30, angle, true));
+        }
+    }
+    
     draw() {
         const h = this.size / 2;
         
+        // 根据阶段改变颜色
+        const phaseColors = ['#ff0000', '#ff6600', '#ff4444'];
+        const bodyColor = phaseColors[this.phase - 1] || '#ff4444';
+        
         // 主体
-        ctx.fillStyle = '#ff4444';
+        ctx.fillStyle = bodyColor;
         ctx.fillRect(this.x - h, this.y - h, this.size, this.size);
         
         // 装甲
@@ -787,26 +840,73 @@ class Boss extends Enemy {
         ctx.lineTo(this.x + h - 10, this.y - h);
         ctx.fill();
         
-        // 眼睛
+        // 眼睛 - 根据阶段变化
         ctx.fillStyle = '#fff';
         ctx.fillRect(this.x - 20, this.y - 15, 12, 12);
         ctx.fillRect(this.x + 8, this.y - 15, 12, 12);
-        ctx.fillStyle = '#ff0000';
+        const eyeColors = ['#ff0000', '#ff6600', '#ffff00'];
+        ctx.fillStyle = eyeColors[this.phase - 1] || '#ff0000';
         ctx.fillRect(this.x - 17, this.y - 12, 6, 6);
         ctx.fillRect(this.x + 11, this.y - 12, 6, 6);
         
-        // 血条背景
+        // 三管血条显示
+        const barWidth = this.size + 10;
+        const barHeight = 6;
+        const barY = this.y - h - 20;
+        
+        // 背景
         ctx.fillStyle = '#333';
-        ctx.fillRect(this.x - h - 5, this.y - h - 15, this.size + 10, 8);
-        // 血条
-        const hpPercent = this.hp / this.maxHp;
-        ctx.fillStyle = hpPercent > 0.5 ? '#00ff00' : hpPercent > 0.25 ? '#ffff00' : '#ff0000';
-        ctx.fillRect(this.x - h - 3, this.y - h - 13, (this.size + 6) * hpPercent, 4);
+        ctx.fillRect(this.x - barWidth/2, barY, barWidth, barHeight * 3 + 4);
+        
+        // 计算每管血的百分比
+        const phase1Hp = Math.max(0, Math.min(30, this.hp - 60));
+        const phase2Hp = Math.max(0, Math.min(30, this.hp - 30));
+        const phase3Hp = Math.max(0, Math.min(30, this.hp));
+        
+        const phaseColors = ['#00ff00', '#ffff00', '#ff0000'];
+        const phaseHps = [phase3Hp, phase2Hp, phase1Hp];
+        
+        for (let i = 0; i < 3; i++) {
+            const y = barY + i * (barHeight + 2);
+            const percent = phaseHps[i] / 30;
+            
+            ctx.fillStyle = '#222';
+            ctx.fillRect(this.x - barWidth/2 + 1, y + 1, barWidth - 2, barHeight - 2);
+            
+            if (percent > 0) {
+                ctx.fillStyle = phaseColors[i];
+                ctx.fillRect(this.x - barWidth/2 + 1, y + 1, (barWidth - 2) * percent, barHeight - 2);
+            }
+        }
+        
+        // 显示当前阶段
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 14px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(`PHASE ${this.phase}`, this.x, this.y - h - 25);
         
         // 炮管
         ctx.fillStyle = '#333';
         ctx.fillRect(this.x - 30, this.y + h - 10, 20, 15);
         ctx.fillRect(this.x + 10, this.y + h - 10, 20, 15);
+    }
+    
+    onHit(damage) {
+        this.hp -= damage;
+        for (let i = 0; i < 2; i++) {
+            particles.push(new Particle(this.x + (Math.random()-0.5)*40, this.y + (Math.random()-0.5)*40, '#ff6b6b'));
+        }
+        if (this.hp <= 0) {
+            this.active = false;
+            // Boss死亡大爆炸
+            for (let i = 0; i < 30; i++) {
+                particles.push(new Particle(this.x, this.y, '#ffd700'));
+                particles.push(new Particle(this.x, this.y, '#ff6b6b'));
+                particles.push(new Particle(this.x, this.y, '#ff0000'));
+            }
+            return true;
+        }
+        return false;
     }
 }
 
