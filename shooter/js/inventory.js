@@ -63,9 +63,10 @@ function renderMaterialsGrid(mats) {
     return materials.map(mat => {
         const tooltipText = `${mat.name}: ${mat.desc}`;
         return `
-            <div class="material-slot" title="${tooltipText}">
+            <div class="material-slot" data-tooltip="${tooltipText}">
                 <div class="slot-icon" style="color: ${mat.color}">${mat.icon}</div>
                 <div class="slot-count">${mats[mat.key] || 0}</div>
+                <div class="slot-tooltip">${tooltipText}</div>
             </div>
         `;
     }).join('');
