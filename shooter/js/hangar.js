@@ -9,6 +9,9 @@ import { drawStaticShip, drawDynamicShip } from './ship-renderer.js';
 // 当前选中的飞机
 let selectedUpgradeShip = null;
 
+// 当前选中的标签页 (enhance/constellation/story)
+let currentHangarTab = 'enhance';
+
 // 收藏的飞机列表
 let favoriteShips = [];
 
@@ -188,18 +191,6 @@ export function renderHangarUpgrade() {
 
     container.innerHTML = `
         <h2>机库升级</h2>
-
-        <div class="upgrade-entries">
-            <button id="constellation-entry" class="upgrade-entry-btn">
-                <span class="entry-icon">⭐</span>
-                <span class="entry-text">命座提升</span>
-            </button>
-            <button id="story-entry" class="upgrade-entry-btn">
-                <span class="entry-icon">📖</span>
-                <span class="entry-text">飞机故事</span>
-            </button>
-        </div>
-
         <div class="hangar-layout">
             <div class="hangar-ship-list" id="hangar-ship-list"></div>
             <div class="hangar-upgrade-panel" id="hangar-upgrade-panel">
@@ -212,7 +203,6 @@ export function renderHangarUpgrade() {
         </div>
     `;
 
-    // 绑定返回按钮
     const backBtn = document.getElementById('back-btn');
     if (backBtn) {
         backBtn.addEventListener('click', () => {
@@ -223,36 +213,10 @@ export function renderHangarUpgrade() {
         });
     }
 
-    // 绑定命座入口
-    const constellationEntry = document.getElementById('constellation-entry');
-    if (constellationEntry) {
-        constellationEntry.addEventListener('click', () => {
-            document.getElementById('upgrade-screen').classList.add('hidden');
-            document.getElementById('constellation-screen').classList.remove('hidden');
-            // 动态导入并渲染命座界面
-            import('./constellation.js').then(module => {
-                module.renderConstellationScreen();
-            });
-        });
-    }
-
-    // 绑定故事入口
-    const storyEntry = document.getElementById('story-entry');
-    if (storyEntry) {
-        storyEntry.addEventListener('click', () => {
-            document.getElementById('upgrade-screen').classList.add('hidden');
-            document.getElementById('story-screen').classList.remove('hidden');
-            // 动态导入并渲染故事界面
-            import('./story.js').then(module => {
-                module.renderStoryScreen();
-            });
-        });
-    }
-
     renderShipList();
 
     if (selectedUpgradeShip) {
-        renderUpgradePanel(selectedUpgradeShip);
+        renderPanel(selectedUpgradeShip);
     }
 }
 
@@ -325,10 +289,11 @@ function renderShipList() {
             if (e.target.closest('.fav-btn')) return;
 
             selectedUpgradeShip = shipId;
+            currentHangarTab = 'enhance'; // 重置为强化标签
             listEl.querySelectorAll('.hangar-ship-item').forEach(el => {
                 el.classList.toggle('selected', el.dataset.shipId === shipId);
             });
-            renderUpgradePanel(shipId);
+            renderPanel(shipId);
         });
 
         const favBtn = item.querySelector('.fav-btn');
@@ -351,42 +316,95 @@ function renderShipList() {
         selectedUpgradeShip = sortedShips[0];
         const firstItem = listEl.querySelector('.hangar-ship-item');
         if (firstItem) firstItem.classList.add('selected');
-        renderUpgradePanel(selectedUpgradeShip);
+        renderPanel(selectedUpgradeShip);
     }
 }
 
-// 渲染强化面板
-function renderUpgradePanel(shipId) {
+// 渲染右侧面板 - 根据当前标签页
+function renderPanel(shipId) {
     const panelEl = document.getElementById('hangar-upgrade-panel');
     if (!panelEl) return;
 
     const config = SHIP_CONFIGS.find(s => s.id === shipId);
     if (!config) return;
 
-    const enhanceLevel = getShipEnhanceLevel(shipId);
-    const maxEnhanceLevel = RANK_CONFIGS[config.rank].maxEnhance;
-    const enhanceCost = getEnhanceCost(config, enhanceLevel);
-
     const panelCanvasId = `panel-ship-preview-${shipId}-${Date.now()}`;
 
-    panelEl.innerHTML = `
+    // 渲染头部（通用）
+    let html = `
         <div class="upgrade-panel-header">
             <canvas id="${panelCanvasId}" class="panel-ship-canvas" width="120" height="120"></canvas>
             <div class="panel-ship-info">
-                <div class="panel-ship-name">${config.name} <span class="panel-ship-rank rank-${config.rank.toLowerCase()}">${config.rank}</span> <span class="panel-ship-level">Lv.${enhanceLevel}/${maxEnhanceLevel}</span></div>
+                <div class="panel-ship-name">${config.name} <span class="panel-ship-rank rank-${config.rank.toLowerCase()}">${config.rank}</span></div>
                 <div class="panel-ship-stats">
                     <span class="stat-item"><span class="stat-icon">❤️</span>${config.stats.maxHp}</span>
                     <span class="stat-item"><span class="stat-icon">⚔️</span>${config.stats.damage}</span>
-                    <span class="stat-item"><span class="stat-icon">⚡</span>${(1000/config.stats.fireRate).toFixed(1)}/s</span>
+                    <span class="stat-item"><span class="stat-icon">⚡</span>${(1000 / config.stats.fireRate).toFixed(1)}/s</span>
                 </div>
             </div>
         </div>
 
+        <!-- 标签按钮 -->
+        <div class="hangar-tabs">
+            <button class="hangar-tab ${currentHangarTab === 'enhance' ? 'active' : ''}" data-tab="enhance">
+                <span class="tab-icon">⚡</span>强化
+            </button>
+            <button class="hangar-tab ${currentHangarTab === 'constellation' ? 'active' : ''}" data-tab="constellation">
+                <span class="tab-icon">⭐</span>命座
+            </button>
+            <button class="hangar-tab ${currentHangarTab === 'story' ? 'active' : ''}" data-tab="story">
+                <span class="tab-icon">📖</span>故事
+            </button>
+        </div>
+
+        <!-- 内容区域 -->
+        <div class="hangar-panel-content" id="hangar-panel-content"></div>
+    `;
+
+    panelEl.innerHTML = html;
+
+    // 绑定标签切换
+    panelEl.querySelectorAll('.hangar-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            currentHangarTab = tab.dataset.tab;
+            renderPanel(shipId);
+        });
+    });
+
+    // 根据当前标签渲染内容
+    const contentEl = document.getElementById('hangar-panel-content');
+    if (contentEl) {
+        switch (currentHangarTab) {
+            case 'enhance':
+                renderEnhanceContent(shipId, config, contentEl);
+                break;
+            case 'constellation':
+                renderConstellationContent(shipId, config, contentEl);
+                break;
+            case 'story':
+                renderStoryContent(shipId, config, contentEl);
+                break;
+        }
+    }
+
+    // 绘制飞机预览
+    requestAnimationFrame(() => {
+        drawDynamicShip(panelCanvasId, config, { animateFloat: true, shootBullets: true });
+    });
+}
+
+// 渲染强化内容
+function renderEnhanceContent(shipId, config, container) {
+    const enhanceLevel = getShipEnhanceLevel(shipId);
+    const maxEnhanceLevel = RANK_CONFIGS[config.rank].maxEnhance;
+    const enhanceCost = getEnhanceCost(config, enhanceLevel);
+
+    container.innerHTML = `
         <div class="upgrade-panel-level">
             <div class="level-enhance-card ${enhanceLevel >= maxEnhanceLevel ? 'maxed' : ''}">
                 <div class="level-enhance-info">
                     <div class="level-enhance-title">✨ 进阶强化 (+5%全属性)</div>
-                    <div class="level-enhance-desc">消耗材料提升飞机等级</div>
+                    <div class="level-enhance-desc">当前等级: Lv.${enhanceLevel}/${maxEnhanceLevel}</div>
                 </div>
                 <div class="level-enhance-materials" id="level-enhance-materials"></div>
                 <button class="level-enhance-btn ${enhanceLevel >= maxEnhanceLevel ? 'maxed' : ''}" id="level-enhance-btn">
@@ -408,7 +426,7 @@ function renderUpgradePanel(shipId) {
         levelBtn.addEventListener('click', () => {
             const result = enhanceShip(shipId);
             if (result.success) {
-                renderUpgradePanel(shipId);
+                renderPanel(shipId);
                 updateHangarCoinDisplay();
             } else {
                 levelBtn.textContent = result.message;
@@ -420,10 +438,104 @@ function renderUpgradePanel(shipId) {
     }
 
     renderUpgradeItems(shipId);
+}
 
-    requestAnimationFrame(() => {
-        drawDynamicShip(panelCanvasId, config, { animateFloat: true, shootBullets: true });
+// 渲染命座内容
+function renderConstellationContent(shipId, config, container) {
+    import('./constellation.js').then(module => {
+        const constellations = module.CONSTELLATION_CONFIGS[shipId];
+        const level = module.getConstellationLevel ? module.getConstellationLevel(shipId) : 0;
+        const materialId = `constellation_${shipId}`;
+        const materialCount = GameState.materials?.[materialId] || 0;
+
+        if (!constellations) {
+            container.innerHTML = '<div class="empty-content">该飞机暂无需座系统</div>';
+            return;
+        }
+
+        let nodesHtml = '';
+        constellations.constellations.forEach((c, i) => {
+            const unlocked = i < level;
+            const canUnlock = i === level && materialCount > 0;
+            nodesHtml += `
+                <div class="constellation-node-item ${unlocked ? 'unlocked' : ''} ${canUnlock ? 'can-unlock' : ''}">
+                    <div class="const-node-icon">${unlocked ? '★' : '☆'}</div>
+                    <div class="const-node-info">
+                        <div class="const-node-name">${c.level}命 · ${c.name}</div>
+                        <div class="const-node-desc">${c.desc}</div>
+                    </div>
+                    ${canUnlock ? `<button class="const-node-btn" data-level="${c.level}">激活</button>` : ''}
+                </div>
+            `;
+        });
+
+        container.innerHTML = `
+            <div class="constellation-panel">
+                <div class="constellation-header-mini">
+                    <div class="const-material-info">
+                        <span class="const-material-icon">⭐</span>
+                        <span class="const-material-name">${config.name}·命星</span>
+                        <span class="const-material-count">x${materialCount}</span>
+                    </div>
+                    <div class="constellation-progress">当前命座: ${level}/6</div>
+                </div>
+                <div class="constellation-nodes-list">
+                    ${nodesHtml}
+                </div>
+            </div>
+        `;
+
+        // 绑定激活按钮
+        container.querySelectorAll('.const-node-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (materialCount > 0 && GameState.materials[materialId] > 0) {
+                    GameState.materials[materialId]--;
+                    if (!GameState.constellations) GameState.constellations = {};
+                    if (!GameState.constellations[shipId]) GameState.constellations[shipId] = 0;
+                    GameState.constellations[shipId]++;
+                    saveShipData();
+                    renderPanel(shipId); // 刷新面板
+                }
+            });
+        });
     });
+}
+
+// 渲染故事内容
+function renderStoryContent(shipId, config, container) {
+    import('./story.js').then(module => {
+        const story = module.SHIP_STORIES?.[shipId];
+
+        if (!story) {
+            container.innerHTML = '<div class="empty-content">该飞机暂无背景故事</div>';
+            return;
+        }
+
+        const formattedContent = story.content
+            .split('\n')
+            .map(line => line.trim())
+            .filter(line => line)
+            .map(line => `<p>${line}</p>`)
+            .join('');
+
+        container.innerHTML = `
+            <div class="story-panel">
+                <div class="story-panel-subtitle">${story.subtitle}</div>
+                <div class="story-panel-content">
+                    ${formattedContent}
+                </div>
+                <div class="story-panel-quote">
+                    <span class="quote-mark">"</span>${story.quote.replace(/"/g, '')}<span class="quote-mark">"</span>
+                </div>
+            </div>
+        `;
+    });
+}
+
+// 渲染强化面板（旧函数，保留兼容）
+function renderUpgradePanel(shipId) {
+    currentHangarTab = 'enhance';
+    renderPanel(shipId);
 }
 
 // 渲染等级强化材料

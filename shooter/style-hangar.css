@@ -638,3 +638,232 @@
 .level-enhance-desc {
     font-size: 11px;
 }
+
+/* ========== 标签页样式 ========== */
+.hangar-tabs {
+    display: flex;
+    gap: 8px;
+    margin: 15px 0;
+    padding: 0 5px;
+}
+
+.hangar-tab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 8px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(157, 141, 247, 0.3);
+    border-radius: 8px;
+    color: #888;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 13px;
+}
+
+.hangar-tab:hover {
+    background: rgba(107, 92, 231, 0.2);
+    border-color: rgba(157, 141, 247, 0.5);
+    color: #fff;
+}
+
+.hangar-tab.active {
+    background: linear-gradient(135deg, rgba(107, 92, 231, 0.4), rgba(157, 141, 247, 0.2));
+    border-color: #9d8df7;
+    color: #fff;
+    box-shadow: 0 0 15px rgba(157, 141, 247, 0.3);
+}
+
+.tab-icon {
+    font-size: 14px;
+}
+
+/* 内容区域 */
+.hangar-panel-content {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+}
+
+.empty-content {
+    text-align: center;
+    padding: 40px 20px;
+    color: #888;
+    font-size: 14px;
+}
+
+/* ========== 命座面板 ========== */
+.constellation-panel {
+    padding: 10px 5px;
+}
+
+.constellation-header-mini {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    background: rgba(255, 215, 0, 0.1);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 10px;
+    margin-bottom: 15px;
+}
+
+.const-material-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.const-material-icon {
+    font-size: 20px;
+}
+
+.const-material-name {
+    font-size: 13px;
+    color: #ffd700;
+}
+
+.const-material-count {
+    font-size: 14px;
+    font-weight: bold;
+    color: #ffd700;
+    background: rgba(255, 215, 0, 0.2);
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+.constellation-progress {
+    font-size: 12px;
+    color: #888;
+}
+
+.constellation-nodes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.constellation-node-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 15px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    opacity: 0.6;
+    transition: all 0.2s;
+}
+
+.constellation-node-item.unlocked {
+    opacity: 1;
+    border-color: rgba(255, 215, 0, 0.4);
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 140, 0, 0.05));
+}
+
+.constellation-node-item.can-unlock {
+    opacity: 1;
+    border-color: #4ade80;
+    box-shadow: 0 0 10px rgba(74, 222, 128, 0.2);
+}
+
+.const-node-icon {
+    font-size: 24px;
+    color: #444;
+    line-height: 1;
+}
+
+.constellation-node-item.unlocked .const-node-icon {
+    color: #ffd700;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.constellation-node-item.can-unlock .const-node-icon {
+    color: #4ade80;
+    animation: pulse-star 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-star {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+}
+
+.const-node-info {
+    flex: 1;
+}
+
+.const-node-name {
+    font-size: 14px;
+    font-weight: bold;
+    color: #fff;
+    margin-bottom: 4px;
+}
+
+.const-node-desc {
+    font-size: 12px;
+    color: #888;
+    line-height: 1.4;
+}
+
+.const-node-btn {
+    padding: 6px 14px;
+    background: linear-gradient(135deg, #4ade80, #22c55e);
+    border: none;
+    border-radius: 15px;
+    color: #000;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.const-node-btn:hover {
+    transform: scale(1.05);
+}
+
+/* ========== 故事面板 ========== */
+.story-panel {
+    padding: 10px 5px;
+}
+
+.story-panel-subtitle {
+    text-align: center;
+    font-size: 13px;
+    color: #9d8df7;
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(157, 141, 247, 0.3);
+}
+
+.story-panel-content {
+    line-height: 1.8;
+    color: #ccc;
+    margin-bottom: 20px;
+}
+
+.story-panel-content p {
+    margin: 0 0 12px 0;
+    text-indent: 2em;
+}
+
+.story-panel-content p:last-child {
+    margin-bottom: 0;
+}
+
+.story-panel-quote {
+    text-align: center;
+    padding: 20px 15px;
+    font-size: 15px;
+    font-style: italic;
+    color: #ffd700;
+    background: rgba(255, 215, 0, 0.1);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+.story-panel-quote .quote-mark {
+    color: rgba(255, 215, 0, 0.5);
+    font-size: 18px;
+}
