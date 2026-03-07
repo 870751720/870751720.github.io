@@ -39,7 +39,9 @@ export class Destroyer extends Boss {
                 const count = 5 + (3 - this.phase) * 2 + bonusCount;
                 for (let i = 0; i < count; i++) {
                     const angle = (i - (count - 1) / 2) * 0.3;
-                    GameObjects.enemyBullets.push(new Bullet(this.x, this.y + 30, angle, true));
+                    const b = new Bullet(this.x, this.y + 30, angle, true);
+                    b.color = '#ffd700'; // 金色弹幕
+                    GameObjects.enemyBullets.push(b);
                 }
             },
             () => {
@@ -47,29 +49,39 @@ export class Destroyer extends Boss {
                 for (let i = 0; i < count; i++) {
                     const offset = (i - (count - 1) / 2) * 15;
                     const angle = Math.atan2(GameObjects.player.x - (this.x + offset), -(GameObjects.player.y - this.y));
-                    GameObjects.enemyBullets.push(new Bullet(this.x + offset, this.y + 30, angle, true));
+                    const b = new Bullet(this.x + offset, this.y + 30, angle, true);
+                    b.color = '#ffaa00'; // 橙色追踪弹
+                    GameObjects.enemyBullets.push(b);
                 }
             },
             () => {
                 const count = 6 + (3 - this.phase) * 2 + bonusCount;
                 for (let i = 0; i < count; i++) {
                     const angle = (i / count) * Math.PI * 2;
-                    GameObjects.enemyBullets.push(new Bullet(this.x, this.y, angle, true));
+                    const b = new Bullet(this.x, this.y, angle, true);
+                    b.color = '#ff6666'; // 红色环形弹
+                    GameObjects.enemyBullets.push(b);
                 }
             },
             () => {
                 for (let i = -3 - bonusCount; i <= 3 + bonusCount; i++) {
-                    GameObjects.enemyBullets.push(new Bullet(this.x - 40, this.y + 20, i * 0.25, true));
-                    GameObjects.enemyBullets.push(new Bullet(this.x + 40, this.y + 20, -i * 0.25, true));
+                    const b1 = new Bullet(this.x - 40, this.y + 20, i * 0.25, true);
+                    const b2 = new Bullet(this.x + 40, this.y + 20, -i * 0.25, true);
+                    b1.color = b2.color = '#ff8c00'; // 深橙色交叉弹
+                    GameObjects.enemyBullets.push(b1, b2);
                 }
             },
             () => {
                 for (let i = 0; i < 12 + bonusCount; i++) {
                     const angle = (i / (12 + bonusCount)) * Math.PI * 2;
-                    GameObjects.enemyBullets.push(new Bullet(this.x, this.y, angle, true));
+                    const b = new Bullet(this.x, this.y, angle, true);
+                    b.color = '#ff4500'; // 橙红色全屏弹
+                    GameObjects.enemyBullets.push(b);
                 }
                 const angle = Math.atan2(GameObjects.player.x - this.x, -(GameObjects.player.y - this.y));
-                GameObjects.enemyBullets.push(new Bullet(this.x, this.y + 30, angle, true));
+                const b = new Bullet(this.x, this.y + 30, angle, true);
+                b.color = '#ff0000'; // 纯红追踪弹
+                GameObjects.enemyBullets.push(b);
             }
         ];
         
