@@ -227,9 +227,11 @@ export function getRankConfig(rank) {
     return RANK_CONFIGS[rank] || RANK_CONFIGS['C'];
 }
 
-// 获取已拥有的飞机
+// 获取已拥有的飞机（去重）
 export function getOwnedShips() {
-    return GameState.ownedShips || ['basic'];
+    const ships = GameState.ownedShips || ['basic'];
+    // 去重，保留首次出现的顺序
+    return [...new Set(ships)];
 }
 
 // 获取当前选择的飞机
@@ -292,6 +294,11 @@ export function applyShipStats() {
 
 // 保存数据
 export function saveShipData() {
+    // 保存前先去重
+    if (GameState.ownedShips) {
+        GameState.ownedShips = [...new Set(GameState.ownedShips)];
+    }
+    
     const data = JSON.parse(localStorage.getItem('shooterProgress') || '{}');
     data.ownedShips = GameState.ownedShips || ['basic'];
     data.currentShip = GameState.currentShip || 'basic';
