@@ -563,15 +563,6 @@ function renderStoryContent(shipId, config, container) {
         `;
     });
 }
-                    ${formattedContent}
-                </div>
-                <div class="story-panel-quote">
-                    <span class="quote-mark">"</span>${story.quote.replace(/"/g, '')}<span class="quote-mark">"</span>
-                </div>
-            </div>
-        `;
-    });
-}
 
 // 渲染强化面板（旧函数，保留兼容）
 function renderUpgradePanel(shipId) {
