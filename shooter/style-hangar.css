@@ -1,5 +1,36 @@
 /* 机库升级系统样式 */
 
+/* 自定义滚动条 */
+.hangar-ship-list::-webkit-scrollbar,
+.hangar-upgrade-panel::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.hangar-ship-list::-webkit-scrollbar-track,
+.hangar-upgrade-panel::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+}
+
+.hangar-ship-list::-webkit-scrollbar-thumb,
+.hangar-upgrade-panel::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #6b5ce7, #9d8df7);
+    border-radius: 3px;
+}
+
+.hangar-ship-list::-webkit-scrollbar-thumb:hover,
+.hangar-upgrade-panel::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #9d8df7, #b8a9ff);
+}
+
+/* Firefox */
+.hangar-ship-list,
+.hangar-upgrade-panel {
+    scrollbar-width: thin;
+    scrollbar-color: #6b5ce7 rgba(0, 0, 0, 0.2);
+}
+
 /* 机库布局 */
 .hangar-layout {
     display: flex;
