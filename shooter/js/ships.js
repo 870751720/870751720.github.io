@@ -16,7 +16,7 @@ export const RANK_CONFIGS = {
 
 // 材料配置
 export const MATERIAL_CONFIGS = {
-    common: { name: '普通零件', icon: '⚙️', color: '#888888', desc: '普通敌机掉落的零件', tier: 'common', tierName: '普通', stack: 1 },
+    common: { name: '普通零件', icon: '⚙️', color: '#888888', desc: '普通敌机掉落的零件', tier: 'common', tierName: '普通', stack: 999 },
     rare: { name: '稀有合金', icon: '🔩', color: '#4ade80', desc: '精英敌机掉落的合金', tier: 'rare', tierName: '稀有', stack: 999 },
     epic: { name: '史诗核心', icon: '⚡', color: '#60a5fa', desc: 'Boss掉落的能量核心', tier: 'epic', tierName: '史诗', stack: 999 },
     legendary: { name: '传说碎片', icon: '💎', color: '#fbbf24', desc: '传说中的神秘碎片', tier: 'legendary', tierName: '传说', stack: 999 }
