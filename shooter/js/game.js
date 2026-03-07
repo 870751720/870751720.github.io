@@ -10,6 +10,7 @@ import { collectItem, spawnItem, updateBuffs } from './items.js';
 import { Player, Wingman, Bullet, Enemy, Item, Particle } from './entities.js';
 import { Destroyer, FrostGiant, LightningRider, MechSpider, ShadowAssassin, ChaosEye } from './bosses.js';
 import { addCoins, updateCoinDisplays, applyUpgrades } from './upgrades.js';
+import { applyShipStats } from './ships.js';
 
 const bossClasses = { Destroyer, FrostGiant, LightningRider, MechSpider, ShadowAssassin, ChaosEye };
 
@@ -276,8 +277,9 @@ export function startGame() {
     GameState.timeScale = 1;
     lastTime = performance.now();
 
-    // 应用升级效果
+    // 应用升级和飞机效果
     applyUpgrades();
+    applyShipStats();
 
     PlayerState.hp = PlayerState.maxHp;
     PlayerState.invincible = false;

@@ -6,6 +6,7 @@ import { DOM, setContext, GameState } from './state.js';
 import { startGame } from './game.js';
 import { InputState } from './state.js';
 import { loadProgress, renderUpgradeShop, updateCoinDisplays } from './upgrades.js';
+import { loadShipData, renderShipShop, updateShipCoinDisplay } from './ships.js';
 
 /**
  * 初始化游戏
@@ -23,6 +24,7 @@ function initGame() {
 
     // 加载存档
     loadProgress();
+    loadShipData();
     updateCoinDisplays();
 
     // 设置 Canvas
@@ -38,6 +40,7 @@ function initGame() {
     const upgradeBtn = document.getElementById('upgrade-btn');
     const upgradeScreen = document.getElementById('upgrade-screen');
     const backBtn = document.getElementById('back-btn');
+    const toShipBtn = document.getElementById('to-ship-btn');
 
     if (upgradeBtn) {
         upgradeBtn.addEventListener('click', () => {
@@ -52,6 +55,47 @@ function initGame() {
         backBtn.addEventListener('click', () => {
             upgradeScreen.classList.add('hidden');
             DOM.startScreen.classList.remove('hidden');
+            updateCoinDisplays();
+        });
+    }
+
+    // 飞机商店
+    const shipBtn = document.getElementById('ship-btn');
+    const shipScreen = document.getElementById('ship-screen');
+    const shipBackBtn = document.getElementById('ship-back-btn');
+    const toUpgradeBtn = document.getElementById('to-upgrade-btn');
+
+    if (shipBtn) {
+        shipBtn.addEventListener('click', () => {
+            DOM.startScreen.classList.add('hidden');
+            shipScreen.classList.remove('hidden');
+            renderShipShop();
+            updateShipCoinDisplay();
+        });
+    }
+
+    if (shipBackBtn) {
+        shipBackBtn.addEventListener('click', () => {
+            shipScreen.classList.add('hidden');
+            DOM.startScreen.classList.remove('hidden');
+            updateCoinDisplays();
+        });
+    }
+
+    if (toShipBtn) {
+        toShipBtn.addEventListener('click', () => {
+            upgradeScreen.classList.add('hidden');
+            shipScreen.classList.remove('hidden');
+            renderShipShop();
+            updateShipCoinDisplay();
+        });
+    }
+
+    if (toUpgradeBtn) {
+        toUpgradeBtn.addEventListener('click', () => {
+            shipScreen.classList.add('hidden');
+            upgradeScreen.classList.remove('hidden');
+            renderUpgradeShop();
             updateCoinDisplays();
         });
     }

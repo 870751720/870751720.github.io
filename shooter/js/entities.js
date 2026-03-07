@@ -101,10 +101,13 @@ export class Player {
             ctx.shadowBlur = 10;
         }
         
-        ctx.shadowColor = COLORS.player;
+        // 使用飞机颜色或默认颜色
+        const shipColor = PlayerState.shipColor || COLORS.player;
+        
+        ctx.shadowColor = shipColor;
         ctx.shadowBlur = 15;
         
-        ctx.fillStyle = COLORS.player;
+        ctx.fillStyle = shipColor;
         ctx.beginPath();
         ctx.moveTo(this.x, this.y - s);
         ctx.lineTo(this.x + s * 0.7, this.y + s * 0.5);

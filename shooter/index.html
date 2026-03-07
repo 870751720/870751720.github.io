@@ -24,6 +24,7 @@
         <div class="menu-buttons">
             <button id="start-btn">开始游戏</button>
             <button id="upgrade-btn">机库升级</button>
+            <button id="ship-btn">飞机商店</button>
         </div>
         <p class="menu-hint">鼠标移动控制 · 左键射击 · 收集道具变强</p>
     </div>
@@ -35,7 +36,23 @@
         <div class="upgrade-grid" id="upgrade-grid">
             <!-- 升级项目由JS生成 -->
         </div>
-        <button id="back-btn" class="back-btn">返回主菜单</button>
+        <div class="menu-buttons-row">
+            <button id="to-ship-btn" class="secondary-btn">飞机商店</button>
+            <button id="back-btn" class="back-btn">返回主菜单</button>
+        </div>
+    </div>
+    
+    <!-- 飞机商店 -->
+    <div class="ship-screen hidden" id="ship-screen">
+        <h2>飞机商店</h2>
+        <div class="ship-coins">💰 <span id="ship-coin-display">0</span></div>
+        <div class="ship-grid" id="ship-grid">
+            <!-- 飞机由JS生成 -->
+        </div>
+        <div class="menu-buttons-row">
+            <button id="to-upgrade-btn" class="secondary-btn">机库升级</button>
+            <button id="ship-back-btn" class="back-btn">返回主菜单</button>
+        </div>
     </div>
     
     <script type="module" src="js/main.js"></script>

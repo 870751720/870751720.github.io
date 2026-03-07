@@ -15,7 +15,9 @@ export const GameState = {
     timeScale: 1,
     lastTime: 0,
     coins: 0,           // 局外金币
-    upgrades: {}        // 升级等级记录
+    upgrades: {},       // 升级等级记录
+    ownedShips: ['basic'],  // 已拥有的飞机
+    currentShip: 'basic'    // 当前选择的飞机
 };
 
 // 玩家状态
