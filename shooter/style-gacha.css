@@ -439,6 +439,45 @@
     font-size: 14px;
 }
 
+/* 命座转化标识 */
+.card-constellation {
+    font-size: 10px;
+    color: #ffd700;
+    font-weight: bold;
+    background: rgba(255, 215, 0, 0.15);
+    padding: 2px 8px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+.card-constellation.full {
+    color: #888;
+    background: rgba(136, 136, 136, 0.15);
+    border-color: rgba(136, 136, 136, 0.3);
+}
+
+.result-constellation-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #9d8df7, #6b5ce7);
+    color: #fff;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 16px;
+    font-weight: bold;
+    animation: constellationPop 0.5s ease-out;
+}
+
+.result-constellation-badge.full {
+    background: linear-gradient(135deg, #666, #444);
+    color: #aaa;
+}
+
+@keyframes constellationPop {
+    0% { transform: scale(0); opacity: 0; }
+    70% { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
 /* 材料结果 */
 .single-material-result {
     padding: 30px;

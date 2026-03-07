@@ -4,6 +4,7 @@
 
 import { PlayerState, GameState } from './state.js';
 import { saveShipData, SHIP_CONFIGS, addMaterial, getOwnedShips } from './ships.js';
+import { addConstellation } from './constellation.js';
 
 // 抽卡货币
 export const GACHA_CONFIG = {
@@ -142,6 +143,10 @@ export function doGacha(isTen = false) {
             if (result.isNew) {
                 if (!GameState.ownedShips) GameState.ownedShips = ['basic'];
                 GameState.ownedShips.push(result.item.id);
+            } else if (result.isDuplicate) {
+                // 重复飞机转化为命座
+                const constellationResult = addConstellation(result.item.id);
+                result.constellationResult = constellationResult;
             }
             
             displayResults.push({
@@ -150,7 +155,8 @@ export function doGacha(isTen = false) {
                 name: result.item.name,
                 color: result.item.color,
                 isNew: result.isNew,
-                isDuplicate: result.isDuplicate
+                isDuplicate: result.isDuplicate,
+                constellationResult: result.constellationResult
             });
         } else {
             // 添加材料
@@ -300,13 +306,17 @@ function createResultCard(result, index) {
     
     if (result.type === 'ship') {
         const rankClass = result.rank.toLowerCase();
+        const constellationMsg = result.constellationResult?.success 
+            ? `<div class="card-constellation">命座+1</div>` 
+            : (result.isDuplicate ? '<div class="card-constellation full">命座已满</div>' : '');
+        
         return `
             <div class="gacha-card ${rankClass}" style="animation-delay: ${delay}ms">
                 <div class="card-rank">${result.rank}</div>
                 <div class="card-icon" style="background: ${result.color}"></div>
                 <div class="card-name">${result.name}</div>
                 ${result.isNew ? '<div class="card-new">NEW!</div>' : ''}
-                ${result.isDuplicate ? '<div class="card-duplicate">重复</div>' : ''}
+                ${constellationMsg}
             </div>
         `;
     } else {
@@ -326,14 +336,22 @@ function createSingleResult(result) {
         const rankClass = result.rank.toLowerCase();
         const isHighRank = result.rank === 'A' || result.rank === 'SSR';
         
+        let extraBadge = '';
+        if (result.isNew) {
+            extraBadge = '<div class="result-new-badge">✨ 新飞机! ✨</div>';
+        } else if (result.constellationResult?.success) {
+            extraBadge = `<div class="result-constellation-badge">命座 +1</div>`;
+        } else if (result.isDuplicate) {
+            extraBadge = '<div class="result-constellation-badge full">命座已满</div>';
+        }
+        
         return `
             <div class="single-ship-result ${rankClass} ${isHighRank ? 'special' : ''}">
                 <div class="result-bg-effect"></div>
                 <div class="result-rank">${result.rank}</div>
                 <div class="result-ship-preview" style="background: ${result.color}"></div>
                 <div class="result-ship-name">${result.name}</div>
-                ${result.isNew ? '<div class="result-new-badge">✨ 新飞机! ✨</div>' : ''}
-                ${result.isDuplicate ? '<div class="result-duplicate-badge">重复获得</div>' : ''}
+                ${extraBadge}
             </div>
         `;
     } else {
