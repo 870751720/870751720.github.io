@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="style-gacha.css">
     <link rel="stylesheet" href="style-hangar.css">
     <link rel="stylesheet" href="style-inventory.css">
+    <link rel="stylesheet" href="style-constellation.css">
 </head>
 <body>
     <canvas id="game-canvas"></canvas>
@@ -44,6 +45,19 @@
     <div class="upgrade-screen hidden" id="upgrade-screen">
         <h2>机库升级</h2>
         <div class="upgrade-coins">💰 <span id="upgrade-coin-display">0</span></div>
+        
+        <!-- 功能入口 -->
+        <div class="upgrade-entries">
+            <button id="constellation-entry" class="upgrade-entry-btn">
+                <span class="entry-icon">⭐</span>
+                <span class="entry-text">命座提升</span>
+            </button>
+            <button id="story-entry" class="upgrade-entry-btn">
+                <span class="entry-icon">📖</span>
+                <span class="entry-text">飞机故事</span>
+            </button>
+        </div>
+        
         <div class="upgrade-grid" id="upgrade-grid">
             <!-- 升级项目由JS生成 -->
         </div>
@@ -51,6 +65,29 @@
             <button id="to-ship-btn" class="secondary-btn">飞机商店</button>
             <button id="to-gacha-btn" class="secondary-btn">🎰 扭蛋机</button>
             <button id="back-btn" class="back-btn">返回主菜单</button>
+        </div>
+    </div>
+
+    <!-- 命座提升界面 -->
+    <div class="constellation-screen hidden" id="constellation-screen">
+        <h2>⭐ 命座提升</h2>
+        <div class="constellation-coins">💰 <span id="constellation-coin-display">0</span></div>
+        <div class="constellation-container" id="constellation-container">
+            <!-- 命座内容由JS生成 -->
+        </div>
+        <div class="menu-buttons-row">
+            <button id="constellation-back-btn" class="back-btn">返回机库</button>
+        </div>
+    </div>
+
+    <!-- 飞机故事界面 -->
+    <div class="story-screen hidden" id="story-screen">
+        <h2>📖 飞机故事</h2>
+        <div class="story-container" id="story-container">
+            <!-- 故事内容由JS生成 -->
+        </div>
+        <div class="menu-buttons-row">
+            <button id="story-back-btn" class="back-btn">返回机库</button>
         </div>
     </div>
 

@@ -10,6 +10,8 @@ import { loadShipData, renderShipShop, updateShipCoinDisplay } from './ships.js'
 import { renderGachaShop } from './gacha.js';
 import { loadShipUpgrades, renderHangarUpgrade, updateHangarCoinDisplay, loadFavoriteShips } from './hangar.js';
 import { renderInventory } from './inventory.js';
+import { renderConstellationScreen, updateConstellationCoinDisplay } from './constellation.js';
+import { renderStoryScreen } from './story.js';
 
 /**
  * 初始化游戏
@@ -164,6 +166,48 @@ function initGame() {
             upgradeScreen.classList.add('hidden');
             gachaScreen.classList.remove('hidden');
             renderGachaShop();
+        });
+    }
+
+    // 命座提升
+    const constellationEntry = document.getElementById('constellation-entry');
+    const constellationScreen = document.getElementById('constellation-screen');
+    const constellationBackBtn = document.getElementById('constellation-back-btn');
+
+    if (constellationEntry) {
+        constellationEntry.addEventListener('click', () => {
+            upgradeScreen.classList.add('hidden');
+            constellationScreen.classList.remove('hidden');
+            renderConstellationScreen();
+        });
+    }
+
+    if (constellationBackBtn) {
+        constellationBackBtn.addEventListener('click', () => {
+            constellationScreen.classList.add('hidden');
+            upgradeScreen.classList.remove('hidden');
+            updateHangarCoinDisplay();
+        });
+    }
+
+    // 飞机故事
+    const storyEntry = document.getElementById('story-entry');
+    const storyScreen = document.getElementById('story-screen');
+    const storyBackBtn = document.getElementById('story-back-btn');
+
+    if (storyEntry) {
+        storyEntry.addEventListener('click', () => {
+            upgradeScreen.classList.add('hidden');
+            storyScreen.classList.remove('hidden');
+            renderStoryScreen();
+        });
+    }
+
+    if (storyBackBtn) {
+        storyBackBtn.addEventListener('click', () => {
+            storyScreen.classList.add('hidden');
+            upgradeScreen.classList.remove('hidden');
+            updateHangarCoinDisplay();
         });
     }
 
