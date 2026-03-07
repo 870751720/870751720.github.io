@@ -88,14 +88,17 @@ function initGame() {
     hpDisplay.id = 'hp-display';
     hpDisplay.style.cssText = `
         position: fixed;
-        top: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        font-size: 24px;
+        bottom: 20px;
+        left: 20px;
+        font-size: 28px;
         color: #ff5555;
         text-shadow: 2px 2px 0 #000;
         z-index: 5;
         display: none;
+        background: rgba(0,0,0,0.5);
+        padding: 10px 15px;
+        border-radius: 10px;
+        border: 2px solid #444;
     `;
     document.body.appendChild(hpDisplay);
     
@@ -1248,6 +1251,13 @@ function startGame() {
     
     document.body.classList.add('game-active');
     startBtn.classList.add('hidden');
+    
+    // 隐藏个人主页
+    const container = document.querySelector('.container');
+    if (container) container.style.display = 'none';
+    
+    // 显示血条
+    hpDisplay.style.display = 'block';
     gameCanvas.classList.add('active');
     gameScore.classList.add('active');
     hpDisplay.style.display = 'block';
