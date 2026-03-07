@@ -361,7 +361,7 @@
             <div class="character-row">
                 <div class="avatar-container">
                     <div class="avatar"></div>
-                    <div class="level-badge">Lv.29</div>
+                    <div class="level-badge">Lv.--</div>
                 </div>
                 <div class="info-section">
                     <h1 class="name cursor">贺加文</h1>
@@ -458,5 +458,24 @@
             <div class="contact-hint">加为好友发起会话... <span class="blink">▋</span></div>
         </div>
     </div>
+    
+    <script>
+        // 农历1996年7月初6 = 公历1996年8月19日
+        const birthYear = 1996;
+        const birthMonth = 8;  // 8月
+        const birthDay = 19;   // 19日
+        
+        const now = new Date();
+        let age = now.getFullYear() - birthYear;
+        
+        // 判断是否过了今年生日
+        const thisYearBirthday = new Date(now.getFullYear(), birthMonth - 1, birthDay);
+        if (now < thisYearBirthday) {
+            age--; // 还没过生日，减1岁
+        }
+        
+        // 更新等级显示
+        document.querySelector('.level-badge').textContent = 'Lv.' + age;
+    </script>
 </body>
 </html>
