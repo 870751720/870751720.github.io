@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>太空弹幕射击 - Space Shooter</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <canvas id="game-canvas"></canvas>
+    <div class="game-score" id="game-score">SCORE: 0</div>
+    <div class="combo-display" id="combo-display">
+        <div class="combo-count">0</div>
+        <div class="combo-text">COMBO</div>
+    </div>
+    <div class="buff-display" id="buff-display"></div>
+    <div class="hp-display" id="hp-display"></div>
+    
+    <div class="start-screen" id="start-screen">
+        <h1>太空弹幕射击</h1>
+        <p>鼠标移动控制 · 左键射击 · 收集道具变强</p>
+        <button id="start-btn">开始游戏</button>
+    </div>
+    
+    <script src="game.js"></script>
+</body>
+</html>

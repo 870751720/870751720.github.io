@@ -72,50 +72,19 @@ let enemySpawnInterval = 800;
 let bossKillCount = 0; // 击杀boss数量，影响boss强度
 
 // DOM
-let startBtn, gameCanvas, gameScore, comboDisplay, comboCountEl, hpDisplay;
+let startScreen, startBtn, gameCanvas, gameScore, comboDisplay, comboCountEl, hpDisplay;
 let buffDisplay = null;
 
 // ==================== 初始化 ====================
 function initGame() {
-    startBtn = document.getElementById('start-game-btn');
+    startScreen = document.getElementById('start-screen');
+    startBtn = document.getElementById('start-btn');
     gameCanvas = document.getElementById('game-canvas');
     gameScore = document.getElementById('game-score');
     comboDisplay = document.getElementById('combo-display');
     comboCountEl = comboDisplay.querySelector('.combo-count');
-    
-    // 生命显示
-    hpDisplay = document.createElement('div');
-    hpDisplay.id = 'hp-display';
-    hpDisplay.style.cssText = `
-        position: fixed;
-        bottom: 20px;
-        left: 20px;
-        font-size: 28px;
-        color: #ff5555;
-        text-shadow: 2px 2px 0 #000;
-        z-index: 5;
-        display: none;
-        background: rgba(0,0,0,0.5);
-        padding: 10px 15px;
-        border-radius: 10px;
-        border: 2px solid #444;
-    `;
-    document.body.appendChild(hpDisplay);
-    
-    // buff显示
-    buffDisplay = document.createElement('div');
-    buffDisplay.style.cssText = `
-        position: fixed;
-        bottom: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        display: flex;
-        gap: 10px;
-        z-index: 5;
-        flex-wrap: wrap;
-        justify-content: center;
-    `;
-    document.body.appendChild(buffDisplay);
+    hpDisplay = document.getElementById('hp-display');
+    buffDisplay = document.getElementById('buff-display');
     
     startBtn.addEventListener('click', startGame);
     
@@ -178,7 +147,22 @@ class Item {
         this.size = 20;
         this.active = true;
         this.vy = 2;
-        this.type = ITEM_TYPES[Math.floor(Math.random() * ITEM_TYPES.length)];
+        
+        // 过滤已升级的永久道具
+        const availableTypes = ITEM_TYPES.filter(type => {
+            if (!type.permanent) return true;
+            // 检查是否已升级
+            if (type.id === 'spread') return playerStats.multiShot < 3;
+            if (type.id === 'big') return playerStats.bulletSizeBuff < 2.5;
+            if (type.id === 'perm_spd') return playerStats.fireRate > 50;
+            if (type.id === 'perm_dmg') return playerStats.damage < 10;
+            if (type.id === 'wingman') return playerStats.wingmanCount < 3;
+            if (type.id === 'maxhp') return playerMaxHp < 10;
+            if (type.id === 'playersize') return playerStats.sizeLevel < 3;
+            return true;
+        });
+        
+        this.type = availableTypes[Math.floor(Math.random() * availableTypes.length)];
         this.bobOffset = Math.random() * Math.PI * 2;
     }
     
@@ -664,30 +648,37 @@ class Enemy {
                 
             case 'shooter':
                 // 绿色史莱姆 - 圆润弹性身体
-                const wobble = Math.sin(performance.now() / 200) * 2; // 呼吸动画
+                const wobble = Math.sin(performance.now() / 200) * 2;
                 
-                // 史莱姆身体主体 - 椭圆形状，底部扁平
-                ctx.fillStyle = this.color; // 绿色主体
+                // 史莱姆身体主体 - 完整的椭圆
+                ctx.fillStyle = this.color;
                 ctx.beginPath();
-                ctx.ellipse(this.x, this.y + 2, half + wobble, half - 2, 0, 0, Math.PI * 2);
+                ctx.ellipse(this.x, this.y, half + wobble, half, 0, 0, Math.PI * 2);
                 ctx.closePath();
                 ctx.fill();
                 
-                // 身体高光（半透明）
+                // 身体底部阴影（让看起来是趴在地上）
+                ctx.fillStyle = 'rgba(0,0,0,0.2)';
+                ctx.beginPath();
+                ctx.ellipse(this.x, this.y + half - 3, half * 0.8, 4, 0, 0, Math.PI * 2);
+                ctx.closePath();
+                ctx.fill();
+                
+                // 身体高光
                 ctx.fillStyle = 'rgba(255,255,255,0.3)';
                 ctx.beginPath();
-                ctx.ellipse(this.x - 5, this.y - 3, 6, 4, -0.3, 0, Math.PI * 2);
+                ctx.ellipse(this.x - 5, this.y - 5, 6, 4, -0.3, 0, Math.PI * 2);
                 ctx.closePath();
                 ctx.fill();
                 
                 // 小高光点
                 ctx.fillStyle = 'rgba(255,255,255,0.6)';
                 ctx.beginPath();
-                ctx.arc(this.x - 7, this.y - 5, 2, 0, Math.PI * 2);
+                ctx.arc(this.x - 7, this.y - 7, 2, 0, Math.PI * 2);
                 ctx.closePath();
                 ctx.fill();
                 
-                // 左眼 - 萌系大眼
+                // 左眼
                 ctx.fillStyle = '#fff';
                 ctx.beginPath();
                 ctx.ellipse(this.x - 7, this.y - 2, 5, 6, 0, 0, Math.PI * 2);
@@ -700,15 +691,13 @@ class Enemy {
                 ctx.closePath();
                 ctx.fill();
                 
-                // 左瞳孔（随时间轻微移动，显得生动）
+                // 瞳孔
                 const eyeOffset = Math.sin(performance.now() / 500) * 1;
-                ctx.fillStyle = '#1a472a'; // 深绿色瞳孔
+                ctx.fillStyle = '#1a472a';
                 ctx.beginPath();
                 ctx.arc(this.x - 6 + eyeOffset, this.y - 1, 2.5, 0, Math.PI * 2);
                 ctx.closePath();
                 ctx.fill();
-                
-                // 右瞳孔
                 ctx.beginPath();
                 ctx.arc(this.x + 8 + eyeOffset, this.y - 1, 2.5, 0, Math.PI * 2);
                 ctx.closePath();
@@ -725,8 +714,13 @@ class Enemy {
                 ctx.closePath();
                 ctx.fill();
                 
-                // 发射口（史莱姆吐出子弹的位置）
+                // 发射口 - 在身体表面，不是缺口
                 ctx.fillStyle = '#0f2e1a';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y + half - 5, 3, 0, Math.PI * 2);
+                ctx.closePath();
+                ctx.fill();
+                break;
                 ctx.beginPath();
                 ctx.arc(this.x, this.y + half - 3, 4, 0, Math.PI * 2);
                 ctx.closePath();
@@ -1821,11 +1815,7 @@ function startGame() {
     mouseY = gameCanvas.height - 100;
     
     document.body.classList.add('game-active');
-    startBtn.classList.add('hidden');
-    
-    // 隐藏个人主页
-    const container = document.querySelector('.container');
-    if (container) container.style.display = 'none';
+    if (startScreen) startScreen.classList.add('hidden');
     
     // 显示血条
     hpDisplay.style.display = 'block';
