@@ -709,14 +709,6 @@ function drawAGame(ctx, x, y, s, color, now, isMoving) {
 
     ctx.shadowBlur = 0;
 }
-        ctx.fillStyle = `rgba(0, 255, 255, ${Math.random()})`;
-        ctx.beginPath();
-        ctx.arc(x + (Math.random() - 0.5) * s * 0.3, y + s * 0.5 + Math.random() * flameSize, 2, 0, Math.PI * 2);
-        ctx.fill();
-    }
-
-    ctx.shadowBlur = 0;
-}
 
 function drawSSRGame(ctx, x, y, s, color, now, isMoving) {
     // 护盾板/翅膀展开动画（去掉双层能量光环）
