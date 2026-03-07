@@ -363,17 +363,6 @@ body {
     box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
 }
 
-/* 分数显示 */
-.game-score {
-    position: fixed;
-    top: 20px;
-    left: 20px;
-    font-size: 20px;
-    color: #fff;
-    text-shadow: 2px 2px 0 #000;
-    z-index: 5;
-}
-
 /* 连击显示 */
 .combo-display {
     position: fixed;

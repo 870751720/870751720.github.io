@@ -20,6 +20,7 @@ export function renderInventory() {
             <div class="inventory-section">
                 <h3>💰 金币</h3>
                 <div class="inventory-coins">
+                    <span class="coin-icon">💰</span>
                     <span class="coin-amount">${(GameState.coins || 0).toLocaleString()}</span>
                 </div>
             </div>
@@ -27,8 +28,10 @@ export function renderInventory() {
             <!-- 材料格子 -->
             <div class="inventory-section">
                 <h3>📦 材料</h3>
-                <div class="inventory-materials-grid">
-                    ${renderMaterialsGrid(mats)}
+                <div class="inventory-materials-container">
+                    <div class="inventory-materials-grid">
+                        ${renderMaterialsGrid(mats)}
+                    </div>
                 </div>
             </div>
         </div>

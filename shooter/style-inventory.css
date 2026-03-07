@@ -12,7 +12,6 @@
     align-items: center;
     padding: 40px 20px;
     box-sizing: border-box;
-    overflow-y: auto;
 }
 
 .inventory-screen h2 {
@@ -24,10 +23,12 @@
 
 .inventory-content {
     width: 100%;
-    max-width: 600px;
+    max-width: 500px;
     display: flex;
     flex-direction: column;
     gap: 25px;
+    flex: 1;
+    min-height: 0;
 }
 
 .inventory-section {
@@ -38,31 +39,63 @@
 }
 
 .inventory-section h3 {
-    font-size: 18px;
+    font-size: 16px;
     color: #9d8df7;
     margin: 0 0 15px 0;
     padding-bottom: 10px;
     border-bottom: 1px solid rgba(157, 141, 247, 0.3);
 }
 
-/* 金币显示 */
+/* 金币显示 - 优化版 */
 .inventory-coins {
-    text-align: center;
-    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 15px;
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 140, 0, 0.05));
+    border-radius: 12px;
+    border: 2px solid rgba(255, 215, 0, 0.3);
+}
+
+.coin-icon {
+    font-size: 28px;
 }
 
 .coin-amount {
-    font-size: 36px;
+    font-size: 32px;
     font-weight: bold;
     color: #ffd700;
-    text-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
 }
 
-/* 材料格子网格 */
+/* 材料格子容器 - 可滚动 */
+.inventory-materials-container {
+    max-height: 320px;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+/* 自定义滚动条 */
+.inventory-materials-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.inventory-materials-container::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+}
+
+.inventory-materials-container::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #6b5ce7, #9d8df7);
+    border-radius: 3px;
+}
+
+/* 材料格子网格 - 每行4个 */
 .inventory-materials-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 15px;
+    gap: 12px;
 }
 
 /* 材料格子 */
@@ -70,12 +103,11 @@
     aspect-ratio: 1;
     background: rgba(107, 92, 231, 0.1);
     border: 2px solid rgba(157, 141, 247, 0.3);
-    border-radius: 12px;
+    border-radius: 10px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 5px;
     position: relative;
     transition: all 0.2s;
 }
@@ -83,34 +115,39 @@
 .material-slot:hover {
     background: rgba(107, 92, 231, 0.2);
     border-color: rgba(157, 141, 247, 0.6);
-    transform: translateY(-3px);
+    transform: scale(1.05);
 }
 
 .slot-icon {
-    font-size: 32px;
+    font-size: 28px;
 }
 
 .slot-count {
     position: absolute;
-    bottom: 5px;
-    right: 8px;
-    font-size: 14px;
+    bottom: 4px;
+    right: 6px;
+    font-size: 12px;
     font-weight: bold;
     color: #fff;
-    background: rgba(0, 0, 0, 0.6);
-    padding: 2px 8px;
-    border-radius: 6px;
-    min-width: 24px;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 2px 6px;
+    border-radius: 4px;
+    min-width: 20px;
     text-align: center;
 }
 
 /* 响应式 */
 @media (max-width: 600px) {
     .inventory-materials-grid {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
     }
 
     .coin-amount {
-        font-size: 28px;
+        font-size: 24px;
+    }
+
+    .slot-icon {
+        font-size: 22px;
     }
 }
