@@ -7,6 +7,7 @@ import { startGame } from './game.js';
 import { InputState } from './state.js';
 import { loadProgress, renderUpgradeShop, updateCoinDisplays } from './upgrades.js';
 import { loadShipData, renderShipShop, updateShipCoinDisplay, updateMaterialDisplay } from './ships.js';
+import { renderGachaShop } from './gacha.js';
 
 /**
  * 初始化游戏
@@ -98,6 +99,57 @@ function initGame() {
             upgradeScreen.classList.remove('hidden');
             renderUpgradeShop();
             updateCoinDisplays();
+        });
+    }
+
+    // 抽卡商店
+    const gachaBtn = document.getElementById('gacha-btn');
+    const gachaScreen = document.getElementById('gacha-screen');
+    const gachaBackBtn = document.getElementById('gacha-back-btn');
+    const gachaToShipBtn = document.getElementById('gacha-to-ship-btn');
+    const gachaToUpgradeBtn = document.getElementById('gacha-to-upgrade-btn');
+    const toGachaBtn = document.getElementById('to-gacha-btn');
+
+    if (gachaBtn) {
+        gachaBtn.addEventListener('click', () => {
+            DOM.startScreen.classList.add('hidden');
+            gachaScreen.classList.remove('hidden');
+            renderGachaShop();
+        });
+    }
+
+    if (gachaBackBtn) {
+        gachaBackBtn.addEventListener('click', () => {
+            gachaScreen.classList.add('hidden');
+            DOM.startScreen.classList.remove('hidden');
+            updateCoinDisplays();
+        });
+    }
+
+    if (gachaToShipBtn) {
+        gachaToShipBtn.addEventListener('click', () => {
+            gachaScreen.classList.add('hidden');
+            shipScreen.classList.remove('hidden');
+            renderShipShop();
+            updateShipCoinDisplay();
+            updateMaterialDisplay();
+        });
+    }
+
+    if (gachaToUpgradeBtn) {
+        gachaToUpgradeBtn.addEventListener('click', () => {
+            gachaScreen.classList.add('hidden');
+            upgradeScreen.classList.remove('hidden');
+            renderUpgradeShop();
+            updateCoinDisplays();
+        });
+    }
+
+    if (toGachaBtn) {
+        toGachaBtn.addEventListener('click', () => {
+            upgradeScreen.classList.add('hidden');
+            gachaScreen.classList.remove('hidden');
+            renderGachaShop();
         });
     }
 

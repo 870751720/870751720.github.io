@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="style-rank.css">
     <link rel="stylesheet" href="style-enhance.css">
+    <link rel="stylesheet" href="style-gacha.css">
 </head>
 <body>
     <canvas id="game-canvas"></canvas>
@@ -27,6 +28,7 @@
             <button id="start-btn">开始游戏</button>
             <button id="upgrade-btn">机库升级</button>
             <button id="ship-btn">飞机商店</button>
+            <button id="gacha-btn">🎰 扭蛋机</button>
         </div>
         <p class="menu-hint">鼠标移动控制 · 左键射击 · 收集道具变强</p>
     </div>
@@ -40,7 +42,20 @@
         </div>
         <div class="menu-buttons-row">
             <button id="to-ship-btn" class="secondary-btn">飞机商店</button>
+            <button id="to-gacha-btn" class="secondary-btn">🎰 扭蛋机</button>
             <button id="back-btn" class="back-btn">返回主菜单</button>
+        </div>
+    </div>
+
+    <!-- 抽卡商店 -->
+    <div class="gacha-screen hidden" id="gacha-screen">
+        <div class="gacha-container" id="gacha-container">
+            <!-- 内容由JS生成 -->
+        </div>
+        <div class="menu-buttons-row">
+            <button id="gacha-to-ship-btn" class="secondary-btn">飞机商店</button>
+            <button id="gacha-to-upgrade-btn" class="secondary-btn">机库升级</button>
+            <button id="gacha-back-btn" class="back-btn">返回主菜单</button>
         </div>
     </div>
     
