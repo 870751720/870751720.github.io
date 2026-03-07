@@ -2,8 +2,8 @@
  * 游戏入口文件
  */
 
-import { DOM, setContext } from './state.js';
-import { startGame, gameLoop } from './game.js';
+import { DOM, setContext, GameState } from './state.js';
+import { startGame } from './game.js';
 import { InputState } from './state.js';
 
 /**
@@ -35,9 +35,8 @@ function initGame() {
     });
     
     window.addEventListener('mousedown', e => {
-        if (gameRunning && e.button === 0) {
+        if (GameState.running && e.button === 0) {
             InputState.mouseDown = true;
-            shoot();
         }
     });
     
