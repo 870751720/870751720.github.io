@@ -3,7 +3,7 @@
  */
 
 import { Boss } from './entities.js';
-import { GameState, PlayerState, GameObjects } from './state.js';
+import { GameState, PlayerState, GameObjects, ctx } from './state.js';
 import { Bullet, Particle } from './entities.js';
 
 // 毁灭者

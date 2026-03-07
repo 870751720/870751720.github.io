@@ -163,21 +163,6 @@ function handleEnemyDeath(enemy) {
     if (enemy.type === 'boss' || Math.random() < 0.15) {
         spawnItem(enemy.x, enemy.y, Item);
     }
-    
-    // 分裂怪
-    if (enemy.type === 'splitter') {
-        for (let i = 0; i < 3; i++) {
-            const mini = new Enemy();
-            mini.type = 'splitter';
-            mini.size = 12;
-            mini.hp = mini.maxHp = 1;
-            mini.x = enemy.x + (Math.random() - 0.5) * 30;
-            mini.y = enemy.y;
-            mini.vx = (Math.random() - 0.5) * 3;
-            mini.vy = 1 + Math.random();
-            GameObjects.enemies.push(mini);
-        }
-    }
 }
 
 /**

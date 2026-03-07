@@ -393,7 +393,10 @@ export class Enemy {
         this.hp -= damage;
         if (this.hp <= 0) {
             this.active = false;
-            // 小怪死亡不生成白色弹幕粒子
+            // 小怪死亡粒子效果
+            for (let i = 0; i < 6; i++) {
+                GameObjects.particles.push(new Particle(this.x, this.y, this.color));
+            }
             return true;
         }
         return false;
