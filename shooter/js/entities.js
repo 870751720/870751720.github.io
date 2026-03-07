@@ -55,89 +55,342 @@ export class Player {
     draw(inputState) {
         const s = this.size;
         const now = performance.now();
+        const rank = PlayerState.shipRank || 'C';
+        const shipColor = PlayerState.shipColor || COLORS.player;
         
         // 无敌状态 - 闪烁效果
         if (PlayerState.invincible) {
             const remaining = PlayerState.invincibleEndTime - now;
-            // 最后0.5秒闪烁加快
             const flashSpeed = remaining < 500 ? 50 : 100;
             if (Math.floor(now / flashSpeed) % 2 === 0) {
                 ctx.globalAlpha = 0.4;
             }
         }
         
-        // 护盾特效 - 多层旋转光环
+        // 护盾特效
         if (PlayerState.shield > 0) {
-            const shieldRadius = s + 15 + Math.sin(now / 200) * 3;
-            const rotation = now / 500;
-            
-            // 外层光环
-            ctx.strokeStyle = `rgba(0, 255, 170, ${0.6 + Math.sin(now / 150) * 0.2})`;
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, shieldRadius, rotation, rotation + Math.PI * 1.5);
-            ctx.stroke();
-            
-            // 内层光环（反向旋转）
-            ctx.strokeStyle = `rgba(0, 255, 200, ${0.4 + Math.sin(now / 200) * 0.2})`;
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, shieldRadius - 5, -rotation * 1.5, -rotation * 1.5 + Math.PI);
-            ctx.stroke();
-            
-            // 护盾光点
-            for (let i = 0; i < PlayerState.shield; i++) {
-                const angle = rotation + (i / Math.max(1, PlayerState.shield)) * Math.PI * 2;
-                const dotX = this.x + Math.cos(angle) * shieldRadius;
-                const dotY = this.y + Math.sin(angle) * shieldRadius;
-                ctx.fillStyle = '#00ffaa';
-                ctx.beginPath();
-                ctx.arc(dotX, dotY, 3 + Math.sin(now / 100 + i) * 1, 0, Math.PI * 2);
-                ctx.fill();
-            }
-            
-            // 整体发光
-            ctx.shadowColor = '#00ffaa';
-            ctx.shadowBlur = 10;
+            this.drawShieldEffect(s, now);
         }
         
-        // 使用飞机颜色或默认颜色
-        const shipColor = PlayerState.shipColor || COLORS.player;
+        // 根据等级绘制不同效果
+        switch(rank) {
+            case 'SSR':
+                this.drawSSRShip(s, now, shipColor, inputState);
+                break;
+            case 'A':
+                this.drawAShip(s, now, shipColor, inputState);
+                break;
+            case 'B':
+                this.drawBShip(s, now, shipColor, inputState);
+                break;
+            case 'C':
+            default:
+                this.drawCShip(s, now, shipColor, inputState);
+                break;
+        }
         
-        ctx.shadowColor = shipColor;
-        ctx.shadowBlur = 15;
+        ctx.shadowBlur = 0;
         
-        ctx.fillStyle = shipColor;
+        if (PlayerState.invincible) {
+            ctx.globalAlpha = 1;
+        }
+    }
+
+    // C级 - 量产型，简单设计
+    drawCShip(s, now, color, inputState) {
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 5;
+        
+        // 基础三角形
+        ctx.fillStyle = color;
         ctx.beginPath();
         ctx.moveTo(this.x, this.y - s);
-        ctx.lineTo(this.x + s * 0.7, this.y + s * 0.5);
+        ctx.lineTo(this.x + s * 0.6, this.y + s * 0.5);
         ctx.lineTo(this.x, this.y + s * 0.2);
-        ctx.lineTo(this.x - s * 0.7, this.y + s * 0.5);
+        ctx.lineTo(this.x - s * 0.6, this.y + s * 0.5);
         ctx.closePath();
         ctx.fill();
         
+        // 驾驶舱
         ctx.fillStyle = '#fff';
         ctx.beginPath();
-        ctx.arc(this.x, this.y - s * 0.2, s * 0.25, 0, Math.PI * 2);
+        ctx.arc(this.x, this.y - s * 0.2, s * 0.2, 0, Math.PI * 2);
         ctx.fill();
         
+        // 简单橙色尾焰
+        const flameSize = inputState.mouseDown ? 12 : 6;
+        ctx.fillStyle = `rgba(255, 150, 0, ${0.6 + Math.random() * 0.2})`;
+        ctx.beginPath();
+        ctx.moveTo(this.x - s * 0.25, this.y + s * 0.3);
+        ctx.lineTo(this.x, this.y + s * 0.3 + flameSize);
+        ctx.lineTo(this.x + s * 0.25, this.y + s * 0.3);
+        ctx.closePath();
+        ctx.fill();
+    }
+
+    // B级 - 改装型，边缘光效+推进器
+    drawBShip(s, now, color, inputState) {
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 10;
+        
+        // 双层机身 - 浅色描边
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(this.x, this.y - s);
+        ctx.lineTo(this.x + s * 0.65, this.y + s * 0.5);
+        ctx.lineTo(this.x, this.y + s * 0.2);
+        ctx.lineTo(this.x - s * 0.65, this.y + s * 0.5);
+        ctx.closePath();
+        ctx.fill();
+        
+        // 内层浅色
+        ctx.fillStyle = lightenColor(color, 30);
+        ctx.beginPath();
+        ctx.moveTo(this.x, this.y - s * 0.7);
+        ctx.lineTo(this.x + s * 0.4, this.y + s * 0.3);
+        ctx.lineTo(this.x, this.y + s * 0.1);
+        ctx.lineTo(this.x - s * 0.4, this.y + s * 0.3);
+        ctx.closePath();
+        ctx.fill();
+        
+        // 驾驶舱
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.arc(this.x, this.y - s * 0.2, s * 0.22, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // 机翼推进器
+        ctx.fillStyle = color;
+        ctx.fillRect(this.x - s * 0.8, this.y + s * 0.1, s * 0.15, s * 0.4);
+        ctx.fillRect(this.x + s * 0.65, this.y + s * 0.1, s * 0.15, s * 0.4);
+        
+        // 蓝色脉动尾焰
         const flameSize = inputState.mouseDown ? 15 : 8;
-        ctx.fillStyle = `rgba(0, 200, 255, ${0.5 + Math.random() * 0.3})`;
+        const pulse = Math.sin(now / 150) * 0.2;
+        ctx.fillStyle = `rgba(0, 200, 255, ${0.6 + pulse + Math.random() * 0.2})`;
         ctx.beginPath();
         ctx.moveTo(this.x - s * 0.3, this.y + s * 0.3);
         ctx.lineTo(this.x, this.y + s * 0.3 + flameSize);
         ctx.lineTo(this.x + s * 0.3, this.y + s * 0.3);
         ctx.closePath();
         ctx.fill();
+    }
+
+    // A级 - 特装型，渐变+能量环
+    drawAShip(s, now, color, inputState) {
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 20;
         
-        ctx.shadowBlur = 0;
+        // 能量光环
+        const ringRotation = now / 400;
+        ctx.strokeStyle = `rgba(255, 255, 255, 0.3)`;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, s * 0.8, ringRotation, ringRotation + Math.PI * 1.5);
+        ctx.stroke();
         
-        // 恢复透明度（无敌闪烁效果）
-        if (PlayerState.invincible) {
-            ctx.globalAlpha = 1;
+        // 流线型机身 - 渐变填充
+        const gradient = ctx.createLinearGradient(this.x - s * 0.5, this.y - s, this.x + s * 0.5, this.y + s * 0.5);
+        gradient.addColorStop(0, color);
+        gradient.addColorStop(0.5, lightenColor(color, 40));
+        gradient.addColorStop(1, color);
+        
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.moveTo(this.x, this.y - s);
+        ctx.lineTo(this.x + s * 0.5, this.y + s * 0.1);
+        ctx.lineTo(this.x + s * 0.7, this.y + s * 0.6);
+        ctx.lineTo(this.x, this.y + s * 0.3);
+        ctx.lineTo(this.x - s * 0.7, this.y + s * 0.6);
+        ctx.lineTo(this.x - s * 0.5, this.y + s * 0.1);
+        ctx.closePath();
+        ctx.fill();
+        
+        // 驾驶舱
+        ctx.fillStyle = '#e0f7fa';
+        ctx.beginPath();
+        ctx.ellipse(this.x, this.y - s * 0.25, s * 0.25, s * 0.35, 0, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // 紫青色尾焰+粒子拖尾
+        const flameSize = inputState.mouseDown ? 18 : 10;
+        const tailGradient = ctx.createLinearGradient(this.x, this.y + s * 0.3, this.x, this.y + s * 0.3 + flameSize);
+        tailGradient.addColorStop(0, 'rgba(150, 0, 255, 0.8)');
+        tailGradient.addColorStop(0.5, 'rgba(0, 200, 255, 0.6)');
+        tailGradient.addColorStop(1, 'rgba(0, 200, 255, 0)');
+        
+        ctx.fillStyle = tailGradient;
+        ctx.beginPath();
+        ctx.moveTo(this.x - s * 0.25, this.y + s * 0.3);
+        ctx.lineTo(this.x, this.y + s * 0.3 + flameSize);
+        ctx.lineTo(this.x + s * 0.25, this.y + s * 0.3);
+        ctx.closePath();
+        ctx.fill();
+        
+        // 随机粒子
+        if (Math.random() < 0.3) {
+            ctx.fillStyle = `rgba(0, 255, 255, ${Math.random()})`;
+            ctx.beginPath();
+            ctx.arc(this.x + (Math.random() - 0.5) * s * 0.3, this.y + s * 0.5 + Math.random() * flameSize, 2, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+
+    // SSR级 - 传说，复杂几何+多层光环+彩虹边缘
+    drawSSRShip(s, now, color, inputState) {
+        const rotation = now / 300;
+        
+        // 双层能量光环反向旋转
+        ctx.strokeStyle = `rgba(255, 215, 0, ${0.4 + Math.sin(now / 200) * 0.2})`;
+        ctx.lineWidth = 3;
+        ctx.shadowColor = '#ffd700';
+        ctx.shadowBlur = 15;
+        
+        // 外环
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, s + 10, rotation, rotation + Math.PI * 2);
+        ctx.stroke();
+        
+        // 内环反向
+        ctx.strokeStyle = `rgba(255, 100, 200, ${0.4 + Math.sin(now / 200 + 1) * 0.2})`;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, s * 0.7, -rotation * 1.5, -rotation * 1.5 + Math.PI * 2);
+        ctx.stroke();
+        
+        // 护盾板/翅膀展开动画
+        const wingOffset = Math.sin(now / 500) * 5;
+        ctx.fillStyle = lightenColor(color, 20);
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 25;
+        
+        // 左翼
+        ctx.beginPath();
+        ctx.moveTo(this.x - s * 0.3, this.y);
+        ctx.lineTo(this.x - s * 1.2, this.y - s * 0.3 + wingOffset);
+        ctx.lineTo(this.x - s * 1.0, this.y + s * 0.2);
+        ctx.lineTo(this.x - s * 0.2, this.y + s * 0.1);
+        ctx.closePath();
+        ctx.fill();
+        
+        // 右翼
+        ctx.beginPath();
+        ctx.moveTo(this.x + s * 0.3, this.y);
+        ctx.lineTo(this.x + s * 1.2, this.y - s * 0.3 + wingOffset);
+        ctx.lineTo(this.x + s * 1.0, this.y + s * 0.2);
+        ctx.lineTo(this.x + s * 0.2, this.y + s * 0.1);
+        ctx.closePath();
+        ctx.fill();
+        
+        // 主体 - 金属质感多层
+        const metalGradient = ctx.createLinearGradient(this.x, this.y - s, this.x, this.y + s * 0.5);
+        metalGradient.addColorStop(0, '#ffffff');
+        metalGradient.addColorStop(0.2, color);
+        metalGradient.addColorStop(0.5, lightenColor(color, 30));
+        metalGradient.addColorStop(0.8, color);
+        metalGradient.addColorStop(1, darkenColor(color, 20));
+        
+        ctx.fillStyle = metalGradient;
+        ctx.beginPath();
+        ctx.moveTo(this.x, this.y - s * 1.1);
+        ctx.lineTo(this.x + s * 0.4, this.y + s * 0.2);
+        ctx.lineTo(this.x + s * 0.6, this.y + s * 0.5);
+        ctx.lineTo(this.x, this.y + s * 0.3);
+        ctx.lineTo(this.x - s * 0.6, this.y + s * 0.5);
+        ctx.lineTo(this.x - s * 0.4, this.y + s * 0.2);
+        ctx.closePath();
+        ctx.fill();
+        
+        // 彩虹边缘
+        const rainbowGradient = ctx.createLinearGradient(this.x - s, this.y - s, this.x + s, this.y + s);
+        rainbowGradient.addColorStop(0, '#ff0000');
+        rainbowGradient.addColorStop(0.17, '#ff8800');
+        rainbowGradient.addColorStop(0.33, '#ffff00');
+        rainbowGradient.addColorStop(0.5, '#00ff00');
+        rainbowGradient.addColorStop(0.67, '#0088ff');
+        rainbowGradient.addColorStop(0.83, '#8800ff');
+        rainbowGradient.addColorStop(1, '#ff0088');
+        
+        ctx.strokeStyle = rainbowGradient;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(this.x, this.y - s * 1.1);
+        ctx.lineTo(this.x + s * 0.4, this.y + s * 0.2);
+        ctx.lineTo(this.x + s * 0.6, this.y + s * 0.5);
+        ctx.lineTo(this.x, this.y + s * 0.3);
+        ctx.lineTo(this.x - s * 0.6, this.y + s * 0.5);
+        ctx.lineTo(this.x - s * 0.4, this.y + s * 0.2);
+        ctx.closePath();
+        ctx.stroke();
+        
+        // 核心
+        ctx.fillStyle = '#ffffff';
+        ctx.shadowColor = '#ffffff';
+        ctx.shadowBlur = 20;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y - s * 0.1, s * 0.2, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // 多色渐变尾焰+星光粒子
+        const flameSize = inputState.mouseDown ? 25 : 15;
+        for (let i = 0; i < 3; i++) {
+            const offset = (i - 1) * s * 0.15;
+            const fireGradient = ctx.createLinearGradient(
+                this.x + offset, this.y + s * 0.3,
+                this.x + offset, this.y + s * 0.3 + flameSize
+            );
+            fireGradient.addColorStop(0, `hsla(${i * 60 + now / 10}, 100%, 70%, 0.8)`);
+            fireGradient.addColorStop(0.5, `hsla(${i * 60 + now / 10 + 30}, 100%, 60%, 0.6)`);
+            fireGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+            
+            ctx.fillStyle = fireGradient;
+            ctx.beginPath();
+            ctx.moveTo(this.x + offset - s * 0.1, this.y + s * 0.3);
+            ctx.lineTo(this.x + offset, this.y + s * 0.3 + flameSize * (0.8 + Math.random() * 0.4));
+            ctx.lineTo(this.x + offset + s * 0.1, this.y + s * 0.3);
+            ctx.closePath();
+            ctx.fill();
+        }
+        
+        // 随机能量脉冲
+        if (Math.random() < 0.1) {
+            ctx.strokeStyle = `rgba(255, 255, 255, ${Math.random()})`;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, s * (0.8 + Math.random() * 0.5), 0, Math.PI * 2);
+            ctx.stroke();
+        }
+    }
+
+    // 护盾特效
+    drawShieldEffect(s, now) {
+        const shieldRadius = s + 15 + Math.sin(now / 200) * 3;
+        const rotation = now / 500;
+        
+        ctx.strokeStyle = `rgba(0, 255, 170, ${0.6 + Math.sin(now / 150) * 0.2})`;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, shieldRadius, rotation, rotation + Math.PI * 1.5);
+        ctx.stroke();
+        
+        ctx.strokeStyle = `rgba(0, 255, 200, ${0.4 + Math.sin(now / 200) * 0.2})`;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, shieldRadius - 5, -rotation * 1.5, -rotation * 1.5 + Math.PI);
+        ctx.stroke();
+        
+        for (let i = 0; i < PlayerState.shield; i++) {
+            const angle = rotation + (i / Math.max(1, PlayerState.shield)) * Math.PI * 2;
+            const dotX = this.x + Math.cos(angle) * shieldRadius;
+            const dotY = this.y + Math.sin(angle) * shieldRadius;
+            ctx.fillStyle = '#00ffaa';
+            ctx.beginPath();
+            ctx.arc(dotX, dotY, 3 + Math.sin(now / 100 + i) * 1, 0, Math.PI * 2);
+            ctx.fill();
         }
     }
 }
+
+// 僚机类...
 
 // ==================== 僚机 ====================
 export class Wingman {
@@ -678,4 +931,23 @@ export class Boss extends Enemy {
         }
         return false;
     }
+}
+
+// 颜色辅助函数
+function lightenColor(color, percent) {
+    const num = parseInt(color.replace('#', ''), 16);
+    const amt = Math.round(2.55 * percent);
+    const R = Math.min(255, (num >> 16) + amt);
+    const G = Math.min(255, ((num >> 8) & 0x00FF) + amt);
+    const B = Math.min(255, (num & 0x0000FF) + amt);
+    return `#${(0x1000000 + R * 0x10000 + G * 0x100 + B).toString(16).slice(1)}`;
+}
+
+function darkenColor(color, percent) {
+    const num = parseInt(color.replace('#', ''), 16);
+    const amt = Math.round(2.55 * percent);
+    const R = Math.max(0, (num >> 16) - amt);
+    const G = Math.max(0, ((num >> 8) & 0x00FF) - amt);
+    const B = Math.max(0, (num & 0x0000FF) - amt);
+    return `#${(0x1000000 + R * 0x10000 + G * 0x100 + B).toString(16).slice(1)}`;
 }
