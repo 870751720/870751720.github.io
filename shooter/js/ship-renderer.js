@@ -271,14 +271,7 @@ function drawAStatic(ctx, x, y, s, color) {
     ctx.shadowColor = color;
     ctx.shadowBlur = 20;
 
-    // 能量光环（静态）
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.arc(x, y, s * 0.7, 0.5, 0.5 + Math.PI * 1.5);
-    ctx.stroke();
-
-    // 流线型机身
+    // 流线型机身（静态版本去掉能量光环）
     const gradient = ctx.createLinearGradient(x - s * 0.5, y - s, x + s * 0.5, y + s * 0.5);
     gradient.addColorStop(0, color);
     gradient.addColorStop(0.5, lightenColor(color, 40));
@@ -373,25 +366,11 @@ function drawADynamic(ctx, x, y, s, color, now) {
 // ==================== SSR级飞机 ====================
 
 function drawSSRStatic(ctx, x, y, s, color) {
-    // 双层能量光环
-    ctx.strokeStyle = 'rgba(255, 215, 0, 0.6)';
-    ctx.lineWidth = 2;
+    // 护盾板/翅膀（静态版本去掉双层能量光环）
+    ctx.fillStyle = lightenColor(color, 20);
     ctx.shadowColor = '#ffd700';
     ctx.shadowBlur = 15;
 
-    // 外环
-    ctx.beginPath();
-    ctx.arc(x, y, s + 5, 0.3, 0.3 + Math.PI * 2);
-    ctx.stroke();
-
-    // 内环
-    ctx.strokeStyle = 'rgba(255, 100, 200, 0.6)';
-    ctx.beginPath();
-    ctx.arc(x, y, s * 0.7, -0.5, -0.5 + Math.PI * 2);
-    ctx.stroke();
-
-    // 护盾板/翅膀
-    ctx.fillStyle = lightenColor(color, 20);
     ctx.beginPath();
     ctx.moveTo(x - s * 0.3, y);
     ctx.lineTo(x - s * 1.1, y - s * 0.2);
