@@ -54,6 +54,43 @@ export class Player {
 
     draw(inputState) {
         const s = this.size;
+        const now = performance.now();
+        
+        // 护盾特效 - 多层旋转光环
+        if (PlayerState.shield > 0) {
+            const shieldRadius = s + 15 + Math.sin(now / 200) * 3;
+            const rotation = now / 500;
+            
+            // 外层光环
+            ctx.strokeStyle = `rgba(0, 255, 170, ${0.6 + Math.sin(now / 150) * 0.2})`;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, shieldRadius, rotation, rotation + Math.PI * 1.5);
+            ctx.stroke();
+            
+            // 内层光环（反向旋转）
+            ctx.strokeStyle = `rgba(0, 255, 200, ${0.4 + Math.sin(now / 200) * 0.2})`;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, shieldRadius - 5, -rotation * 1.5, -rotation * 1.5 + Math.PI);
+            ctx.stroke();
+            
+            // 护盾光点
+            for (let i = 0; i < PlayerState.shield; i++) {
+                const angle = rotation + (i / Math.max(1, PlayerState.shield)) * Math.PI * 2;
+                const dotX = this.x + Math.cos(angle) * shieldRadius;
+                const dotY = this.y + Math.sin(angle) * shieldRadius;
+                ctx.fillStyle = '#00ffaa';
+                ctx.beginPath();
+                ctx.arc(dotX, dotY, 3 + Math.sin(now / 100 + i) * 1, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            // 整体发光
+            ctx.shadowColor = '#00ffaa';
+            ctx.shadowBlur = 10;
+        }
+        
         ctx.shadowColor = COLORS.player;
         ctx.shadowBlur = 15;
         
