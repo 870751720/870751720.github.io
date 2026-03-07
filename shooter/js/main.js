@@ -6,7 +6,7 @@ import { DOM, setContext, GameState } from './state.js';
 import { startGame } from './game.js';
 import { InputState } from './state.js';
 import { loadProgress, updateCoinDisplays } from './upgrades.js';
-import { loadShipData, renderShipShop, updateShipCoinDisplay, updateMaterialDisplay } from './ships.js';
+import { loadShipData, renderShipShop, updateShipCoinDisplay } from './ships.js';
 import { renderGachaShop } from './gacha.js';
 import { loadShipUpgrades, renderHangarUpgrade, updateHangarCoinDisplay } from './hangar.js';
 
@@ -74,7 +74,6 @@ function initGame() {
             shipScreen.classList.remove('hidden');
             renderShipShop();
             updateShipCoinDisplay();
-            updateMaterialDisplay();
         });
     }
 
@@ -134,7 +133,6 @@ function initGame() {
             shipScreen.classList.remove('hidden');
             renderShipShop();
             updateShipCoinDisplay();
-            updateMaterialDisplay();
         });
     }
 
