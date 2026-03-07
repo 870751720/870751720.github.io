@@ -864,7 +864,7 @@ class Boss extends Enemy {
         const phase2Hp = Math.max(0, Math.min(30, this.hp - 30));
         const phase3Hp = Math.max(0, Math.min(30, this.hp));
         
-        const hpColors = ['#00ff00', '#ffff00', '#ff0000'];
+        const phaseColors = ['#00ff00', '#ffff00', '#ff0000'];
         const phaseHps = [phase3Hp, phase2Hp, phase1Hp];
         
         for (let i = 0; i < 3; i++) {
@@ -875,7 +875,7 @@ class Boss extends Enemy {
             ctx.fillRect(this.x - barWidth/2 + 1, y + 1, barWidth - 2, barHeight - 2);
             
             if (percent > 0) {
-                ctx.fillStyle = hpColors[i];
+                ctx.fillStyle = phaseColors[i];
                 ctx.fillRect(this.x - barWidth/2 + 1, y + 1, (barWidth - 2) * percent, barHeight - 2);
             }
         }

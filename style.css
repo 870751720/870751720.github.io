@@ -277,7 +277,7 @@ body.game-active {
 }
 
 .stat-fill.hp { width: 88%; background: linear-gradient(90deg, #c45c5c 0%, #e87e7e 100%); }
-.stat-fill.mp { width: 99%; background: linear-gradient(90deg, #3a6b8b 0%, #5c9bc4 100%); }
+.stat-fill.mp { width: 99%; background: linear-gradient(90deg, #0077aa 0%, #00aaff 100%); }
 .stat-fill.exp { width: 66%; background: linear-gradient(90deg, #6b5ce7 0%, #9d8df7 100%); }
 
 .stat-fill::after {
