@@ -443,6 +443,24 @@ export function renderShipShop() {
         carousel.appendChild(card);
     });
     
+    // 找到默认显示位置：未购买的最低等级飞机
+    const rankWeight = { 'C': 1, 'B': 2, 'A': 3, 'SSR': 4 };
+    let targetIndex = 0;
+    let minRankWeight = Infinity;
+    
+    allShips.forEach((config, index) => {
+        if (!hasShip(config.id)) {
+            const weight = rankWeight[config.rank];
+            if (weight < minRankWeight) {
+                minRankWeight = weight;
+                targetIndex = index;
+            }
+        }
+    });
+    
+    // 设置默认索引
+    carouselState.currentIndex = targetIndex;
+    
     // 初始化轮播
     initCarousel();
 }
@@ -475,7 +493,7 @@ function initCarousel() {
         dots.innerHTML = '';
         for (let i = 0; i < totalCards; i++) {
             const dot = document.createElement('span');
-            dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
+            dot.className = 'carousel-dot' + (i === carouselState.currentIndex ? ' active' : '');
             dot.addEventListener('click', () => goToSlide(i));
             dots.appendChild(dot);
         }
