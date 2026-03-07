@@ -64,10 +64,10 @@ export const UPGRADE_CONFIGS = [
 
 // 保存数据到 localStorage
 export function saveProgress() {
-    const data = {
-        coins: GameState.coins || 0,
-        upgrades: GameState.upgrades || {}
-    };
+    // 读取现有数据，避免覆盖
+    const data = JSON.parse(localStorage.getItem('shooterProgress') || '{}');
+    data.coins = GameState.coins || 0;
+    data.upgrades = GameState.upgrades || {};
     localStorage.setItem('shooterProgress', JSON.stringify(data));
 }
 
