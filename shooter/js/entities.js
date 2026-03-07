@@ -91,6 +91,7 @@ export class Wingman {
         this.total = total;
         this.angle = (index / total) * Math.PI * 2;
         this.radius = 60;
+        this.pulseOffset = Math.random() * Math.PI * 2;
     }
 
     update(player) {
@@ -100,10 +101,38 @@ export class Wingman {
     }
 
     draw() {
+        const pulse = Math.sin(performance.now() / 200 + this.pulseOffset) * 2;
+        
+        // 发光效果
+        ctx.shadowColor = COLORS.wingman;
+        ctx.shadowBlur = 10 + pulse;
+        
+        // 僚机主体 - 小三角形飞船
+        const size = 8 + pulse * 0.5;
         ctx.fillStyle = COLORS.wingman;
         ctx.beginPath();
-        ctx.arc(this.x, this.y, 6, 0, Math.PI * 2);
+        ctx.moveTo(this.x, this.y - size);
+        ctx.lineTo(this.x + size * 0.7, this.y + size * 0.5);
+        ctx.lineTo(this.x - size * 0.7, this.y + size * 0.5);
+        ctx.closePath();
         ctx.fill();
+        
+        // 中心亮点
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, 3, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // 引擎火焰
+        ctx.fillStyle = `rgba(0, 200, 255, ${0.6 + Math.random() * 0.4})`;
+        ctx.beginPath();
+        ctx.moveTo(this.x - 3, this.y + size * 0.3);
+        ctx.lineTo(this.x, this.y + size * 0.3 + 6 + pulse);
+        ctx.lineTo(this.x + 3, this.y + size * 0.3);
+        ctx.closePath();
+        ctx.fill();
+        
+        ctx.shadowBlur = 0;
     }
 
     shoot() {
@@ -281,34 +310,50 @@ export class Enemy {
     }
 
     drawBasic(half) {
+        const breathe = Math.sin(performance.now() / 300 + this.x * 0.1) * 2;
+        const size = this.size + breathe;
+        const h = size / 2;
+        
         ctx.fillStyle = this.color;
-        ctx.fillRect(this.x - half, this.y - half, this.size, this.size);
+        ctx.fillRect(this.x - h, this.y - h, size, size);
+        
+        // 眼睛随呼吸移动
         ctx.fillStyle = '#fff';
-        ctx.fillRect(this.x - 6, this.y - 4, 4, 4);
-        ctx.fillRect(this.x + 2, this.y - 4, 4, 4);
+        ctx.fillRect(this.x - 6 + breathe * 0.3, this.y - 4, 4, 4);
+        ctx.fillRect(this.x + 2 - breathe * 0.3, this.y - 4, 4, 4);
         ctx.fillStyle = '#000';
-        ctx.fillRect(this.x - 4, this.y, 2, 4);
-        ctx.fillRect(this.x + 2, this.y, 2, 4);
+        ctx.fillRect(this.x - 4 + breathe * 0.3, this.y, 2, 4);
+        ctx.fillRect(this.x + 2 - breathe * 0.3, this.y, 2, 4);
     }
 
     drawFast(half) {
+        const breathe = Math.sin(performance.now() / 150 + this.x * 0.2) * 3;
+        const h = half + breathe;
+        
         ctx.fillStyle = this.color;
         ctx.beginPath();
-        ctx.moveTo(this.x, this.y - half);
-        ctx.lineTo(this.x + half, this.y + half);
-        ctx.lineTo(this.x - half, this.y + half);
+        ctx.moveTo(this.x, this.y - h);
+        ctx.lineTo(this.x + h, this.y + h);
+        ctx.lineTo(this.x - h, this.y + h);
         ctx.closePath();
         ctx.fill();
-        ctx.fillStyle = '#ff6600';
-        ctx.fillRect(this.x - 2, this.y, 4, 4);
+        
+        // 引擎发光
+        ctx.fillStyle = `rgba(255, 102, 0, ${0.7 + Math.sin(performance.now() / 100) * 0.3})`;
+        ctx.fillRect(this.x - 3, this.y + h - 5, 6, 5);
     }
 
     drawTank(half) {
+        const breathe = Math.sin(performance.now() / 400) * 1;
+        const h = half + breathe;
+        
         ctx.fillStyle = '#444444';
-        ctx.fillRect(this.x - half, this.y - half, this.size, this.size);
+        ctx.fillRect(this.x - h, this.y - h, h * 2, h * 2);
         ctx.fillStyle = '#666666';
-        ctx.fillRect(this.x - half + 4, this.y - half + 4, this.size - 8, this.size - 8);
-        ctx.fillStyle = '#ff6666';
+        ctx.fillRect(this.x - h + 4, this.y - h + 4, h * 2 - 8, h * 2 - 8);
+        
+        // 眼睛发光
+        ctx.fillStyle = `rgba(255, 102, 102, ${0.6 + Math.sin(performance.now() / 200) * 0.4})`;
         ctx.fillRect(this.x - 8, this.y - 4, 6, 4);
         ctx.fillRect(this.x + 2, this.y - 4, 6, 4);
     }
@@ -367,17 +412,23 @@ export class Enemy {
     }
 
     drawSplitter(half) {
+        const breathe = Math.sin(performance.now() / 250 + this.y * 0.1) * 3;
+        const h = half + breathe;
+        
         ctx.fillStyle = this.color;
         ctx.beginPath();
-        ctx.moveTo(this.x, this.y - half);
-        ctx.lineTo(this.x + half, this.y);
-        ctx.lineTo(this.x, this.y + half);
-        ctx.lineTo(this.x - half, this.y);
+        ctx.moveTo(this.x, this.y - h);
+        ctx.lineTo(this.x + h, this.y);
+        ctx.lineTo(this.x, this.y + h);
+        ctx.lineTo(this.x - h, this.y);
         ctx.closePath();
         ctx.fill();
+        
+        // 中心核心脉动
+        const coreSize = 6 + Math.sin(performance.now() / 150) * 2;
         ctx.fillStyle = '#fff';
         ctx.beginPath();
-        ctx.arc(this.x, this.y, 6, 0, Math.PI * 2);
+        ctx.arc(this.x, this.y, coreSize, 0, Math.PI * 2);
         ctx.fill();
     }
 

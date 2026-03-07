@@ -14,6 +14,10 @@ function handleInstantItem(type, item) {
         PlayerState.hp++;
         updateHpDisplay();
         showFloatingText(item.x, item.y, '+♥', '#ff5555');
+    } else if (type.id === 'shield') {
+        PlayerState.shield++;
+        updateHpDisplay();
+        showFloatingText(item.x, item.y, '+⛨护盾', '#00ffaa');
     }
 }
 
