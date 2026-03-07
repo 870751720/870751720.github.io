@@ -669,15 +669,7 @@ function drawAGame(ctx, x, y, s, color, now, isMoving) {
     ctx.shadowColor = color;
     ctx.shadowBlur = 20;
 
-    // 能量光环（动态旋转）
-    const ringRotation = now / 400;
-    ctx.strokeStyle = `rgba(255, 255, 255, 0.3)`;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.arc(x, y, s * 0.8, ringRotation, ringRotation + Math.PI * 1.5);
-    ctx.stroke();
-
-    // 流线型机身
+    // 流线型机身（去掉能量光环）
     const gradient = ctx.createLinearGradient(x - s * 0.5, y - s, x + s * 0.5, y + s * 0.5);
     gradient.addColorStop(0, color);
     gradient.addColorStop(0.5, lightenColor(color, 40));
@@ -715,8 +707,8 @@ function drawAGame(ctx, x, y, s, color, now, isMoving) {
     ctx.closePath();
     ctx.fill();
 
-    // 随机粒子
-    if (Math.random() < 0.3) {
+    ctx.shadowBlur = 0;
+}
         ctx.fillStyle = `rgba(0, 255, 255, ${Math.random()})`;
         ctx.beginPath();
         ctx.arc(x + (Math.random() - 0.5) * s * 0.3, y + s * 0.5 + Math.random() * flameSize, 2, 0, Math.PI * 2);
@@ -727,26 +719,7 @@ function drawAGame(ctx, x, y, s, color, now, isMoving) {
 }
 
 function drawSSRGame(ctx, x, y, s, color, now, isMoving) {
-    const rotation = now / 300;
-
-    // 双层能量光环反向旋转
-    ctx.strokeStyle = `rgba(255, 215, 0, ${0.4 + Math.sin(now / 200) * 0.2})`;
-    ctx.lineWidth = 3;
-    ctx.shadowColor = '#ffd700';
-    ctx.shadowBlur = 15;
-
-    // 外环
-    ctx.beginPath();
-    ctx.arc(x, y, s + 10, rotation, rotation + Math.PI * 2);
-    ctx.stroke();
-
-    // 内环反向
-    ctx.strokeStyle = `rgba(255, 100, 200, ${0.4 + Math.sin(now / 200 + 1) * 0.2})`;
-    ctx.beginPath();
-    ctx.arc(x, y, s * 0.7, -rotation * 1.5, -rotation * 1.5 + Math.PI * 2);
-    ctx.stroke();
-
-    // 护盾板/翅膀展开动画
+    // 护盾板/翅膀展开动画（去掉双层能量光环）
     const wingOffset = Math.sin(now / 500) * 5;
     ctx.fillStyle = lightenColor(color, 20);
     ctx.shadowColor = color;
