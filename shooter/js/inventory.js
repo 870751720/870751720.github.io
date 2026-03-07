@@ -49,67 +49,6 @@ export function renderInventory() {
             document.getElementById('start-screen').classList.remove('hidden');
         });
     }
-
-    // 绑定 tooltip 事件
-    bindTooltipEvents(container);
-}
-
-// 绑定 tooltip 事件
-function bindTooltipEvents(container) {
-    const slots = container.querySelectorAll('.material-slot');
-    
-    slots.forEach(slot => {
-        slot.addEventListener('mouseenter', (e) => {
-            showTooltip(e, slot.dataset.tooltip);
-        });
-        
-        slot.addEventListener('mouseleave', () => {
-            hideTooltip();
-        });
-        
-        slot.addEventListener('mousemove', (e) => {
-            updateTooltipPosition(e);
-        });
-    });
-}
-
-// 显示 tooltip
-function showTooltip(e, text) {
-    let tooltip = document.getElementById('inventory-tooltip');
-    if (!tooltip) {
-        tooltip = document.createElement('div');
-        tooltip.id = 'inventory-tooltip';
-        tooltip.className = 'inventory-tooltip';
-        document.body.appendChild(tooltip);
-    }
-    
-    tooltip.textContent = text;
-    tooltip.style.opacity = '1';
-    tooltip.style.visibility = 'visible';
-    
-    updateTooltipPosition(e);
-}
-
-// 隐藏 tooltip
-function hideTooltip() {
-    const tooltip = document.getElementById('inventory-tooltip');
-    if (tooltip) {
-        tooltip.style.opacity = '0';
-        tooltip.style.visibility = 'hidden';
-    }
-}
-
-// 更新 tooltip 位置
-function updateTooltipPosition(e) {
-    const tooltip = document.getElementById('inventory-tooltip');
-    if (!tooltip) return;
-    
-    const x = e.clientX;
-    const y = e.clientY - 10;
-    
-    tooltip.style.left = x + 'px';
-    tooltip.style.top = y + 'px';
-    tooltip.style.transform = 'translate(-50%, -100%)';
 }
 
 // 渲染材料格子
@@ -121,10 +60,13 @@ function renderMaterialsGrid(mats) {
         { key: 'legendary', ...MATERIAL_CONFIGS.legendary }
     ];
 
-    return materials.map(mat => `
-        <div class="material-slot" data-tooltip="${mat.name}: ${mat.desc}">
-            <div class="slot-icon" style="color: ${mat.color}">${mat.icon}</div>
-            <div class="slot-count">${mats[mat.key] || 0}</div>
-        </div>
-    `).join('');
+    return materials.map(mat => {
+        const tooltipText = `${mat.name}: ${mat.desc}`;
+        return `
+            <div class="material-slot" title="${tooltipText}">
+                <div class="slot-icon" style="color: ${mat.color}">${mat.icon}</div>
+                <div class="slot-count">${mats[mat.key] || 0}</div>
+            </div>
+        `;
+    }).join('');
 }
