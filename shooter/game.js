@@ -651,13 +651,6 @@ class Enemy {
                 ctx.closePath();
                 ctx.fill();
                 
-                // 身体底部阴影（让看起来是趴在地上）
-                ctx.fillStyle = 'rgba(0,0,0,0.2)';
-                ctx.beginPath();
-                ctx.ellipse(this.x, this.y + half - 3, half * 0.8, 4, 0, 0, Math.PI * 2);
-                ctx.closePath();
-                ctx.fill();
-                
                 // 身体高光
                 ctx.fillStyle = 'rgba(255,255,255,0.3)';
                 ctx.beginPath();
