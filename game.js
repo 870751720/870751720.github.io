@@ -11,7 +11,8 @@ const ITEM_TYPES = [
     { id: 'double', name: '分数翻倍', color: '#ffd700', duration: 80000, icon: '×2' },
     { id: 'magnet', name: '磁力吸引', color: '#ff69b4', duration: 60000, icon: '◎' },
     { id: 'perm_spd', name: '永久攻速+', color: '#ffffff', duration: 0, icon: '↑⚡', permanent: true },
-    { id: 'perm_dmg', name: '永久伤害+', color: '#ff4444', duration: 0, icon: '↑✦', permanent: true }
+    { id: 'perm_dmg', name: '永久伤害+', color: '#ff4444', duration: 0, icon: '↑✦', permanent: true },
+    { id: 'wingman', name: '僚机', color: '#00aaff', duration: 0, icon: '✈', permanent: true }
 ];
 
 // ==================== 游戏状态 ====================
@@ -32,11 +33,16 @@ let player = null;
 let playerStats = {
     fireRate: 150,
     bulletSize: 1,
+    bulletSizeBuff: 1,
     damage: 1,
     multiShot: 1,
     magnetRange: 0,
-    scoreMultiplier: 1
+    scoreMultiplier: 1,
+    wingmanCount: 0
 };
+
+// 僚机数组
+let wingmen = [];
 
 // 临时buff
 let activeBuffs = {};
@@ -157,6 +163,14 @@ function collectItem(item) {
         } else if (type.id === 'perm_dmg') {
             playerStats.damage++;
             showFloatingText(item.x, item.y, '伤害+!', '#ff4444');
+        } else if (type.id === 'wingman') {
+            playerStats.wingmanCount++;
+            // 重新创建僚机
+            wingmen = [];
+            for (let i = 0; i < playerStats.wingmanCount; i++) {
+                wingmen.push(new Wingman(i, playerStats.wingmanCount));
+            }
+            showFloatingText(item.x, item.y, `僚机+1 (${playerStats.wingmanCount})`, '#00aaff');
         }
     } else {
         activeBuffs[type.id] = {
@@ -178,7 +192,7 @@ function updateBuffs(now) {
     
     timeScale = 1;
     playerStats.multiShot = 1;
-    playerStats.bulletSize = 1;
+    playerStats.bulletSizeBuff = 1;
     playerStats.magnetRange = 0;
     playerStats.scoreMultiplier = 1;
     
@@ -196,7 +210,7 @@ function updateBuffs(now) {
                     playerStats.multiShot = 3;
                     break;
                 case 'big':
-                    playerStats.bulletSize = 2.5;
+                    playerStats.bulletSizeBuff = 2.5;
                     break;
                 case 'slow':
                     timeScale = 0.4;
@@ -283,7 +297,38 @@ class Particle {
     }
 }
 
-// ==================== 玩家 ====================
+// ==================== 僚机 ====================
+class Wingman {
+    constructor(index, total) {
+        this.index = index;
+        this.total = total;
+        this.angle = (index / total) * Math.PI * 2;
+        this.radius = 60;
+        this.size = 10;
+    }
+    
+    update() {
+        this.angle += 0.03;
+        this.x = player.x + Math.cos(this.angle) * this.radius;
+        this.y = player.y + Math.sin(this.angle) * this.radius;
+    }
+    
+    draw() {
+        ctx.fillStyle = '#00aaff';
+        ctx.fillRect(this.x - 3, this.y - 6, 6, 12);
+        ctx.fillRect(this.x - 8, this.y, 16, 4);
+        ctx.shadowColor = '#00aaff';
+        ctx.shadowBlur = 10;
+        ctx.fillRect(this.x - 1, this.y - 8, 2, 4);
+        ctx.shadowBlur = 0;
+    }
+    
+    shoot() {
+        const bullet = new Bullet(this.x, this.y - 10);
+        bullet.size = 3 * playerStats.bulletSize * playerStats.bulletSizeBuff;
+        return bullet;
+    }
+}
 class Player {
     constructor() {
         this.size = 16;
@@ -315,7 +360,7 @@ class Bullet {
         this.x = x;
         this.y = y;
         this.speed = 10;
-        this.size = 4 * playerStats.bulletSize;
+        this.size = 4 * playerStats.bulletSize * playerStats.bulletSizeBuff;
         this.active = true;
         this.angle = angle;
         this.damage = playerStats.damage;
@@ -342,6 +387,7 @@ function shoot() {
     
     lastShotTime = now;
     
+    // 主玩家射击
     const count = playerStats.multiShot;
     if (count === 1) {
         bullets.push(new Bullet(player.x, player.y - 15));
@@ -351,6 +397,11 @@ function shoot() {
             bullets.push(new Bullet(player.x, player.y - 15, angle));
         }
     }
+    
+    // 僚机射击
+    wingmen.forEach(wingman => {
+        bullets.push(wingman.shoot());
+    });
 }
 
 // ==================== 敌人类型 ====================
@@ -619,6 +670,12 @@ function gameLoop(timestamp) {
     player.update();
     player.draw();
     
+    // 僚机
+    wingmen.forEach(wingman => {
+        wingman.update();
+        wingman.draw();
+    });
+    
     // 道具
     items = items.filter(item => item.active);
     items.forEach(item => {
@@ -687,11 +744,15 @@ function startGame() {
     playerStats = {
         fireRate: 150,
         bulletSize: 1,
+        bulletSizeBuff: 1,
         damage: 1,
         multiShot: 1,
         magnetRange: 0,
-        scoreMultiplier: 1
+        scoreMultiplier: 1,
+        wingmanCount: 0
     };
+    
+    wingmen = [];
     
     enemySpawnInterval = 800;
     gameScore.textContent = 'SCORE: 0';
