@@ -32,24 +32,3 @@ export function normalizeAngle(angle) {
     while (angle < -Math.PI) angle += Math.PI * 2;
     return angle;
 }
-
-/**
- * 生成随机数
- */
-export function randomRange(min, max) {
-    return Math.random() * (max - min) + min;
-}
-
-/**
- * 生成随机整数
- */
-export function randomInt(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-/**
- * 限制数值范围
- */
-export function clamp(value, min, max) {
-    return Math.max(min, Math.min(max, value));
-}

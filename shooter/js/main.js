@@ -35,8 +35,9 @@ function initGame() {
     });
     
     window.addEventListener('mousedown', e => {
-        if (e.button === 0) {
+        if (gameRunning && e.button === 0) {
             InputState.mouseDown = true;
+            shoot();
         }
     });
     

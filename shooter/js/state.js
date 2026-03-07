@@ -60,8 +60,6 @@ export const DOM = {};
 
 // Canvas 上下文
 export let ctx = null;
-export let animationId = null;
-export let comboTimer = null;
 
 // 设置 Canvas 上下文
 export function setContext(context) {
@@ -96,16 +94,4 @@ export function resetPlayerState() {
         sizeLevel: 1,
         homing: false
     };
-}
-
-// 清空游戏对象
-export function clearGameObjects() {
-    GameObjects.player = null;
-    GameObjects.wingmen = [];
-    GameObjects.bullets = [];
-    GameObjects.enemyBullets = [];
-    GameObjects.enemies = [];
-    GameObjects.particles = [];
-    GameObjects.items = [];
-    GameObjects.activeBuffs = {};
 }

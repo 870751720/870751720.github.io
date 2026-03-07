@@ -4,7 +4,7 @@
 
 import { PlayerState, GameObjects } from './state.js';
 import { showFloatingText, updateHpDisplay, updateBuffDisplay } from './ui.js';
-import { Particle } from './entities.js';
+import { Particle, Wingman } from './entities.js';
 
 /**
  * 处理即时道具
@@ -84,7 +84,6 @@ export function collectItem(item) {
 export function updateWingmen() {
     GameObjects.wingmen = [];
     for (let i = 0; i < PlayerState.stats.wingmanCount; i++) {
-        const Wingman = (await import('./entities.js')).Wingman;
         GameObjects.wingmen.push(new Wingman(i, PlayerState.stats.wingmanCount));
     }
 }

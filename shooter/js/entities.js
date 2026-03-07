@@ -2,13 +2,11 @@
  * 游戏实体类
  */
 
-import { COLORS, ITEM_TYPES, ENEMY_CONFIGS, BOSS_TYPES } from './config.js';
+import { ITEM_TYPES, ENEMY_CONFIGS, COLORS } from './config.js';
 import { GameState, PlayerState, GameObjects, ctx } from './state.js';
-import { normalizeAngle, randomRange } from './utils.js';
+import { normalizeAngle } from './utils.js';
 
-// ============================================================
-// 粒子
-// ============================================================
+// ==================== 粒子 ====================
 export class Particle {
     constructor(x, y, color) {
         this.x = x;
@@ -39,14 +37,10 @@ export class Particle {
     }
 }
 
-// ============================================================
-// 玩家
-// ============================================================
+// ==================== 玩家 ====================
 export class Player {
     constructor() {
         this.size = 20 + PlayerState.stats.sizeLevel * 5;
-        this.x = 0;
-        this.y = 0;
     }
 
     update(inputState) {
@@ -58,7 +52,6 @@ export class Player {
 
     draw(inputState) {
         const s = this.size;
-        
         ctx.shadowColor = COLORS.player;
         ctx.shadowBlur = 15;
         
@@ -89,17 +82,13 @@ export class Player {
     }
 }
 
-// ============================================================
-// 僚机
-// ============================================================
+// ==================== 僚机 ====================
 export class Wingman {
     constructor(index, total) {
         this.index = index;
         this.total = total;
         this.angle = (index / total) * Math.PI * 2;
         this.radius = 60;
-        this.x = 0;
-        this.y = 0;
     }
 
     update(player) {
@@ -120,9 +109,7 @@ export class Wingman {
     }
 }
 
-// ============================================================
-// 子弹
-// ============================================================
+// ==================== 子弹 ====================
 export class Bullet {
     constructor(x, y, angle = 0, isEnemy = false) {
         this.x = x;
@@ -132,7 +119,6 @@ export class Bullet {
         this.speed = isEnemy ? 4 : 10;
         this.size = (isEnemy ? 6 : 4) * (isEnemy ? 1 : PlayerState.stats.bulletSize * PlayerState.stats.bulletSizeBuff);
         this.damage = isEnemy ? 1 : PlayerState.stats.damage;
-        this.color = isEnemy ? COLORS.enemyBullet : COLORS.bullet;
         this.active = true;
     }
 
@@ -177,7 +163,7 @@ export class Bullet {
     }
 
     draw() {
-        ctx.fillStyle = this.color;
+        ctx.fillStyle = this.isEnemy ? COLORS.enemyBullet : COLORS.bullet;
         const s = this.size;
         ctx.fillRect(this.x - s/2, this.y - s, s, s * 2);
         
@@ -188,9 +174,7 @@ export class Bullet {
     }
 }
 
-// ============================================================
-// 道具
-// ============================================================
+// ==================== 道具 ====================
 export class Item {
     constructor(x, y) {
         this.x = x;
@@ -250,17 +234,13 @@ export class Item {
     }
 }
 
-// ============================================================
-// 敌人
-// ============================================================
+// ==================== 敌人 ====================
 export class Enemy {
     constructor() {
         this.type = Object.keys(ENEMY_CONFIGS)[Math.floor(Math.random() * 5)];
         this.x = 30 + Math.random() * (ctx.canvas.width - 60);
         this.y = -40;
         this.active = true;
-        this.lastShot = 0;
-        
         this.initType();
     }
 
@@ -420,9 +400,7 @@ export class Enemy {
     }
 }
 
-// ============================================================
-// Boss 基类
-// ============================================================
+// ==================== Boss 基类 ====================
 export class Boss extends Enemy {
     constructor(bossType = null) {
         super();

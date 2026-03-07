@@ -4,8 +4,7 @@
 
 import { Boss } from './entities.js';
 import { GameState, PlayerState, GameObjects } from './state.js';
-import { Bullet } from './entities.js';
-import { Particle } from './entities.js';
+import { Bullet, Particle } from './entities.js';
 
 // 毁灭者
 export class Destroyer extends Boss {
@@ -118,8 +117,6 @@ export class Destroyer extends Boss {
 // 冰霜巨人
 export class FrostGiant extends Boss {
     initBoss() {
-        this.vx = 1 + GameState.bossKillCount * 0.1;
-        this.vy = 0.2;
         this.color = '#4dd0e1';
     }
 
@@ -210,8 +207,6 @@ export class FrostGiant extends Boss {
 // 闪电行者
 export class LightningRider extends Boss {
     initBoss() {
-        this.targetX = this.x;
-        this.targetY = this.y;
         this.moveTimer = 0;
         this.color = '#ffeb3b';
     }
@@ -220,14 +215,11 @@ export class LightningRider extends Boss {
         this.moveTimer += 16;
         if (this.moveTimer > 2000 - GameState.bossKillCount * 100) {
             this.moveTimer = 0;
-            this.targetX = 100 + Math.random() * (ctx.canvas.width - 200);
-            this.targetY = 80 + Math.random() * 150;
-            
             for (let i = 0; i < 10; i++) {
                 GameObjects.particles.push(new Particle(this.x, this.y, '#ffeb3b'));
             }
-            this.x = this.targetX;
-            this.y = this.targetY;
+            this.x = 100 + Math.random() * (ctx.canvas.width - 200);
+            this.y = 80 + Math.random() * 150;
             for (let i = 0; i < 10; i++) {
                 GameObjects.particles.push(new Particle(this.x, this.y, '#ffeb3b'));
             }
@@ -239,8 +231,7 @@ export class LightningRider extends Boss {
         const pattern = (this.shotPattern++) % 3;
         
         if (pattern === 0) {
-            const zigzags = 3 + bonusCount;
-            for (let i = 0; i < zigzags; i++) {
+            for (let i = 0; i < 3 + bonusCount; i++) {
                 const startX = this.x + (i - 1) * 60;
                 for (let j = 0; j < 5; j++) {
                     const angle = Math.PI / 2 + (Math.random() - 0.5) * 0.5;
@@ -414,7 +405,6 @@ export class ShadowAssassin extends Boss {
     initBoss() {
         this.stealthTimer = 0;
         this.isStealth = false;
-        this.attackTimer = 0;
         this.color = '#7e57c2';
     }
 

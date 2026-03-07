@@ -2,7 +2,7 @@
  * 游戏主逻辑
  */
 
-import { GameState, PlayerState, InputState, GameObjects, DOM, setContext, ctx, animationId } from './state.js';
+import { GameState, PlayerState, InputState, GameObjects, DOM, setContext, ctx } from './state.js';
 import { BOSS_TYPES } from './config.js';
 import { checkCollision, showFloatingText } from './utils.js';
 import { updateHpDisplay, updateBuffDisplay, updateCombo } from './ui.js';
