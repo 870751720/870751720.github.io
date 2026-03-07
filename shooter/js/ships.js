@@ -375,19 +375,17 @@ export function renderShipShop() {
             buttonDisabled = (GameState.coins || 0) < config.price;
         }
         
-        // 强化显示
-        const enhanceDisplay = owned ? `
-            <div class="card-enhance">
-                <span class="enhance-level">+${enhanceLevel}/${maxLevel}</span>
-                <button class="enhance-btn-small ${enhanceLevel >= maxLevel ? 'maxed' : ''}" data-ship-id="${config.id}">
-                    ${enhanceLevel >= maxLevel ? 'MAX' : '强化'}
-                </button>
+        // 显示等级（仅显示，强化移到机库升级）
+        const levelDisplay = owned ? `
+            <div class="card-level-display">
+                <span class="level-badge">Lv.${enhanceLevel}/${maxLevel}</span>
             </div>
         ` : '';
         
         card.innerHTML = `
             <div class="card-rank-badge rank-${config.rank.toLowerCase()}">${config.rank}</div>
             <div class="card-ship-preview rank-${config.rank.toLowerCase()}" style="--ship-color: ${config.color}"></div>
+            ${levelDisplay}
             <div class="card-info">
                 <div class="card-name">${config.name}</div>
                 <div class="card-desc">${config.desc}</div>
@@ -400,7 +398,6 @@ export function renderShipShop() {
             <button class="card-btn ${buttonClass}" ${buttonDisabled ? 'disabled' : ''}>
                 ${buttonText}
             </button>
-            ${enhanceDisplay}
         `;
         
         // 点击卡片切换 (如果不是当前激活的卡片)

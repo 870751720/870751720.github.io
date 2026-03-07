@@ -232,6 +232,123 @@
     font-weight: bold;
 }
 
+/* 等级强化区域 */
+.upgrade-panel-level {
+    margin-bottom: 20px;
+}
+
+.upgrade-panel-level h4 {
+    font-size: 16px;
+    color: #9d8df7;
+    margin-bottom: 12px;
+}
+
+.level-enhance-card {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 140, 0, 0.05));
+    border: 2px solid #ffd700;
+    border-radius: 15px;
+    padding: 18px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.level-enhance-card.maxed {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(22, 163, 74, 0.05));
+    border-color: #22c55e;
+}
+
+.level-enhance-info {
+    flex: 1;
+    min-width: 140px;
+}
+
+.level-enhance-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #ffd700;
+    margin-bottom: 4px;
+}
+
+.level-enhance-desc {
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 6px;
+}
+
+.level-enhance-current {
+    font-size: 14px;
+    color: #fff;
+    font-weight: bold;
+}
+
+.level-enhance-materials {
+    flex: 2;
+    min-width: 200px;
+}
+
+.materials-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.material-need {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(0,0,0,0.3);
+    padding: 5px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+}
+
+.material-need.enough {
+    border: 1px solid #4ade80;
+}
+
+.material-need.not-enough {
+    border: 1px solid #ef4444;
+    opacity: 0.7;
+}
+
+.mat-icon {
+    font-size: 14px;
+}
+
+.mat-count {
+    font-weight: bold;
+}
+
+.level-enhance-btn {
+    padding: 10px 25px;
+    font-size: 15px;
+    background: linear-gradient(135deg, #ffd700, #ff8c00);
+    border: none;
+    border-radius: 10px;
+    color: #000;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.level-enhance-btn:hover:not(:disabled) {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+}
+
+.level-enhance-btn:disabled {
+    background: #444;
+    color: #888;
+    cursor: not-allowed;
+}
+
+.level-enhance-btn.maxed {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: #fff;
+}
+
 /* 强化项目列表 */
 .upgrade-panel-list h4 {
     font-size: 16px;
