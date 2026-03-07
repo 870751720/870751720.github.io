@@ -375,13 +375,12 @@ export function renderShipShop() {
             buttonDisabled = (GameState.coins || 0) < config.price;
         }
         
-        // 显示等级（仅显示，强化移到机库升级）
-        const levelDisplay = '';
+        // 创建 canvas 预览
+        const canvasId = `ship-preview-${config.id}-${Date.now()}`;
         
         card.innerHTML = `
             <div class="card-rank-badge rank-${config.rank.toLowerCase()}">${config.rank}</div>
-            <div class="card-ship-preview rank-${config.rank.toLowerCase()}" style="--ship-color: ${config.color}"></div>
-            ${levelDisplay}
+            <canvas id="${canvasId}" class="card-ship-canvas" width="120" height="120"></canvas>
             <div class="card-info">
                 <div class="card-name">${config.name}</div>
                 <div class="card-desc">${config.desc}</div>
@@ -395,6 +394,11 @@ export function renderShipShop() {
                 ${buttonText}
             </button>
         `;
+        
+        // 延迟绘制 canvas (等 DOM 插入后)
+        requestAnimationFrame(() => {
+            drawShipPreview(canvasId, config);
+        });
         
         // 点击卡片切换 (如果不是当前激活的卡片)
         card.addEventListener('click', (e) => {
@@ -749,4 +753,291 @@ export function updateMaterialDisplay() {
             <span style="color: ${MATERIAL_CONFIGS.legendary.color}">💎</span> ${mats.legendary || 0}
         </div>
     `;
+}
+
+// 在 canvas 上绘制飞机预览
+function drawShipPreview(canvasId, config) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    const s = 35; // 飞机大小
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const color = config.color;
+    const rank = config.rank;
+
+    // 清空画布
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // 根据等级绘制
+    switch(rank) {
+        case 'SSR':
+            drawSSRPreview(ctx, centerX, centerY, s, color);
+            break;
+        case 'A':
+            drawAPreview(ctx, centerX, centerY, s, color);
+            break;
+        case 'B':
+            drawBPreview(ctx, centerX, centerY, s, color);
+            break;
+        case 'C':
+        default:
+            drawCPreview(ctx, centerX, centerY, s, color);
+            break;
+    }
+}
+
+// C级预览
+function drawCPreview(ctx, x, y, s, color) {
+    ctx.shadowColor = color;
+    ctx.shadowBlur = 10;
+
+    // 基础三角形
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(x, y - s);
+    ctx.lineTo(x + s * 0.6, y + s * 0.5);
+    ctx.lineTo(x, y + s * 0.2);
+    ctx.lineTo(x - s * 0.6, y + s * 0.5);
+    ctx.closePath();
+    ctx.fill();
+
+    // 驾驶舱
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.arc(x, y - s * 0.2, s * 0.2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 尾焰
+    ctx.fillStyle = 'rgba(255, 150, 0, 0.8)';
+    ctx.beginPath();
+    ctx.moveTo(x - s * 0.2, y + s * 0.3);
+    ctx.lineTo(x, y + s * 0.3 + 10);
+    ctx.lineTo(x + s * 0.2, y + s * 0.3);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.shadowBlur = 0;
+}
+
+// B级预览
+function drawBPreview(ctx, x, y, s, color) {
+    ctx.shadowColor = color;
+    ctx.shadowBlur = 15;
+
+    // 双层机身
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(x, y - s);
+    ctx.lineTo(x + s * 0.65, y + s * 0.5);
+    ctx.lineTo(x, y + s * 0.2);
+    ctx.lineTo(x - s * 0.65, y + s * 0.5);
+    ctx.closePath();
+    ctx.fill();
+
+    // 内层浅色
+    ctx.fillStyle = lightenColor(color, 30);
+    ctx.beginPath();
+    ctx.moveTo(x, y - s * 0.7);
+    ctx.lineTo(x + s * 0.4, y + s * 0.3);
+    ctx.lineTo(x, y + s * 0.1);
+    ctx.lineTo(x - s * 0.4, y + s * 0.3);
+    ctx.closePath();
+    ctx.fill();
+
+    // 驾驶舱
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.arc(x, y - s * 0.2, s * 0.22, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 机翼推进器
+    ctx.fillStyle = color;
+    ctx.fillRect(x - s * 0.75, y + s * 0.1, s * 0.12, s * 0.35);
+    ctx.fillRect(x + s * 0.63, y + s * 0.1, s * 0.12, s * 0.35);
+
+    // 蓝色尾焰
+    ctx.fillStyle = 'rgba(0, 200, 255, 0.8)';
+    ctx.beginPath();
+    ctx.moveTo(x - s * 0.25, y + s * 0.3);
+    ctx.lineTo(x, y + s * 0.3 + 12);
+    ctx.lineTo(x + s * 0.25, y + s * 0.3);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.shadowBlur = 0;
+}
+
+// A级预览
+function drawAPreview(ctx, x, y, s, color) {
+    ctx.shadowColor = color;
+    ctx.shadowBlur = 20;
+
+    // 能量光环
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(x, y, s * 0.7, 0.5, 0.5 + Math.PI * 1.5);
+    ctx.stroke();
+
+    // 流线型机身 - 渐变填充
+    const gradient = ctx.createLinearGradient(x - s * 0.5, y - s, x + s * 0.5, y + s * 0.5);
+    gradient.addColorStop(0, color);
+    gradient.addColorStop(0.5, lightenColor(color, 40));
+    gradient.addColorStop(1, color);
+
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.moveTo(x, y - s);
+    ctx.lineTo(x + s * 0.5, y + s * 0.1);
+    ctx.lineTo(x + s * 0.7, y + s * 0.6);
+    ctx.lineTo(x, y + s * 0.3);
+    ctx.lineTo(x - s * 0.7, y + s * 0.6);
+    ctx.lineTo(x - s * 0.5, y + s * 0.1);
+    ctx.closePath();
+    ctx.fill();
+
+    // 驾驶舱
+    ctx.fillStyle = '#e0f7fa';
+    ctx.beginPath();
+    ctx.ellipse(x, y - s * 0.25, s * 0.22, s * 0.32, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 紫青色尾焰
+    const tailGradient = ctx.createLinearGradient(x, y + s * 0.3, x, y + s * 0.3 + 15);
+    tailGradient.addColorStop(0, 'rgba(150, 0, 255, 0.8)');
+    tailGradient.addColorStop(0.5, 'rgba(0, 200, 255, 0.6)');
+    tailGradient.addColorStop(1, 'rgba(0, 200, 255, 0)');
+
+    ctx.fillStyle = tailGradient;
+    ctx.beginPath();
+    ctx.moveTo(x - s * 0.2, y + s * 0.3);
+    ctx.lineTo(x, y + s * 0.3 + 15);
+    ctx.lineTo(x + s * 0.2, y + s * 0.3);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.shadowBlur = 0;
+}
+
+// SSR级预览
+function drawSSRPreview(ctx, x, y, s, color) {
+    // 双层能量光环
+    ctx.strokeStyle = 'rgba(255, 215, 0, 0.6)';
+    ctx.lineWidth = 2;
+    ctx.shadowColor = '#ffd700';
+    ctx.shadowBlur = 15;
+
+    // 外环
+    ctx.beginPath();
+    ctx.arc(x, y, s + 5, 0.3, 0.3 + Math.PI * 2);
+    ctx.stroke();
+
+    // 内环
+    ctx.strokeStyle = 'rgba(255, 100, 200, 0.6)';
+    ctx.beginPath();
+    ctx.arc(x, y, s * 0.7, -0.5, -0.5 + Math.PI * 2);
+    ctx.stroke();
+
+    // 护盾板/翅膀
+    ctx.fillStyle = lightenColor(color, 20);
+    ctx.beginPath();
+    ctx.moveTo(x - s * 0.3, y);
+    ctx.lineTo(x - s * 1.1, y - s * 0.2);
+    ctx.lineTo(x - s * 0.9, y + s * 0.15);
+    ctx.lineTo(x - s * 0.2, y + s * 0.1);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.moveTo(x + s * 0.3, y);
+    ctx.lineTo(x + s * 1.1, y - s * 0.2);
+    ctx.lineTo(x + s * 0.9, y + s * 0.15);
+    ctx.lineTo(x + s * 0.2, y + s * 0.1);
+    ctx.closePath();
+    ctx.fill();
+
+    // 主体 - 金属质感
+    const metalGradient = ctx.createLinearGradient(x, y - s, x, y + s * 0.5);
+    metalGradient.addColorStop(0, '#ffffff');
+    metalGradient.addColorStop(0.2, color);
+    metalGradient.addColorStop(0.5, lightenColor(color, 30));
+    metalGradient.addColorStop(0.8, color);
+    metalGradient.addColorStop(1, darkenColor(color, 20));
+
+    ctx.fillStyle = metalGradient;
+    ctx.beginPath();
+    ctx.moveTo(x, y - s * 1.1);
+    ctx.lineTo(x + s * 0.4, y + s * 0.2);
+    ctx.lineTo(x + s * 0.6, y + s * 0.5);
+    ctx.lineTo(x, y + s * 0.3);
+    ctx.lineTo(x - s * 0.6, y + s * 0.5);
+    ctx.lineTo(x - s * 0.4, y + s * 0.2);
+    ctx.closePath();
+    ctx.fill();
+
+    // 彩虹边缘
+    const rainbowGradient = ctx.createLinearGradient(x - s, y - s, x + s, y + s);
+    rainbowGradient.addColorStop(0, '#ff0000');
+    rainbowGradient.addColorStop(0.17, '#ff8800');
+    rainbowGradient.addColorStop(0.33, '#ffff00');
+    rainbowGradient.addColorStop(0.5, '#00ff00');
+    rainbowGradient.addColorStop(0.67, '#0088ff');
+    rainbowGradient.addColorStop(0.83, '#8800ff');
+    rainbowGradient.addColorStop(1, '#ff0088');
+
+    ctx.strokeStyle = rainbowGradient;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(x, y - s * 1.1);
+    ctx.lineTo(x + s * 0.4, y + s * 0.2);
+    ctx.lineTo(x + s * 0.6, y + s * 0.5);
+    ctx.lineTo(x, y + s * 0.3);
+    ctx.lineTo(x - s * 0.6, y + s * 0.5);
+    ctx.lineTo(x - s * 0.4, y + s * 0.2);
+    ctx.closePath();
+    ctx.stroke();
+
+    // 核心
+    ctx.fillStyle = '#ffffff';
+    ctx.shadowColor = '#ffffff';
+    ctx.shadowBlur = 10;
+    ctx.beginPath();
+    ctx.arc(x, y - s * 0.1, s * 0.15, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 多色尾焰
+    for (let i = 0; i < 3; i++) {
+        const offset = (i - 1) * s * 0.12;
+        const hue = i * 60;
+        ctx.fillStyle = `hsla(${hue}, 100%, 70%, 0.8)`;
+        ctx.beginPath();
+        ctx.moveTo(x + offset - s * 0.08, y + s * 0.3);
+        ctx.lineTo(x + offset, y + s * 0.3 + 12);
+        ctx.lineTo(x + offset + s * 0.08, y + s * 0.3);
+        ctx.closePath();
+        ctx.fill();
+    }
+
+    ctx.shadowBlur = 0;
+}
+
+// 颜色辅助函数
+function lightenColor(color, percent) {
+    const num = parseInt(color.replace('#', ''), 16);
+    const amt = Math.round(2.55 * percent);
+    const R = Math.min(255, (num >> 16) + amt);
+    const G = Math.min(255, ((num >> 8) & 0x00FF) + amt);
+    const B = Math.min(255, (num & 0x0000FF) + amt);
+    return `#${(0x1000000 + R * 0x10000 + G * 0x100 + B).toString(16).slice(1)}`;
+}
+
+function darkenColor(color, percent) {
+    const num = parseInt(color.replace('#', ''), 16);
+    const amt = Math.round(2.55 * percent);
+    const R = Math.max(0, (num >> 16) - amt);
+    const G = Math.max(0, ((num >> 8) & 0x00FF) - amt);
+    const B = Math.max(0, (num & 0x0000FF) - amt);
+    return `#${(0x1000000 + R * 0x10000 + G * 0x100 + B).toString(16).slice(1)}`;
 }
