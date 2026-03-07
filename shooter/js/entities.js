@@ -41,6 +41,8 @@ export class Particle {
 export class Player {
     constructor() {
         this.size = 20 + PlayerState.stats.sizeLevel * 5;
+        this.x = ctx.canvas.width / 2;
+        this.y = ctx.canvas.height - 100;
     }
 
     update(inputState) {
