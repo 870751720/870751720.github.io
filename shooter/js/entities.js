@@ -5,6 +5,7 @@
 import { ITEM_TYPES, ENEMY_CONFIGS, COLORS, BOSS_TYPES } from './config.js';
 import { GameState, PlayerState, GameObjects, ctx } from './state.js';
 import { normalizeAngle } from './utils.js';
+import { drawGameShip } from './ship-renderer.js';
 
 // ==================== 粒子 ====================
 export class Particle {
@@ -72,24 +73,8 @@ export class Player {
             this.drawShieldEffect(s, now);
         }
         
-        // 根据等级绘制不同效果
-        switch(rank) {
-            case 'SSR':
-                this.drawSSRShip(s, now, shipColor, inputState);
-                break;
-            case 'A':
-                this.drawAShip(s, now, shipColor, inputState);
-                break;
-            case 'B':
-                this.drawBShip(s, now, shipColor, inputState);
-                break;
-            case 'C':
-            default:
-                this.drawCShip(s, now, shipColor, inputState);
-                break;
-        }
-        
-        ctx.shadowBlur = 0;
+        // 使用可复用模块绘制飞机
+        drawGameShip(ctx, this.x, this.y, s, rank, shipColor, now, inputState.mouseDown);
         
         if (PlayerState.invincible) {
             ctx.globalAlpha = 1;
