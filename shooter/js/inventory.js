@@ -114,7 +114,10 @@ function bindSlotEvents(container) {
         let matConfig = MATERIAL_CONFIGS[matKey];
         if (!matConfig && matKey.startsWith('constellation_')) {
             const shipId = matKey.replace('constellation_', '');
-            matConfig = getConstellationMaterialConfig(shipId);
+            const shipConfig = SHIP_CONFIGS.find(s => s.id === shipId);
+            if (shipConfig) {
+                matConfig = getConstellationMaterialConfig(shipId, shipConfig.name, shipConfig.color);
+            }
         }
 
         slot.addEventListener('mouseenter', (e) => {
