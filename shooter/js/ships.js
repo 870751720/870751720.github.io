@@ -405,8 +405,7 @@ function initCarousel() {
       } else if (action === 'buy') {
         // 只有当前选中的飞机才能购买
         if (cardIndex !== carouselState.currentIndex) {
-          // 先切换到该飞机
-          goToSlide(cardIndex);
+          // 非选中飞机，不执行购买
           return;
         }
         buyShip(shipId).then(result => {
