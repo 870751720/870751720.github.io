@@ -3,7 +3,7 @@
  */
 
 import { GameState } from './state.js';
-import { MATERIAL_CONFIGS, getConstellationMaterialConfig } from './ships.js';
+import { MATERIAL_CONFIGS, getConstellationMaterialConfig, SHIP_CONFIGS } from './ships.js';
 
 // 品质颜色配置
 const TIER_COLORS = {
@@ -146,9 +146,12 @@ function renderMaterialsGrid(mats) {
     Object.keys(mats).forEach(key => {
         if (key.startsWith('constellation_') && mats[key] > 0) {
             const shipId = key.replace('constellation_', '');
-            const config = getConstellationMaterialConfig(shipId);
-            if (config) {
-                constellationMaterials.push({ key, ...config });
+            const shipConfig = SHIP_CONFIGS.find(s => s.id === shipId);
+            if (shipConfig) {
+                const config = getConstellationMaterialConfig(shipId, shipConfig.name, shipConfig.color);
+                if (config) {
+                    constellationMaterials.push({ key, ...config });
+                }
             }
         }
     });
