@@ -261,8 +261,7 @@ function createShipCard(ship, index) {
 
   return `
     <div class="ship-card rank-${rankClass} ${owned ? 'owned' : ''} ${current ? 'current' : ''}" 
-         data-ship-id="${ship.id}" data-index="${index}"
-         style="transform: translateX(${index * (carouselState.itemWidth + carouselState.gap)}px)">
+         data-ship-id="${ship.id}" data-index="${index}">
       <div class="ship-rank-badge rank-${rankClass}">${ship.rank}</div>
       <canvas id="ship-preview-${index}" class="ship-preview-canvas" width="200" height="200"></canvas>
       <div class="ship-info">
@@ -378,12 +377,14 @@ function updateCarousel() {
   if (!container) return;
   
   // 限制边界
+  const itemWidth = carouselState.itemWidth + carouselState.gap;
   const maxTranslate = 0;
-  const minTranslate = -(carouselState.items.length - 1) * (carouselState.itemWidth + carouselState.gap);
+  const minTranslate = -(carouselState.items.length - 1) * itemWidth;
   carouselState.translateX = Math.max(minTranslate, Math.min(maxTranslate, carouselState.translateX));
   
-  // 应用变换
-  container.style.transform = `translateX(${carouselState.translateX}px)`;
+  // 应用变换到容器
+  const centerOffset = container.parentElement.offsetWidth / 2 - carouselState.itemWidth / 2;
+  container.style.transform = `translateX(${centerOffset + carouselState.translateX}px)`;
   
   // 更新卡片状态
   const cards = container.querySelectorAll('.ship-card');
@@ -392,7 +393,8 @@ function updateCarousel() {
     const isActive = i === carouselState.currentIndex;
     
     card.classList.toggle('active', isActive);
-    card.style.transform = `translateX(${i * (carouselState.itemWidth + carouselState.gap) + carouselState.translateX}px) scale(${isActive ? 1 : 0.85})`;
+    // 卡片基础位置，不叠加 translateX
+    card.style.transform = `translateX(${i * itemWidth}px) scale(${isActive ? 1 : 0.85})`;
     card.style.opacity = Math.abs(offset) > 2 ? '0' : (isActive ? '1' : '0.6');
     card.style.zIndex = isActive ? '10' : '1';
   });
