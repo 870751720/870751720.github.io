@@ -39,7 +39,7 @@ export function renderInventory() {
                         <div class="inventory-materials-grid">
                             ${renderMaterialsGrid(mats)}
                         </div>
-n                    </div>
+                    </div>
                 </div>
             </div>
             
