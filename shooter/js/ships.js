@@ -5,7 +5,7 @@
 
 import { PlayerState, GameState } from './state.js';
 import { saveProgress } from './upgrades.js';
-import { drawDynamicShip } from './ship-renderer.js';
+import { drawStaticShip } from './ship-renderer.js';
 import { getStorage, setStorage, updateStorage } from './core/storage.js';
 import {
   RANK_CONFIGS,
@@ -199,22 +199,37 @@ let carouselState = {
   translateX: 0
 };
 
-export async function renderShipShop() {
+export function renderShipShop() {
   const container = document.getElementById('ship-grid');
   const dotsContainer = document.getElementById('carousel-dots');
   if (!container) return;
 
-  carouselState.items = SHIP_CONFIGS;
+  // 按等级分组并排序
+  const groups = { 'SSR': [], 'A': [], 'B': [], 'C': [] };
+  SHIP_CONFIGS.forEach(config => {
+    if (groups[config.rank]) groups[config.rank].push(config);
+  });
+  
+  const rankOrder = ['C', 'B', 'A', 'SSR'];
+  carouselState.items = [];
+  rankOrder.forEach(rank => {
+    carouselState.items.push(...groups[rank]);
+  });
 
   container.innerHTML = carouselState.items.map((ship, index) => createShipCard(ship, index)).join('');
 
+  // 绘制预览
   requestAnimationFrame(() => {
     carouselState.items.forEach((ship, index) => {
       const canvas = document.getElementById(`ship-preview-${index}`);
-      if (canvas) drawDynamicShip(`ship-preview-${index}`, ship);
+      if (canvas) {
+        const ctx = canvas.getContext('2d');
+        drawStaticShip(ctx, canvas.width/2, canvas.height/2, 40, ship);
+      }
     });
   });
 
+  // 更新指示点
   if (dotsContainer) {
     dotsContainer.innerHTML = carouselState.items.map((_, i) =>
       `<div class="carousel-dot ${i === carouselState.currentIndex ? 'active' : ''}" data-index="${i}"></div>`
@@ -222,11 +237,173 @@ export async function renderShipShop() {
   }
 
   initCarousel();
+  updateCarousel();
 }
 
 function createShipCard(ship, index) {
   const owned = hasShip(ship.id);
   const current = getCurrentShip() === ship.id;
+  const rankClass = ship.rank.toLowerCase();
+
+  let buttonText, buttonClass, buttonDisabled;
+  if (current) {
+    buttonText = '当前使用';
+    buttonClass = 'equipped';
+    buttonDisabled = true;
+  } else if (owned) {
+    buttonText = '装备';
+    buttonClass = 'equip';
+    buttonDisabled = false;
+  } else {
+    buttonText = `💰 ${ship.price}`;
+    buttonClass = 'buy';
+    buttonDisabled = (GameState.coins || 0) < ship.price;
+  }
+
+  return `
+    <div class="ship-card rank-${rankClass} ${owned ? 'owned' : ''} ${current ? 'current' : ''}" 
+         data-ship-id="${ship.id}" data-index="${index}"
+         style="transform: translateX(${index * (carouselState.itemWidth + carouselState.gap)}px)">
+      <div class="ship-rank-badge rank-${rankClass}">${ship.rank}</div>
+      <canvas id="ship-preview-${index}" class="ship-preview-canvas" width="200" height="200"></canvas>
+      <div class="ship-info">
+        <h3 class="ship-name">${ship.name}</h3>
+        <p class="ship-desc">${ship.desc}</p>
+        <div class="ship-stats">
+          <span>❤️ ${ship.stats.maxHp}</span>
+          <span>⚔️ ${ship.stats.damage}</span>
+          <span>⚡ ${(1000/ship.stats.fireRate).toFixed(1)}/s</span>
+        </div>
+        <button class="ship-btn ${buttonClass}" ${buttonDisabled ? 'disabled' : ''} data-action="${owned ? (current ? '' : 'equip') : 'buy'}" data-ship-id="${ship.id}">
+          ${buttonText}
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function initCarousel() {
+  const container = document.querySelector('.ship-carousel');
+  if (!container) return;
+
+  // 清除旧事件
+  container.onmousedown = null;
+  container.ontouchstart = null;
+  
+  // 鼠标/触摸按下
+  container.onmousedown = container.ontouchstart = (e) => {
+    carouselState.isDragging = true;
+    carouselState.startX = (e.touches ? e.touches[0].clientX : e.clientX) - carouselState.translateX;
+    container.style.cursor = 'grabbing';
+  };
+  
+  // 鼠标/触摸移动
+  const moveHandler = (e) => {
+    if (!carouselState.isDragging) return;
+    e.preventDefault();
+    const x = e.touches ? e.touches[0].clientX : e.clientX;
+    carouselState.translateX = x - carouselState.startX;
+    updateCarousel();
+  };
+  
+  container.onmousemove = moveHandler;
+  container.ontouchmove = moveHandler;
+  
+  // 鼠标/触摸松开
+  const endHandler = () => {
+    if (!carouselState.isDragging) return;
+    carouselState.isDragging = false;
+    container.style.cursor = 'grab';
+    
+    // 吸附到最近的卡片
+    const itemWidth = carouselState.itemWidth + carouselState.gap;
+    const newIndex = Math.round(-carouselState.translateX / itemWidth);
+    goToSlide(Math.max(0, Math.min(newIndex, carouselState.items.length - 1)));
+  };
+  
+  container.onmouseup = container.onmouseleave = endHandler;
+  container.ontouchend = endHandler;
+  
+  // 按钮点击
+  document.getElementById('ship-prev')?.addEventListener('click', () => {
+    goToSlide(Math.max(0, carouselState.currentIndex - 1));
+  });
+  
+  document.getElementById('ship-next')?.addEventListener('click', () => {
+    goToSlide(Math.min(carouselState.items.length - 1, carouselState.currentIndex + 1));
+  });
+  
+  // 卡片点击事件委托
+  container.addEventListener('click', (e) => {
+    const btn = e.target.closest('.ship-btn');
+    if (btn) {
+      e.stopPropagation();
+      const shipId = btn.dataset.shipId;
+      const action = btn.dataset.action;
+      
+      if (action === 'equip') {
+        setCurrentShip(shipId).then(() => {
+          renderShipShop();
+          updateCarousel();
+        });
+      } else if (action === 'buy') {
+        buyShip(shipId).then(result => {
+          if (result.success) {
+            renderShipShop();
+            updateShipCoinDisplay();
+          }
+        });
+      }
+      return;
+    }
+    
+    // 点击卡片切换到该卡片
+    const card = e.target.closest('.ship-card');
+    if (card) {
+      const index = parseInt(card.dataset.index);
+      if (index !== carouselState.currentIndex) {
+        goToSlide(index);
+      }
+    }
+  });
+}
+
+function goToSlide(index) {
+  carouselState.currentIndex = index;
+  carouselState.translateX = -index * (carouselState.itemWidth + carouselState.gap);
+  updateCarousel();
+}
+
+function updateCarousel() {
+  const container = document.querySelector('.ship-carousel');
+  if (!container) return;
+  
+  // 限制边界
+  const maxTranslate = 0;
+  const minTranslate = -(carouselState.items.length - 1) * (carouselState.itemWidth + carouselState.gap);
+  carouselState.translateX = Math.max(minTranslate, Math.min(maxTranslate, carouselState.translateX));
+  
+  // 应用变换
+  container.style.transform = `translateX(${carouselState.translateX}px)`;
+  
+  // 更新卡片状态
+  const cards = container.querySelectorAll('.ship-card');
+  cards.forEach((card, i) => {
+    const offset = i - carouselState.currentIndex;
+    const isActive = i === carouselState.currentIndex;
+    
+    card.classList.toggle('active', isActive);
+    card.style.transform = `translateX(${i * (carouselState.itemWidth + carouselState.gap) + carouselState.translateX}px) scale(${isActive ? 1 : 0.85})`;
+    card.style.opacity = Math.abs(offset) > 2 ? '0' : (isActive ? '1' : '0.6');
+    card.style.zIndex = isActive ? '10' : '1';
+  });
+  
+  // 更新指示点
+  const dots = document.querySelectorAll('.carousel-dot');
+  dots.forEach((dot, i) => {
+    dot.classList.toggle('active', i === carouselState.currentIndex);
+  });
+}
   const rankClass = ship.rank.toLowerCase();
 
   return `
