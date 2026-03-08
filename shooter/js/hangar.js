@@ -6,6 +6,7 @@ import { PlayerState, GameState } from './state.js';
 import { getOwnedShips, getCurrentShip, SHIP_CONFIGS, RANK_CONFIGS, getShipEnhanceLevel, getEnhanceCost, enhanceShip, MATERIAL_CONFIGS } from './ships.js';
 import { drawStaticShip, drawDynamicShip } from './ship-renderer.js';
 import { getStorage, setStorage, updateStorage } from './core/storage.js';
+import { Tooltip } from './ui/index.js';
 
 // 当前选中的飞机
 let selectedUpgradeShip = null;
@@ -493,14 +494,16 @@ function renderConstellationContent(shipId, config, container) {
             });
         });
 
-        // 绑定悬停提示
+        // 绑定悬停提示 - 使用 Tooltip 组件
         container.querySelectorAll('.constellation-hex').forEach((hex, i) => {
-            hex.addEventListener('mouseenter', () => {
-                showConstellationTooltip(hex, configs[i]);
+            const tooltip = new Tooltip({
+                content: `
+                    <div class="tooltip-level">${configs[i].level}命 · ${configs[i].name}</div>
+                    <div class="tooltip-desc">${configs[i].desc}</div>
+                `,
+                className: 'constellation-tooltip'
             });
-            hex.addEventListener('mouseleave', () => {
-                hideConstellationTooltip();
-            });
+            tooltip.attach(hex);
         });
     });
 }
@@ -625,36 +628,4 @@ function renderUpgradeItems(shipId) {
 export function updateHangarCoinDisplay() {
     const el = document.getElementById('hangar-coin-display');
     if (el) el.textContent = GameState.coins || 0;
-}
-
-// 命座悬停提示
-let constellationTooltip = null;
-
-function showConstellationTooltip(hexElement, config) {
-    hideConstellationTooltip();
-    
-    const rect = hexElement.getBoundingClientRect();
-    
-    constellationTooltip = document.createElement('div');
-    constellationTooltip.className = 'constellation-tooltip';
-    constellationTooltip.innerHTML = `
-        <div class="tooltip-level">${config.level}命 · ${config.name}</div>
-        <div class="tooltip-desc">${config.desc}</div>
-    `;
-    
-    document.body.appendChild(constellationTooltip);
-    
-    const tooltipRect = constellationTooltip.getBoundingClientRect();
-    const left = rect.left + (rect.width - tooltipRect.width) / 2;
-    const top = rect.top - tooltipRect.height - 10;
-    
-    constellationTooltip.style.left = `${Math.max(10, left)}px`;
-    constellationTooltip.style.top = `${Math.max(10, top)}px`;
-}
-
-function hideConstellationTooltip() {
-    if (constellationTooltip) {
-        constellationTooltip.remove();
-        constellationTooltip = null;
-    }
 }
