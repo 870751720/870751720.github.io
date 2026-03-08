@@ -623,6 +623,11 @@
     }
     
     .panel-ship-stats {
+        justify-content: flex-start;
+        padding-left: 0;
+    }
+    
+    .panel-ship-name {
         justify-content: center;
     }
     
