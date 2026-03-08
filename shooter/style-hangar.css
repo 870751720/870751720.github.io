@@ -872,6 +872,8 @@
 /* ========== 命座界面新设计 ========== */
 .constellation-container {
     padding: 20px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .constellation-header {
