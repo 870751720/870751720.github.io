@@ -483,8 +483,10 @@ function renderConstellationContent(shipId, config, container) {
         container.querySelectorAll('.hex-unlock-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                if (materialCount > 0 && GameState.materials[materialId] > 0) {
-                    GameState.materials[materialId]--;
+                const currentMaterialId = `constellation_${shipId}`;
+                const currentMaterialCount = GameState.materials?.[currentMaterialId] || 0;
+                if (currentMaterialCount > 0) {
+                    GameState.materials[currentMaterialId]--;
                     if (!GameState.constellations) GameState.constellations = {};
                     if (!GameState.constellations[shipId]) GameState.constellations[shipId] = 0;
                     GameState.constellations[shipId]++;
