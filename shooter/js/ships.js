@@ -321,6 +321,21 @@ function initCarousel() {
     // 基于当前选中位置 + 拖拽偏移，可以持续拖动
     const baseX = getBaseX();
     newContainer.style.transform = `translateX(${baseX + deltaX}px)`;
+    
+    // 实时计算应该展示哪个飞机（根据当前容器位置）
+    const itemWidth = carouselState.itemWidth + carouselState.gap;
+    const containerWidth = newContainer.parentElement.offsetWidth;
+    const centerOffset = containerWidth / 2 - carouselState.itemWidth / 2;
+    const currentTranslateX = baseX + deltaX;
+    
+    // 计算哪个卡片最接近中心
+    const newIndex = Math.round((centerOffset - currentTranslateX) / itemWidth);
+    const clampedIndex = Math.max(0, Math.min(carouselState.items.length - 1, newIndex));
+    
+    if (clampedIndex !== carouselState.currentIndex) {
+      carouselState.currentIndex = clampedIndex;
+      updateCarouselState(); // 只更新卡片状态，不移动容器
+    }
   };
 
   // 结束拖拽
@@ -329,17 +344,9 @@ function initCarousel() {
     isDragging = false;
     newContainer.style.cursor = 'grab';
     newContainer.style.transition = 'transform 0.3s ease-out'; // 恢复动画
-
-    const deltaX = currentX - startX;
-    const threshold = carouselState.itemWidth / 3; // 简单阈值
-
-    if (deltaX > threshold && carouselState.currentIndex > 0) {
-      goToSlide(carouselState.currentIndex - 1);
-    } else if (deltaX < -threshold && carouselState.currentIndex < carouselState.items.length - 1) {
-      goToSlide(carouselState.currentIndex + 1);
-    } else {
-      updateCarousel(); // 回弹到原位
-    }
+    
+    // 松手后吸附到当前选中的卡片
+    updateCarousel();
   };
 
   // 绑定事件到容器
@@ -422,16 +429,28 @@ function updateCarousel() {
   container.style.transform = `translateX(${targetX}px)`;
   
   // 更新卡片状态
+  updateCarouselState();
+  
+  // 更新指示点
+  const dots = document.querySelectorAll('.carousel-dot');
+  dots.forEach((dot, i) => {
+    dot.classList.toggle('active', i === carouselState.currentIndex);
+  });
+}
+
+// 只更新卡片状态（不移动容器）
+function updateCarouselState() {
+  const container = document.querySelector('.ship-carousel');
+  if (!container) return;
+  
   const cards = container.querySelectorAll('.ship-card');
   cards.forEach((card, i) => {
     const offset = i - carouselState.currentIndex;
     const isActive = i === carouselState.currentIndex;
     
     card.classList.toggle('active', isActive);
-    // 卡片使用 margin 来设置间距，不需要 transform
     card.style.marginRight = i < cards.length - 1 ? `${carouselState.gap}px` : '0';
     card.style.transform = `scale(${isActive ? 1 : 0.85})`;
-    // 只隐藏非常远的卡片，显示更多相邻卡片
     card.style.opacity = Math.abs(offset) > 10 ? '0' : (isActive ? '1' : '0.6');
     card.style.zIndex = isActive ? '10' : '1';
   });
