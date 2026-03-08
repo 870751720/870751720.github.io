@@ -52,16 +52,18 @@
             <div class="upgrade-coins">💰 <span id="upgrade-coin-display">0</span></div>
         </div>
         
-        <!-- 功能入口 -->
-        <div class="upgrade-entries">
-            <button id="story-entry" class="upgrade-entry-btn">
-                <span class="entry-icon">📖</span>
-                <span class="entry-text">飞机故事</span>
-            </button>
-        </div>
-        
-        <div class="upgrade-grid" id="upgrade-grid">
-            <!-- 升级项目由JS生成 -->
+        <div class="upgrade-content">
+            <!-- 功能入口 -->
+            <div class="upgrade-entries">
+                <button id="story-entry" class="upgrade-entry-btn">
+                    <span class="entry-icon">📖</span>
+                    <span class="entry-text">飞机故事</span>
+                </button>
+            </div>
+            
+            <div class="upgrade-grid" id="upgrade-grid">
+                <!-- 升级项目由JS生成 -->
+            </div>
         </div>
     </div>
 
@@ -72,8 +74,10 @@
             <h2>📖 飞机故事</h2>
             <div></div><!-- 占位 -->
         </div>
-        <div class="story-container" id="story-container">
-            <!-- 故事内容由JS生成 -->
+        <div class="story-content">
+            <div class="story-container" id="story-container">
+                <!-- 故事内容由JS生成 -->
+            </div>
         </div>
     </div>
 
@@ -84,8 +88,10 @@
             <div></div>
             <div></div>
         </div>
-        <div class="gacha-container" id="gacha-container">
-            <!-- 内容由JS生成 -->
+        <div class="gacha-content">
+            <div class="gacha-container" id="gacha-container">
+                <!-- 内容由JS生成 -->
+            </div>
         </div>
     </div>
     
@@ -97,14 +103,16 @@
             <div class="ship-coins">💰 <span id="ship-coin-display">0</span></div>
         </div>
         
-        <div class="ship-carousel-container">
-            <button class="carousel-nav prev" id="ship-prev">◀</button>
-            <div class="ship-carousel" id="ship-grid">
-                <!-- 飞机由JS生成 -->
+        <div class="ship-content">
+            <div class="ship-carousel-container">
+                <button class="carousel-nav prev" id="ship-prev">◀</button>
+                <div class="ship-carousel" id="ship-grid">
+                    <!-- 飞机由JS生成 -->
+                </div>
+                <button class="carousel-nav next" id="ship-next">▶</button>
             </div>
-            <button class="carousel-nav next" id="ship-next">▶</button>
+            <div class="carousel-dots" id="carousel-dots"></div>
         </div>
-        <div class="carousel-dots" id="carousel-dots"></div>
     </div>
     
     <script type="module" src="js/main.js"></script>
