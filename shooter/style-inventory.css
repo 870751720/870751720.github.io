@@ -233,6 +233,24 @@
     line-height: 1.4;
 }
 
+/* Tooltip 使用按钮 */
+.tooltip-use-btn {
+    margin-top: 8px;
+    padding: 6px 16px;
+    background: linear-gradient(135deg, #6b5ce7, #9d8df7);
+    border: none;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.tooltip-use-btn:hover {
+    background: linear-gradient(135deg, #9d8df7, #b8a8ff);
+    transform: scale(1.05);
+}
+
 /* Tooltip 箭头 */
 .global-inventory-tooltip::after {
     content: '';

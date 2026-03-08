@@ -28,19 +28,69 @@ function createGlobalTooltip() {
 }
 
 // 显示 tooltip
-function showTooltip(e, mat, count) {
+function showTooltip(e, mat, count, matKey) {
     if (!globalTooltip) createGlobalTooltip();
 
     const tierColor = TIER_COLORS[mat.tier] || '#fff';
+    
+    // 判断是否是命座材料
+    const isConstellation = mat.tier === 'constellation' || matKey?.startsWith('constellation_');
 
     globalTooltip.innerHTML = `
         <div class="tooltip-name" style="color: ${tierColor}">${mat.name}</div>
         <div class="tooltip-count">${mat.icon} ${count} 个</div>
         <div class="tooltip-desc">${mat.desc}</div>
+        ${isConstellation ? `<button class="tooltip-use-btn" data-mat-key="${matKey}">使用</button>` : ''}
     `;
+    
+    // 绑定使用按钮事件
+    if (isConstellation) {
+        const useBtn = globalTooltip.querySelector('.tooltip-use-btn');
+        if (useBtn) {
+            useBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const key = useBtn.dataset.matKey;
+                if (key) {
+                    useConstellationMaterial(key);
+                }
+            });
+        }
+    }
 
     globalTooltip.classList.add('show');
     updateTooltipPosition(e);
+}
+
+// 使用命座材料 - 跳转到机库命座页面
+function useConstellationMaterial(matKey) {
+    const shipId = matKey.replace('constellation_', '');
+    if (!shipId) return;
+    
+    // 隐藏背包
+    const inventoryScreen = document.getElementById('inventory-screen');
+    if (inventoryScreen) {
+        inventoryScreen.classList.add('hidden');
+    }
+    
+    // 隐藏主菜单
+    const startScreen = document.getElementById('start-screen');
+    if (startScreen) {
+        startScreen.classList.add('hidden');
+    }
+    
+    // 导入并渲染机库，选中对应飞机和命座标签
+    import('./hangar.js').then(hangarModule => {
+        // 设置选中的飞机
+        if (typeof hangarModule.setSelectedUpgradeShip === 'function') {
+            hangarModule.setSelectedUpgradeShip(shipId);
+        }
+        // 设置当前标签为命座
+        if (typeof hangarModule.setCurrentHangarTab === 'function') {
+            hangarModule.setCurrentHangarTab('constellation');
+        }
+        // 渲染机库
+        hangarModule.renderHangar();
+    });
 }
 
 // 更新 tooltip 位置
@@ -121,7 +171,7 @@ function bindSlotEvents(container) {
         }
 
         slot.addEventListener('mouseenter', (e) => {
-            if (matConfig && count > 0) showTooltip(e, matConfig, count);
+            if (matConfig && count > 0) showTooltip(e, matConfig, count, matKey);
         });
 
         slot.addEventListener('mouseleave', () => {

@@ -629,3 +629,13 @@ export function updateHangarCoinDisplay() {
     const el = document.getElementById('hangar-coin-display');
     if (el) el.textContent = GameState.coins || 0;
 }
+
+// 设置选中的升级飞机
+export function setSelectedUpgradeShip(shipId) {
+    selectedUpgradeShip = shipId;
+}
+
+// 设置当前机库标签页
+export function setCurrentHangarTab(tab) {
+    currentHangarTab = tab;
+}
