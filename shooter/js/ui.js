@@ -5,24 +5,16 @@
 import { PlayerState, GameObjects, DOM } from './state.js';
 
 /**
- * 更新血量显示
+ * 更新血量显示 - 简化为图标+数字
  */
 export function updateHpDisplay() {
-    DOM.hpDisplay.innerHTML = '';
+    const hpText = `♥${PlayerState.hp}/${PlayerState.maxHp}`;
+    const shieldText = PlayerState.shield > 0 ? `⛨${PlayerState.shield}` : '';
     
-    for (let i = 0; i < PlayerState.maxHp; i++) {
-        const heart = document.createElement('span');
-        heart.style.cssText = 'display:inline-block;width:24px;height:24px;line-height:24px;text-align:center;font-size:20px;';
-        heart.textContent = i < PlayerState.hp ? '♥' : '♡';
-        DOM.hpDisplay.appendChild(heart);
-    }
-    
-    if (PlayerState.shield > 0) {
-        const shield = document.createElement('span');
-        shield.style.cssText = 'margin-left:10px;color:#00ffaa;font-size:20px;';
-        shield.textContent = `⛨${PlayerState.shield}`;
-        DOM.hpDisplay.appendChild(shield);
-    }
+    DOM.hpDisplay.innerHTML = `
+        <span style="color:#ff5555">${hpText}</span>
+        ${shieldText ? `<span style="color:#00ffaa">${shieldText}</span>` : ''}
+    `;
 }
 
 /**

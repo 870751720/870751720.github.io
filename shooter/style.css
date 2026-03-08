@@ -516,9 +516,9 @@ body {
 /* 血量显示 */
 .hp-display {
     position: fixed;
-    bottom: 20px;
-    left: 20px;
-    font-size: 28px;
+    top: 20px;
+    right: 20px;
+    font-size: 24px;
     color: #ff5555;
     text-shadow: 2px 2px 0 #000;
     z-index: 5;
@@ -526,6 +526,8 @@ body {
     padding: 10px 15px;
     border-radius: 10px;
     border: 2px solid #444;
+    display: flex;
+    gap: 15px;
 }
 
 .game-score {
