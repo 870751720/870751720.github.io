@@ -285,7 +285,7 @@
 /* 响应式 */
 @media (max-width: 768px) {
     .inventory-screen {
-        padding: 20px 15px;
+        padding: 70px 15px 15px;
     }
 
     .inventory-screen h2 {
@@ -297,8 +297,14 @@
         max-width: 100%;
     }
     
+    .inventory-left .inventory-coins {
+        margin-bottom: 15px;
+    }
+    
     .inventory-right {
         width: 100%;
+        margin-top: 15px;
+    }
     }
     
     .material-detail-panel {
