@@ -1,0 +1,38 @@
+/**
+ * 组件样式 - 仅补充性样式
+ * 不覆盖原有样式文件中的定义
+ */
+
+/* 使用 CSS 变量的工具类，可在 HTML 中直接使用 */
+
+/* 品级颜色工具类 */
+.text-ssr { color: var(--rank-ssr); }
+.text-a { color: var(--rank-a); }
+.text-b { color: var(--rank-b); }
+.text-c { color: var(--rank-c); }
+.text-gold { color: var(--color-gold); }
+.text-accent { color: var(--color-accent); }
+
+/* 背景工具类 */
+.bg-card { background: var(--bg-card); }
+.bg-panel { background: var(--bg-panel); }
+
+/* 间距工具类 */
+.m-xs { margin: var(--spacing-xs); }
+.m-sm { margin: var(--spacing-sm); }
+.m-md { margin: var(--spacing-md); }
+.m-lg { margin: var(--spacing-lg); }
+
+.p-xs { padding: var(--spacing-xs); }
+.p-sm { padding: var(--spacing-sm); }
+.p-md { padding: var(--spacing-md); }
+.p-lg { padding: var(--spacing-lg); }
+
+/* 阴影工具类 */
+.shadow-sm { box-shadow: var(--shadow-sm); }
+.shadow-md { box-shadow: var(--shadow-md); }
+.shadow-glow { box-shadow: var(--shadow-glow); }
+
+/* 过渡工具类 */
+.transition-fast { transition: all var(--transition-fast); }
+.transition-normal { transition: all var(--transition-normal); }

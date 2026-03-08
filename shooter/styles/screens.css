@@ -1,0 +1,32 @@
+/**
+ * 屏幕级样式 - 仅补充性样式
+ * 主要样式仍由原有样式文件提供
+ */
+
+/* 这些样式只在原有样式文件缺失时生效 */
+
+/* 命座提示框 - 可能原文件中不存在 */
+.constellation-tooltip {
+  position: fixed;
+  background: rgba(26, 26, 46, 0.95);
+  border: 1px solid rgba(157, 141, 247, 0.5);
+  border-radius: 8px;
+  padding: 12px 16px;
+  z-index: 1000;
+  pointer-events: none;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  max-width: 250px;
+}
+
+.constellation-tooltip .tooltip-level {
+  font-size: 14px;
+  font-weight: bold;
+  color: var(--color-gold, #ffd700);
+  margin-bottom: 6px;
+}
+
+.constellation-tooltip .tooltip-desc {
+  font-size: 12px;
+  color: #ccc;
+  line-height: 1.4;
+}
