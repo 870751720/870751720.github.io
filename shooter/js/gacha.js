@@ -4,7 +4,6 @@
 
 import { PlayerState, GameState } from './state.js';
 import { saveShipData, SHIP_CONFIGS, addMaterial, getOwnedShips, getConstellationMaterialId } from './ships.js';
-import { addConstellation } from './constellation.js';
 
 // 抽卡货币
 export const GACHA_CONFIG = {
