@@ -452,8 +452,8 @@ function updateCarouselState() {
     
     card.classList.toggle('active', isActive);
     card.style.marginRight = i < cards.length - 1 ? `${carouselState.gap}px` : '0';
-    card.style.transform = `scale(${isActive ? 1 : 0.85})`;
-    card.style.opacity = Math.abs(offset) > 10 ? '0' : (isActive ? '1' : '0.6');
+    card.style.transform = `scale(${isActive ? 1 : 0.75})`;
+    card.style.opacity = Math.abs(offset) > 10 ? '0' : (isActive ? '1' : '0.5');
     card.style.zIndex = isActive ? '10' : '1';
   });
   
