@@ -291,7 +291,8 @@ function initCarousel() {
   // 鼠标/触摸按下
   container.onmousedown = container.ontouchstart = (e) => {
     carouselState.isDragging = true;
-    carouselState.startX = (e.touches ? e.touches[0].clientX : e.clientX) - carouselState.translateX;
+    carouselState.startX = e.touches ? e.touches[0].clientX : e.clientX;
+    carouselState.currentX = carouselState.startX;
     container.style.cursor = 'grabbing';
   };
   
@@ -300,8 +301,15 @@ function initCarousel() {
     if (!carouselState.isDragging) return;
     e.preventDefault();
     const x = e.touches ? e.touches[0].clientX : e.clientX;
-    carouselState.translateX = x - carouselState.startX;
-    updateCarousel();
+    carouselState.currentX = x;
+    const deltaX = x - carouselState.startX;
+    
+    // 实时更新容器位置（跟随手指/鼠标）
+    const itemWidth = carouselState.itemWidth + carouselState.gap;
+    const containerWidth = container.parentElement.offsetWidth;
+    const centerOffset = containerWidth / 2 - carouselState.itemWidth / 2;
+    const baseX = centerOffset - carouselState.currentIndex * itemWidth;
+    container.style.transform = `translateX(${baseX + deltaX}px)`;
   };
   
   container.onmousemove = moveHandler;
@@ -313,10 +321,18 @@ function initCarousel() {
     carouselState.isDragging = false;
     container.style.cursor = 'grab';
     
-    // 吸附到最近的卡片
-    const itemWidth = carouselState.itemWidth + carouselState.gap;
-    const newIndex = Math.round(-carouselState.translateX / itemWidth);
-    goToSlide(Math.max(0, Math.min(newIndex, carouselState.items.length - 1)));
+    // 根据滑动距离判断是否切换
+    const x = carouselState.currentX;
+    const deltaX = x - carouselState.startX;
+    const threshold = carouselState.itemWidth / 3;
+    
+    if (deltaX > threshold && carouselState.currentIndex > 0) {
+      goToSlide(carouselState.currentIndex - 1);
+    } else if (deltaX < -threshold && carouselState.currentIndex < carouselState.items.length - 1) {
+      goToSlide(carouselState.currentIndex + 1);
+    } else {
+      updateCarousel(); // 回弹到原位
+    }
   };
   
   container.onmouseup = container.onmouseleave = endHandler;
@@ -376,15 +392,15 @@ function updateCarousel() {
   const container = document.querySelector('.ship-carousel');
   if (!container) return;
   
-  // 限制边界
   const itemWidth = carouselState.itemWidth + carouselState.gap;
-  const maxTranslate = 0;
-  const minTranslate = -(carouselState.items.length - 1) * itemWidth;
-  carouselState.translateX = Math.max(minTranslate, Math.min(maxTranslate, carouselState.translateX));
+  const containerWidth = container.parentElement.offsetWidth;
+  const centerOffset = containerWidth / 2 - carouselState.itemWidth / 2;
+  
+  // 计算目标位置：让当前卡片居中
+  const targetX = centerOffset - carouselState.currentIndex * itemWidth;
   
   // 应用变换到容器
-  const centerOffset = container.parentElement.offsetWidth / 2 - carouselState.itemWidth / 2;
-  container.style.transform = `translateX(${centerOffset + carouselState.translateX}px)`;
+  container.style.transform = `translateX(${targetX}px)`;
   
   // 更新卡片状态
   const cards = container.querySelectorAll('.ship-card');
@@ -393,8 +409,9 @@ function updateCarousel() {
     const isActive = i === carouselState.currentIndex;
     
     card.classList.toggle('active', isActive);
-    // 卡片基础位置，不叠加 translateX
-    card.style.transform = `translateX(${i * itemWidth}px) scale(${isActive ? 1 : 0.85})`;
+    // 卡片使用 margin 来设置间距，不需要 transform
+    card.style.marginRight = i < cards.length - 1 ? `${carouselState.gap}px` : '0';
+    card.style.transform = `scale(${isActive ? 1 : 0.85})`;
     card.style.opacity = Math.abs(offset) > 2 ? '0' : (isActive ? '1' : '0.6');
     card.style.zIndex = isActive ? '10' : '1';
   });
