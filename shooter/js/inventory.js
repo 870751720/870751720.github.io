@@ -14,101 +14,8 @@ const TIER_COLORS = {
     constellation: '#ffd700'
 };
 
-// 全局 tooltip 元素
-let globalTooltip = null;
-
-// 创建全局 tooltip
-function createGlobalTooltip() {
-    if (globalTooltip) return;
-
-    globalTooltip = document.createElement('div');
-    globalTooltip.id = 'global-inventory-tooltip';
-    globalTooltip.className = 'global-inventory-tooltip';
-    document.body.appendChild(globalTooltip);
-}
-
-// 显示 tooltip
-function showTooltip(e, mat, count, matKey) {
-    if (!globalTooltip) createGlobalTooltip();
-
-    const tierColor = TIER_COLORS[mat.tier] || '#fff';
-    
-    // 判断是否是命座材料
-    const isConstellation = mat.tier === 'constellation' || matKey?.startsWith('constellation_');
-
-    globalTooltip.innerHTML = `
-        <div class="tooltip-name" style="color: ${tierColor}">${mat.name}</div>
-        <div class="tooltip-count">${mat.icon} ${count} 个</div>
-        <div class="tooltip-desc">${mat.desc}</div>
-        ${isConstellation ? `<button class="tooltip-use-btn" data-mat-key="${matKey}">使用</button>` : ''}
-    `;
-    
-    // 绑定使用按钮事件
-    if (isConstellation) {
-        const useBtn = globalTooltip.querySelector('.tooltip-use-btn');
-        if (useBtn) {
-            useBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const key = useBtn.dataset.matKey;
-                if (key) {
-                    useConstellationMaterial(key);
-                }
-            });
-        }
-    }
-
-    globalTooltip.classList.add('show');
-    updateTooltipPosition(e);
-}
-
-// 使用命座材料 - 跳转到机库命座页面
-function useConstellationMaterial(matKey) {
-    const shipId = matKey.replace('constellation_', '');
-    if (!shipId) return;
-    
-    // 隐藏背包
-    const inventoryScreen = document.getElementById('inventory-screen');
-    if (inventoryScreen) {
-        inventoryScreen.classList.add('hidden');
-    }
-    
-    // 隐藏主菜单
-    const startScreen = document.getElementById('start-screen');
-    if (startScreen) {
-        startScreen.classList.add('hidden');
-    }
-    
-    // 导入并渲染机库，选中对应飞机和命座标签
-    import('./hangar.js').then(hangarModule => {
-        // 设置选中的飞机
-        if (typeof hangarModule.setSelectedUpgradeShip === 'function') {
-            hangarModule.setSelectedUpgradeShip(shipId);
-        }
-        // 设置当前标签为命座
-        if (typeof hangarModule.setCurrentHangarTab === 'function') {
-            hangarModule.setCurrentHangarTab('constellation');
-        }
-        // 渲染机库
-        hangarModule.renderHangar();
-    });
-}
-
-// 更新 tooltip 位置
-function updateTooltipPosition(e) {
-    if (!globalTooltip) return;
-
-    const x = e.clientX;
-    const y = e.clientY - 15;
-
-    globalTooltip.style.left = x + 'px';
-    globalTooltip.style.top = y + 'px';
-}
-
-// 隐藏 tooltip
-function hideTooltip() {
-    if (!globalTooltip) return;
-    globalTooltip.classList.remove('show');
-}
+// 当前选中的材料
+let selectedMaterial = null;
 
 // 渲染背包界面
 export function renderInventory() {
@@ -121,15 +28,24 @@ export function renderInventory() {
         <h2>🎒 我的背包</h2>
 
         <div class="inventory-content">
-            <!-- 材料格子 -->
-            <div class="inventory-section">
-                <div class="inventory-header">
-                    <div class="inventory-coins-inline">💰 ${(GameState.coins || 0).toLocaleString()}</div>
-                </div>
-                <div class="inventory-materials-container">
-                    <div class="inventory-materials-grid">
-                        ${renderMaterialsGrid(mats)}
+            <!-- 左侧：材料格子 -->
+            <div class="inventory-left">
+                <div class="inventory-section">
+                    <div class="inventory-header">
+                        <div class="inventory-coins-inline">💰 ${(GameState.coins || 0).toLocaleString()}</div>
                     </div>
+                    <div class="inventory-materials-container">
+                        <div class="inventory-materials-grid">
+                            ${renderMaterialsGrid(mats)}
+                        </div>
+n                    </div>
+                </div>
+            </div>
+            
+            <!-- 右侧：详情面板 -->
+            <div class="inventory-right">
+                <div id="material-detail-panel" class="material-detail-panel">
+                    <div class="detail-placeholder">点击材料查看详情</div>
                 </div>
             </div>
         </div>
@@ -148,12 +64,12 @@ export function renderInventory() {
         });
     }
 
-    // 绑定格子 tooltip 事件
-    bindSlotEvents(container);
+    // 绑定格子点击事件
+    bindSlotEvents(container, mats);
 }
 
-// 绑定格子事件
-function bindSlotEvents(container) {
+// 绑定格子点击事件
+function bindSlotEvents(container, mats) {
     const slots = container.querySelectorAll('.material-slot');
 
     slots.forEach(slot => {
@@ -170,21 +86,95 @@ function bindSlotEvents(container) {
             }
         }
 
-        slot.addEventListener('mouseenter', (e) => {
-            if (matConfig && count > 0) showTooltip(e, matConfig, count, matKey);
-        });
-
-        slot.addEventListener('mouseleave', () => {
-            hideTooltip();
-        });
-
-        slot.addEventListener('mousemove', (e) => {
-            updateTooltipPosition(e);
+        slot.addEventListener('click', () => {
+            if (matConfig && count > 0) {
+                // 移除其他格子的选中状态
+                slots.forEach(s => s.classList.remove('selected'));
+                // 添加选中状态
+                slot.classList.add('selected');
+                // 显示详情
+                showMaterialDetail(matConfig, count, matKey);
+            }
         });
     });
 }
 
-// 渲染材料格子 - 支持展开显示（无堆叠上限的材料每个占一个格子）
+// 显示材料详情面板
+function showMaterialDetail(mat, count, matKey) {
+    const panel = document.getElementById('material-detail-panel');
+    if (!panel) return;
+
+    const tierColor = TIER_COLORS[mat.tier] || '#fff';
+    const isConstellation = mat.tier === 'constellation' || matKey?.startsWith('constellation_');
+
+    panel.innerHTML = `
+        <div class="detail-icon" style="color: ${mat.color}">${mat.icon}</div>
+        <div class="detail-name" style="color: ${tierColor}">${mat.name}</div>
+        <div class="detail-tier">${getTierName(mat.tier)}</div>
+        <div class="detail-count">拥有数量：${count} 个</div>
+        <div class="detail-desc">${mat.desc}</div>
+        ${isConstellation ? `<button class="detail-use-btn" data-mat-key="${matKey}">使用</button>` : ''}
+    `;
+
+    // 绑定使用按钮
+    if (isConstellation) {
+        const useBtn = panel.querySelector('.detail-use-btn');
+        if (useBtn) {
+            useBtn.addEventListener('click', () => {
+                const key = useBtn.dataset.matKey;
+                if (key) {
+                    useConstellationMaterial(key);
+                }
+            });
+        }
+    }
+}
+
+// 获取品质名称
+function getTierName(tier) {
+    const names = {
+        common: '普通',
+        rare: '稀有',
+        epic: '史诗',
+        legendary: '传说',
+        constellation: '命星'
+    };
+    return names[tier] || '未知';
+}
+
+// 使用命座材料 - 跳转到机库命座页面
+function useConstellationMaterial(matKey) {
+    const shipId = matKey.replace('constellation_', '');
+    if (!shipId) return;
+
+    // 隐藏背包
+    const inventoryScreen = document.getElementById('inventory-screen');
+    if (inventoryScreen) {
+        inventoryScreen.classList.add('hidden');
+    }
+
+    // 隐藏主菜单
+    const startScreen = document.getElementById('start-screen');
+    if (startScreen) {
+        startScreen.classList.add('hidden');
+    }
+
+    // 导入并渲染机库，选中对应飞机和命座标签
+    import('./hangar.js').then(hangarModule => {
+        // 设置选中的飞机
+        if (typeof hangarModule.setSelectedUpgradeShip === 'function') {
+            hangarModule.setSelectedUpgradeShip(shipId);
+        }
+        // 设置当前标签为命座
+        if (typeof hangarModule.setCurrentHangarTab === 'function') {
+            hangarModule.setCurrentHangarTab('constellation');
+        }
+        // 渲染机库
+        hangarModule.renderHangar();
+    });
+}
+
+// 渲染材料格子
 function renderMaterialsGrid(mats) {
     // 基础材料
     const baseMaterials = [
@@ -216,30 +206,17 @@ function renderMaterialsGrid(mats) {
 
     allMaterials.forEach(mat => {
         const count = mats[mat.key] || 0;
-        const stackLimit = mat.stack || 999;
 
         // 如果数量为0，跳过
         if (count === 0) return;
 
-        // 如果堆叠上限为1，且数量大于0，展开显示每个物品
-        if (stackLimit === 1 && count > 0) {
-            // 生成 count 个单独的格子
-            for (let i = 0; i < count; i++) {
-                html += `
-                    <div class="material-slot tier-${mat.tier}" data-mat="${mat.key}" data-count="1">
-                        <div class="slot-icon" style="color: ${mat.color}">${mat.icon}</div>
-                    </div>
-                `;
-            }
-        } else {
-            // 普通堆叠显示（一个格子显示数量）
-            html += `
-                <div class="material-slot tier-${mat.tier}" data-mat="${mat.key}" data-count="${count}">
-                    <div class="slot-icon" style="color: ${mat.color}">${mat.icon}</div>
-                    <div class="slot-count">${count}</div>
-                </div>
-            `;
-        }
+        // 普通堆叠显示
+        html += `
+            <div class="material-slot tier-${mat.tier}" data-mat="${mat.key}" data-count="${count}">
+                <div class="slot-icon" style="color: ${mat.color}">${mat.icon}</div>
+                <div class="slot-count">${count}</div>
+            </div>
+        `;
     });
 
     return html;

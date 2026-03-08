@@ -25,12 +25,97 @@
 
 .inventory-content {
     width: 100%;
-    max-width: 400px;
+    max-width: 900px;
     display: flex;
-    flex-direction: column;
-    gap: 15px;
+    flex-direction: row;
+    gap: 20px;
     flex: 1;
     min-height: 0;
+}
+
+/* 左侧材料区域 */
+.inventory-left {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+/* 右侧详情面板 */
+.inventory-right {
+    width: 280px;
+    flex-shrink: 0;
+}
+
+.material-detail-panel {
+    background: linear-gradient(180deg, rgba(25, 25, 40, 0.98), rgba(15, 15, 25, 0.98));
+    border: 2px solid rgba(157, 141, 247, 0.4);
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    min-height: 300px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+}
+
+.detail-placeholder {
+    color: #666;
+    font-size: 14px;
+    text-align: center;
+    margin-top: 100px;
+}
+
+.detail-icon {
+    font-size: 64px;
+    margin-bottom: 8px;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+}
+
+.detail-name {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.detail-tier {
+    font-size: 12px;
+    padding: 4px 12px;
+    background: rgba(157, 141, 247, 0.2);
+    border-radius: 12px;
+    color: #9d8df7;
+}
+
+.detail-count {
+    font-size: 14px;
+    color: #aaa;
+    margin-top: 4px;
+}
+
+.detail-desc {
+    font-size: 13px;
+    color: #888;
+    line-height: 1.5;
+    text-align: center;
+    margin: 8px 0;
+}
+
+.detail-use-btn {
+    margin-top: 16px;
+    padding: 12px 32px;
+    background: linear-gradient(135deg, #6b5ce7, #9d8df7);
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.detail-use-btn:hover {
+    background: linear-gradient(135deg, #9d8df7, #b8a8ff);
+    transform: scale(1.05);
 }
 
 .inventory-section {
@@ -38,6 +123,10 @@
     border-radius: 12px;
     padding: 15px;
     border: 1px solid rgba(157, 141, 247, 0.2);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
 }
 
 /* 头部布局 - 金币靠左 */
@@ -52,24 +141,14 @@
 
 .inventory-coins-inline {
     font-size: 16px;
-    color: #ffd700;
     font-weight: bold;
+    color: #ffd700;
 }
 
-/* 材料区域 */
-.inventory-section {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-}
-
-/* 材料格子容器 */
 .inventory-materials-container {
     flex: 1;
     overflow-y: auto;
     padding-right: 5px;
-    min-height: 0;
 }
 
 .inventory-materials-container::-webkit-scrollbar {
@@ -86,7 +165,6 @@
     border-radius: 2px;
 }
 
-/* 材料格子网格 */
 .inventory-materials-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -94,7 +172,6 @@
     padding: 5px;
 }
 
-/* 基础材料格子 */
 .material-slot {
     aspect-ratio: 1;
     background: rgba(20, 20, 30, 0.6);
@@ -111,6 +188,11 @@
 
 .material-slot:hover {
     transform: scale(1.05);
+}
+
+.material-slot.selected {
+    border: 2px solid #9d8df7 !important;
+    box-shadow: 0 0 20px rgba(157, 141, 247, 0.6);
 }
 
 .slot-icon {
@@ -189,81 +271,8 @@
     50% { box-shadow: 0 0 16px rgba(251, 191, 36, 0.6); }
 }
 
-/* 全局 Tooltip */
-.global-inventory-tooltip {
-    position: fixed;
-    background: linear-gradient(180deg, rgba(25, 25, 40, 0.98), rgba(15, 15, 25, 0.98));
-    border: 1px solid rgba(157, 141, 247, 0.4);
-    border-radius: 10px;
-    padding: 12px 16px;
-    z-index: 99999;
-    pointer-events: none;
-    opacity: 0;
-    visibility: hidden;
-    transform: translate(-50%, -100%);
-    transition: opacity 0.15s, visibility 0.15s;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
-    text-align: center;
-    min-width: 120px;
-}
-
-.global-inventory-tooltip.show {
-    opacity: 1;
-    visibility: visible;
-}
-
-.tooltip-name {
-    font-size: 14px;
-    font-weight: bold;
-    margin-bottom: 6px;
-}
-
-.tooltip-count {
-    font-size: 16px;
-    color: #fff;
-    margin-bottom: 8px;
-    padding: 4px 0;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.tooltip-desc {
-    font-size: 11px;
-    color: #888;
-    line-height: 1.4;
-}
-
-/* Tooltip 使用按钮 */
-.tooltip-use-btn {
-    margin-top: 8px;
-    padding: 6px 16px;
-    background: linear-gradient(135deg, #6b5ce7, #9d8df7);
-    border: none;
-    border-radius: 6px;
-    color: #fff;
-    font-size: 12px;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.tooltip-use-btn:hover {
-    background: linear-gradient(135deg, #9d8df7, #b8a8ff);
-    transform: scale(1.05);
-}
-
-/* Tooltip 箭头 */
-.global-inventory-tooltip::after {
-    content: '';
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    border: 8px solid transparent;
-    border-top-color: rgba(25, 25, 40, 0.98);
-}
-
 /* 响应式 */
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .inventory-screen {
         padding: 20px 15px;
     }
@@ -271,16 +280,35 @@
     .inventory-screen h2 {
         font-size: 24px;
     }
-
+    
     .inventory-content {
+        flex-direction: column;
         max-width: 100%;
     }
-
-    .slot-icon {
-        font-size: 20px;
+    
+    .inventory-right {
+        width: 100%;
     }
     
-    .material-slot {
-        min-height: 50px;
+    .material-detail-panel {
+        min-height: 200px;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+    }
+    
+    .detail-icon {
+        font-size: 48px;
+    }
+    
+    .detail-name {
+        font-size: 18px;
+        width: 100%;
+        text-align: center;
+    }
+    
+    .inventory-materials-grid {
+        grid-template-columns: repeat(5, 1fr);
     }
 }
