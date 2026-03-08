@@ -93,6 +93,8 @@
     padding: 15px;
     cursor: pointer;
     transition: all 0.2s;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .constellation-card:hover {
