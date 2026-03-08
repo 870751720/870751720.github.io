@@ -454,7 +454,8 @@ function updateCarousel() {
     // 卡片使用 margin 来设置间距，不需要 transform
     card.style.marginRight = i < cards.length - 1 ? `${carouselState.gap}px` : '0';
     card.style.transform = `scale(${isActive ? 1 : 0.85})`;
-    card.style.opacity = Math.abs(offset) > 2 ? '0' : (isActive ? '1' : '0.6');
+    // 只隐藏非常远的卡片，显示更多相邻卡片
+    card.style.opacity = Math.abs(offset) > 10 ? '0' : (isActive ? '1' : '0.6');
     card.style.zIndex = isActive ? '10' : '1';
   });
   
