@@ -10,7 +10,7 @@ import { collectItem, spawnItem, updateBuffs } from './items.js';
 import { Player, Wingman, Bullet, Enemy, Item, Particle } from './entities/index.js';
 import { Destroyer, FrostGiant, LightningRider, MechSpider, ShadowAssassin, ChaosEye } from './bosses.js';
 import { addCoins, updateCoinDisplays, applyUpgrades } from './upgrades.js';
-import { applyShipStats, addMaterial, MATERIAL_CONFIGS } from './ships.js';
+import { applyShipStats, addMaterial, MATERIAL_CONFIGS, getCurrentShip } from './ships.js';
 
 // 材料颜色映射
 const MATERIAL_COLORS = {
@@ -317,7 +317,7 @@ export function startGame() {
 
     // 应用升级和飞机效果
     applyUpgrades();
-    applyShipStats();
+    applyShipStats(getCurrentShip());
 
     PlayerState.hp = PlayerState.maxHp;
     PlayerState.invincible = false;
