@@ -3,6 +3,7 @@
  */
 
 import { PlayerState, GameState } from './state.js';
+import { getStorage, setStorage } from './core/storage.js';
 
 // 升级项目配置
 export const UPGRADE_CONFIGS = [
@@ -62,29 +63,17 @@ export const UPGRADE_CONFIGS = [
     }
 ];
 
-// 保存数据到 localStorage
+// 保存数据
 export function saveProgress() {
-    // 读取现有数据，避免覆盖
-    const data = JSON.parse(localStorage.getItem('shooterProgress') || '{}');
-    data.coins = GameState.coins || 0;
-    data.upgrades = GameState.upgrades || {};
-    localStorage.setItem('shooterProgress', JSON.stringify(data));
+  setStorage('coins', GameState.coins || 0);
+  setStorage('upgrades', GameState.upgrades || {});
 }
 
 // 从 localStorage 读取数据
 export function loadProgress() {
-    try {
-        const data = JSON.parse(localStorage.getItem('shooterProgress'));
-        if (data) {
-            GameState.coins = data.coins || 0;
-            GameState.upgrades = data.upgrades || {};
-            // 应用升级效果
-            applyUpgrades();
-        }
-    } catch (e) {
-        GameState.coins = 0;
-        GameState.upgrades = {};
-    }
+  GameState.coins = getStorage('coins') || 0;
+  GameState.upgrades = getStorage('upgrades') || {};
+  applyUpgrades();
 }
 
 // 应用所有升级效果

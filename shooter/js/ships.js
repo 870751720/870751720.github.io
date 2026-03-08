@@ -5,6 +5,7 @@
 import { PlayerState, GameState } from './state.js';
 import { saveProgress } from './upgrades.js';
 import { drawDynamicShip } from './ship-renderer.js';
+import { getStorage, setStorage, updateStorage } from './core/storage.js';
 
 // 等级配置
 export const RANK_CONFIGS = {
@@ -577,39 +578,27 @@ export function applyShipStats() {
 
 // 保存数据
 export function saveShipData() {
-    // 保存前先去重
-    if (GameState.ownedShips) {
-        GameState.ownedShips = [...new Set(GameState.ownedShips)];
-    }
-    
-    const data = JSON.parse(localStorage.getItem('shooterProgress') || '{}');
-    data.ownedShips = GameState.ownedShips || ['basic'];
-    data.currentShip = GameState.currentShip || 'basic';
-    data.coins = GameState.coins || 0;
-    data.materials = GameState.materials || { common: 0, rare: 0, epic: 0, legendary: 0 };
-    data.shipEnhancements = GameState.shipEnhancements || {};
-    data.constellations = GameState.constellations || {};
-    localStorage.setItem('shooterProgress', JSON.stringify(data));
+  // 保存前去重
+  if (GameState.ownedShips) {
+    GameState.ownedShips = [...new Set(GameState.ownedShips)];
+  }
+
+  updateStorage({
+    ownedShips: GameState.ownedShips || ['basic'],
+    currentShip: GameState.currentShip || 'basic',
+    materials: GameState.materials || { common: 0, rare: 0, epic: 0, legendary: 0 },
+    shipEnhancements: GameState.shipEnhancements || {},
+    constellations: GameState.constellations || {}
+  });
 }
 
 // 加载数据
 export function loadShipData() {
-    try {
-        const data = JSON.parse(localStorage.getItem('shooterProgress'));
-        if (data) {
-            GameState.ownedShips = data.ownedShips || ['basic'];
-            GameState.currentShip = data.currentShip || 'basic';
-            GameState.materials = data.materials || { common: 0, rare: 0, epic: 0, legendary: 0 };
-            GameState.shipEnhancements = data.shipEnhancements || {};
-            GameState.constellations = data.constellations || {};
-        }
-    } catch (e) {
-        GameState.ownedShips = ['basic'];
-        GameState.currentShip = 'basic';
-        GameState.materials = { common: 0, rare: 0, epic: 0, legendary: 0 };
-        GameState.shipEnhancements = {};
-        GameState.constellations = {};
-    }
+  GameState.ownedShips = getStorage('ownedShips') || ['basic'];
+  GameState.currentShip = getStorage('currentShip') || 'basic';
+  GameState.materials = getStorage('materials') || { common: 0, rare: 0, epic: 0, legendary: 0 };
+  GameState.shipEnhancements = getStorage('shipEnhancements') || {};
+  GameState.constellations = getStorage('constellations') || {};
 }
 
 // 添加材料

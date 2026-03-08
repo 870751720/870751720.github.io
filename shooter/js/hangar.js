@@ -5,6 +5,7 @@
 import { PlayerState, GameState } from './state.js';
 import { getOwnedShips, getCurrentShip, SHIP_CONFIGS, RANK_CONFIGS, getShipEnhanceLevel, getEnhanceCost, enhanceShip, MATERIAL_CONFIGS } from './ships.js';
 import { drawStaticShip, drawDynamicShip } from './ship-renderer.js';
+import { getStorage, setStorage, updateStorage } from './core/storage.js';
 
 // 当前选中的飞机
 let selectedUpgradeShip = null;
@@ -20,21 +21,12 @@ const RANK_WEIGHT = { 'C': 1, 'B': 2, 'A': 3, 'SSR': 4 };
 
 // 加载收藏数据
 export function loadFavoriteShips() {
-    try {
-        const data = JSON.parse(localStorage.getItem('shooterProgress'));
-        if (data && data.favoriteShips) {
-            favoriteShips = data.favoriteShips;
-        }
-    } catch (e) {
-        favoriteShips = [];
-    }
+  favoriteShips = getStorage('favoriteShips') || [];
 }
 
 // 保存收藏数据
 export function saveFavoriteShips() {
-    const data = JSON.parse(localStorage.getItem('shooterProgress') || '{}');
-    data.favoriteShips = favoriteShips;
-    localStorage.setItem('shooterProgress', JSON.stringify(data));
+  setStorage('favoriteShips', favoriteShips);
 }
 
 // 切换收藏状态
@@ -135,22 +127,15 @@ export function buyShipUpgrade(shipId, upgradeId) {
 
 // 保存数据
 export function saveShipUpgrades() {
-    const data = JSON.parse(localStorage.getItem('shooterProgress') || '{}');
-    data.shipUpgrades = GameState.shipUpgrades || {};
-    data.coins = GameState.coins || 0;
-    localStorage.setItem('shooterProgress', JSON.stringify(data));
+  updateStorage({
+    shipUpgrades: GameState.shipUpgrades || {},
+    coins: GameState.coins || 0
+  });
 }
 
 // 加载数据
 export function loadShipUpgrades() {
-    try {
-        const data = JSON.parse(localStorage.getItem('shooterProgress'));
-        if (data) {
-            GameState.shipUpgrades = data.shipUpgrades || {};
-        }
-    } catch (e) {
-        GameState.shipUpgrades = {};
-    }
+  GameState.shipUpgrades = getStorage('shipUpgrades') || {};
 }
 
 // 应用飞机强化效果
