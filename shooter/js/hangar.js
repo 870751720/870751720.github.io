@@ -409,8 +409,8 @@ function renderEnhanceContent(shipId, config, container) {
 
     const levelBtn = document.getElementById('level-enhance-btn');
     if (levelBtn && enhanceLevel < maxEnhanceLevel) {
-        levelBtn.addEventListener('click', () => {
-            const result = enhanceShip(shipId);
+        levelBtn.addEventListener('click', async () => {
+            const result = await enhanceShip(shipId);
             if (result.success) {
                 renderPanel(shipId);
                 updateHangarCoinDisplay();
