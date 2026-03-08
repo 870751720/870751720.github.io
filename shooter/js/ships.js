@@ -5,7 +5,7 @@
 
 import { PlayerState, GameState } from './state.js';
 import { saveProgress } from './upgrades.js';
-import { drawStaticShip } from './ship-renderer.js';
+import { drawStaticShip, drawDynamicShip } from './ship-renderer.js';
 import { getStorage, setStorage, updateStorage } from './core/storage.js';
 import {
   RANK_CONFIGS,
@@ -218,13 +218,12 @@ export function renderShipShop() {
 
   container.innerHTML = carouselState.items.map((ship, index) => createShipCard(ship, index)).join('');
 
-  // 绘制预览
+  // 绘制预览 - 动态
   requestAnimationFrame(() => {
     carouselState.items.forEach((ship, index) => {
-      const canvas = document.getElementById(`ship-preview-${index}`);
-      if (canvas) {
-        const ctx = canvas.getContext('2d');
-        drawStaticShip(ctx, canvas.width/2, canvas.height/2, 40, ship);
+      const canvasId = `ship-preview-${index}`;
+      if (document.getElementById(canvasId)) {
+        drawDynamicShip(canvasId, ship, { animateFloat: true, shootBullets: true });
       }
     });
   });
