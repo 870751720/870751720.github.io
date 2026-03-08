@@ -289,7 +289,7 @@ function renderShipList() {
             if (e.target.closest('.fav-btn')) return;
 
             selectedUpgradeShip = shipId;
-            currentHangarTab = 'enhance'; // 重置为强化标签
+            // 切换飞机时保持当前标签页
             listEl.querySelectorAll('.hangar-ship-item').forEach(el => {
                 el.classList.toggle('selected', el.dataset.shipId === shipId);
             });
