@@ -99,7 +99,6 @@ export function updateBuffs(dt) {
     
     // 重置临时属性
     PlayerState.stats.magnetRange = 0;
-    PlayerState.stats.scoreMultiplier = 1;
     PlayerState.stats.homing = false;
     
     for (const id in GameObjects.activeBuffs) {
@@ -114,7 +113,6 @@ export function updateBuffs(dt) {
                 case 'rapid': PlayerState.stats.fireRate = 75; break;
                 case 'spread': PlayerState.stats.multiShot = 3; break;
                 case 'big': PlayerState.stats.bulletSizeBuff = 2.5; break;
-                case 'double': PlayerState.stats.scoreMultiplier = 2; break;
                 case 'homing': PlayerState.stats.homing = true; break;
                 case 'magnet': PlayerState.stats.magnetRange = 200; break;
             }

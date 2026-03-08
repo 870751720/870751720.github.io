@@ -177,9 +177,6 @@ function checkCollisions() {
  * 处理敌人死亡
  */
 function handleEnemyDeath(enemy) {
-    GameState.score += enemy.type === 'boss' ? 500 : 10 * GameState.combo;
-    DOM.gameScore.textContent = 'SCORE: ' + GameState.score;
-
     // 金币掉落
     const coinAmount = enemy.type === 'boss' ? 50 : 5;
     const actualCoins = addCoins(coinAmount);
@@ -275,22 +272,18 @@ function drawGameObjects() {
 function gameOver() {
     GameState.running = false;
 
-    // 结算金币奖励
-    const scoreBonus = Math.floor(GameState.score / 100);
-    const totalCoins = addCoins(scoreBonus);
-
     const startScreen = DOM.startScreen;
     if (startScreen) {
         startScreen.classList.remove('hidden');
 
         // 更新标题
         const title = startScreen.querySelector('h1');
-        if (title) title.textContent = `游戏结束 - 得分: ${GameState.score}`;
+        if (title) title.textContent = '游戏结束';
 
         // 更新描述
         const hint = startScreen.querySelector('.menu-hint');
         if (hint) {
-            hint.innerHTML = `击杀: ${GameState.killCount} | Boss击杀: ${GameState.bossKillCount}<br>本局金币: ${totalCoins} | 总金币: ${GameState.coins || 0}`;
+            hint.innerHTML = `击杀: ${GameState.killCount} | Boss击杀: ${GameState.bossKillCount}<br>总金币: ${GameState.coins || 0}`;
         }
 
         // 更新按钮文字
@@ -311,7 +304,6 @@ function gameOver() {
 export function startGame() {
     // 重置状态
     GameState.running = true;
-    GameState.score = 0;
     GameState.killCount = 0;
     GameState.combo = 0;
     GameState.enemySpawnInterval = 800;
@@ -341,7 +333,6 @@ export function startGame() {
     InputState.mouseX = ctx.canvas.width / 2;
     InputState.mouseY = ctx.canvas.height - 100;
 
-    DOM.gameScore.textContent = 'SCORE: 0';
     updateHpDisplay();
     updateBuffDisplay();
 

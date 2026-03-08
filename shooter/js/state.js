@@ -84,7 +84,6 @@ export function setContext(context) {
 // 重置游戏状态
 export function resetGameState() {
     GameState.running = true;
-    GameState.score = 0;
     GameState.killCount = 0;
     GameState.combo = 0;
     GameState.enemySpawnInterval = 800;
@@ -106,7 +105,6 @@ export function resetPlayerState() {
         damage: 1,
         multiShot: 1,
         magnetRange: 0,
-        scoreMultiplier: 1,
         wingmanCount: 0,
         sizeLevel: 1,
         homing: false
