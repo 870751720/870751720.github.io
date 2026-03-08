@@ -284,48 +284,55 @@ function initCarousel() {
   const container = document.querySelector('.ship-carousel');
   if (!container) return;
 
-  // 清除旧事件
-  container.onmousedown = null;
-  container.ontouchstart = null;
-  
-  // 鼠标/触摸按下
-  container.onmousedown = container.ontouchstart = (e) => {
-    carouselState.isDragging = true;
-    carouselState.startX = e.touches ? e.touches[0].clientX : e.clientX;
-    carouselState.currentX = carouselState.startX;
-    container.style.cursor = 'grabbing';
-  };
-  
-  // 鼠标/触摸移动
-  const moveHandler = (e) => {
-    if (!carouselState.isDragging) return;
-    e.preventDefault();
-    const x = e.touches ? e.touches[0].clientX : e.clientX;
-    carouselState.currentX = x;
-    const deltaX = x - carouselState.startX;
-    
-    // 实时更新容器位置（跟随手指/鼠标）
+  // 清理旧事件（移除所有监听器）
+  const newContainer = container.cloneNode(true);
+  container.parentNode.replaceChild(newContainer, container);
+
+  // 状态变量
+  let isDragging = false;
+  let startX = 0;
+  let currentX = 0;
+
+  // 获取当前选中项应居中的位置
+  const getBaseX = () => {
     const itemWidth = carouselState.itemWidth + carouselState.gap;
-    const containerWidth = container.parentElement.offsetWidth;
+    const containerWidth = newContainer.parentElement.offsetWidth;
     const centerOffset = containerWidth / 2 - carouselState.itemWidth / 2;
-    const baseX = centerOffset - carouselState.currentIndex * itemWidth;
-    container.style.transform = `translateX(${baseX + deltaX}px)`;
+    return centerOffset - carouselState.currentIndex * itemWidth;
   };
-  
-  container.onmousemove = moveHandler;
-  container.ontouchmove = moveHandler;
-  
-  // 鼠标/触摸松开
-  const endHandler = () => {
-    if (!carouselState.isDragging) return;
-    carouselState.isDragging = false;
-    container.style.cursor = 'grab';
+
+  // 开始拖拽
+  const onStart = (e) => {
+    isDragging = true;
+    startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+    currentX = startX;
+    newContainer.style.cursor = 'grabbing';
+    newContainer.style.transition = 'none'; // 拖拽时无动画
+  };
+
+  // 拖拽中
+  const onMove = (e) => {
+    if (!isDragging) return;
+    e.preventDefault();
     
-    // 根据滑动距离判断是否切换
-    const x = carouselState.currentX;
-    const deltaX = x - carouselState.startX;
-    const threshold = carouselState.itemWidth / 3;
+    currentX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+    const deltaX = currentX - startX;
     
+    // 基于当前选中位置 + 拖拽偏移，可以持续拖动
+    const baseX = getBaseX();
+    newContainer.style.transform = `translateX(${baseX + deltaX}px)`;
+  };
+
+  // 结束拖拽
+  const onEnd = () => {
+    if (!isDragging) return;
+    isDragging = false;
+    newContainer.style.cursor = 'grab';
+    newContainer.style.transition = 'transform 0.3s ease-out'; // 恢复动画
+
+    const deltaX = currentX - startX;
+    const threshold = carouselState.itemWidth / 3; // 简单阈值
+
     if (deltaX > threshold && carouselState.currentIndex > 0) {
       goToSlide(carouselState.currentIndex - 1);
     } else if (deltaX < -threshold && carouselState.currentIndex < carouselState.items.length - 1) {
@@ -334,27 +341,39 @@ function initCarousel() {
       updateCarousel(); // 回弹到原位
     }
   };
-  
-  container.onmouseup = container.onmouseleave = endHandler;
-  container.ontouchend = endHandler;
-  
-  // 按钮点击
+
+  // 绑定事件到容器
+  newContainer.addEventListener('mousedown', onStart);
+  newContainer.addEventListener('touchstart', onStart, { passive: true });
+
+  // 窗口级事件确保拖拽不中断
+  window.addEventListener('mousemove', onMove);
+  window.addEventListener('touchmove', onMove, { passive: false });
+  window.addEventListener('mouseup', onEnd);
+  window.addEventListener('touchend', onEnd);
+
+  // 防止拖拽时选中文本
+  newContainer.addEventListener('selectstart', (e) => e.preventDefault());
+
+  // 导航按钮
   document.getElementById('ship-prev')?.addEventListener('click', () => {
     goToSlide(Math.max(0, carouselState.currentIndex - 1));
   });
-  
+
   document.getElementById('ship-next')?.addEventListener('click', () => {
     goToSlide(Math.min(carouselState.items.length - 1, carouselState.currentIndex + 1));
   });
-  
+
   // 卡片点击事件委托
-  container.addEventListener('click', (e) => {
+  newContainer.addEventListener('click', (e) => {
+    if (isDragging) return;
+
     const btn = e.target.closest('.ship-btn');
     if (btn) {
       e.stopPropagation();
       const shipId = btn.dataset.shipId;
       const action = btn.dataset.action;
-      
+
       if (action === 'equip') {
         setCurrentShip(shipId).then(() => {
           renderShipShop();
@@ -370,7 +389,7 @@ function initCarousel() {
       }
       return;
     }
-    
+
     // 点击卡片切换到该卡片
     const card = e.target.closest('.ship-card');
     if (card) {
