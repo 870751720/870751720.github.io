@@ -27,6 +27,10 @@ export function renderInventory() {
 
     container.innerHTML = `
         <button id="inventory-back-btn" class="back-btn-fixed">← 返回</button>
+        
+        <div class="inventory-header">
+            <div class="inventory-coins">💰 ${(GameState.coins || 0).toLocaleString()}</div>
+        </div>
 
         <div class="inventory-content">
             <!-- 左侧：材料格子 -->

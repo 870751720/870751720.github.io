@@ -10,17 +10,31 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 30px 20px;
+    padding: 70px 20px 20px;
     box-sizing: border-box;
     overflow: hidden;
 }
 
-.inventory-screen h2 {
-    font-size: 28px;
-    color: #9d8df7;
-    margin: 0 0 20px 0;
-    text-shadow: 0 0 20px rgba(157, 141, 247, 0.5);
+/* 背包头部 - 显示金币 */
+.inventory-header {
+    width: 100%;
+    max-width: 900px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 0 10px 15px;
     flex-shrink: 0;
+}
+
+.inventory-coins {
+    font-size: 18px;
+    font-weight: bold;
+    color: #ffd700;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    background: rgba(0, 0, 0, 0.3);
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 215, 0, 0.3);
 }
 
 .inventory-content {
