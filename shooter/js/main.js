@@ -8,7 +8,7 @@ import { startGame } from './game.js';
 import { loadProgress, updateCoinDisplays } from './upgrades.js';
 import { loadShipData, renderShipShop, updateShipCoinDisplay } from './ships.js';
 import { renderGachaShop } from './gacha.js';
-import { loadShipUpgrades, renderHangarUpgrade, updateHangarCoinDisplay, loadFavoriteShips } from './hangar.js';
+import { loadShipUpgrades, renderHangarUpgrade, updateHangarCoinDisplay, loadFavoriteShips, setSelectedUpgradeShip, setCurrentHangarTab } from './hangar.js';
 import { renderInventory } from './inventory.js';
 import { renderStoryScreen } from './story.js';
 import { initUIManager, registerUI, pushUI, popUI, gotoUI, backToMain } from './ui-manager.js';
@@ -26,7 +26,15 @@ function setupUIManager() {
   });
   
   registerUI('upgrade-screen', {
-    onOpen: () => {
+    onOpen: (params = {}) => {
+      // 如果传入了 shipId，设置选中的飞机
+      if (params.shipId && typeof setSelectedUpgradeShip === 'function') {
+        setSelectedUpgradeShip(params.shipId);
+      }
+      // 如果传入了 tab，设置当前标签
+      if (params.tab && typeof setCurrentHangarTab === 'function') {
+        setCurrentHangarTab(params.tab);
+      }
       renderHangarUpgrade();
       updateHangarCoinDisplay();
     },
