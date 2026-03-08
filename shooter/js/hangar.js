@@ -176,16 +176,13 @@ export function renderHangarUpgrade() {
     if (!container) return;
 
     container.innerHTML = `
-        <h2>机库升级</h2>
+        <button id="back-btn" class="back-btn-fixed">← 返回</button>
+        
         <div class="hangar-layout">
             <div class="hangar-ship-list" id="hangar-ship-list"></div>
             <div class="hangar-upgrade-panel" id="hangar-upgrade-panel">
                 <div class="no-ship-selected">请从左侧选择一架飞机</div>
             </div>
-        </div>
-
-        <div class="menu-buttons-row">
-            <button id="back-btn" class="back-btn">返回主菜单</button>
         </div>
     `;
 
