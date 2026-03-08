@@ -47,8 +47,11 @@ export function gameLoop(timestamp) {
     }
 
     // 玩家射击
-    if (InputState.mouseDown && timestamp - InputState.lastShotTime > PlayerState.stats.fireRate) {
-        shoot();
+    if (timestamp - InputState.lastShotTime > PlayerState.stats.fireRate) {
+        // PC: 需要按住鼠标; 手机: 触摸即自动开火
+        if (InputState.mouseDown || (InputState.isMobile && InputState.touchActive)) {
+            shoot();
+        }
     }
 
     // 生成敌人

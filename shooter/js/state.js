@@ -53,7 +53,9 @@ export const InputState = {
     mouseX: 0,
     mouseY: 0,
     mouseDown: false,
-    lastShotTime: 0
+    lastShotTime: 0,
+    isMobile: false,        // 是否手机设备
+    touchActive: false      // 是否有手指在屏幕上
 };
 
 // 游戏对象容器

@@ -136,6 +136,10 @@ function bindRoutes() {
  * 初始化输入事件
  */
 function initInputHandlers() {
+  // 检测设备类型
+  InputState.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
+  
+  // PC 鼠标事件
   window.addEventListener('mousemove', e => {
     InputState.mouseX = e.clientX;
     InputState.mouseY = e.clientY;
@@ -150,6 +154,41 @@ function initInputHandlers() {
   window.addEventListener('mouseup', () => {
     InputState.mouseDown = false;
   });
+  
+  // 手机触摸事件
+  if (InputState.isMobile && DOM.gameCanvas) {
+    DOM.gameCanvas.addEventListener('touchstart', e => {
+      e.preventDefault();
+      if (GameState.running) {
+        InputState.touchActive = true;
+        InputState.mouseDown = true; // 自动开火
+        const touch = e.touches[0];
+        InputState.mouseX = touch.clientX;
+        InputState.mouseY = touch.clientY;
+      }
+    }, { passive: false });
+    
+    DOM.gameCanvas.addEventListener('touchmove', e => {
+      e.preventDefault();
+      if (GameState.running && InputState.touchActive) {
+        const touch = e.touches[0];
+        InputState.mouseX = touch.clientX;
+        InputState.mouseY = touch.clientY;
+      }
+    }, { passive: false });
+    
+    DOM.gameCanvas.addEventListener('touchend', e => {
+      e.preventDefault();
+      InputState.touchActive = false;
+      InputState.mouseDown = false;
+    });
+    
+    DOM.gameCanvas.addEventListener('touchcancel', e => {
+      e.preventDefault();
+      InputState.touchActive = false;
+      InputState.mouseDown = false;
+    });
+  }
 
   window.addEventListener('resize', () => {
     if (DOM.gameCanvas) {
