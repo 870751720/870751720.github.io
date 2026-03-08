@@ -230,7 +230,7 @@ function createShipCard(ship, index) {
   const rankClass = ship.rank.toLowerCase();
 
   return `
-    <div class="ship-card ${rankClass} ${owned ? 'owned' : ''} ${current ? 'current' : ''}" data-ship-id="${ship.id}" data-index="${index}">
+    <div class="ship-card rank-${rankClass} ${owned ? 'owned' : ''} ${current ? 'current' : ''}" data-ship-id="${ship.id}" data-index="${index}">
       <div class="ship-rank-badge rank-${rankClass}">${ship.rank}</div>
       <canvas id="ship-preview-${index}" class="ship-preview-canvas" width="200" height="200"></canvas>
       <div class="ship-info">
@@ -242,9 +242,9 @@ function createShipCard(ship, index) {
           <span>⚡ ${(1000/ship.stats.fireRate).toFixed(1)}/s</span>
         </div>
         ${owned ?
-          (current ? '<button class="equip-btn equipped" disabled>当前使用</button>' :
-                     '<button class="equip-btn" onclick="window.equipShip(\'' + ship.id + '\')">装备</button>') :
-          `<button class="buy-btn" onclick="window.buyShip('${ship.id}')">💰 ${ship.price}</button>`
+          (current ? '<button class="ship-btn equipped" disabled>当前使用</button>' :
+                     '<button class="ship-btn equip" onclick="window.equipShip(\'' + ship.id + '\')">装备</button>') :
+          `<button class="ship-btn buy" onclick="window.buyShip('${ship.id}')">💰 ${ship.price}</button>`
         }
       </div>
     </div>
