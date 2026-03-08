@@ -26,11 +26,7 @@ export function renderInventory() {
     const mats = GameState.materials || {};
 
     container.innerHTML = `
-        <div class="screen-header">
-            <button id="inventory-back-btn" class="back-btn">← 返回</button>
-            <h2>🎒 我的背包</h2>
-            <div class="inventory-coins-inline">💰 ${(GameState.coins || 0).toLocaleString()}</div>
-        </div>
+        <button id="inventory-back-btn" class="back-btn-fixed">← 返回</button>
 
         <div class="inventory-content">
             <!-- 左侧：材料格子 -->
