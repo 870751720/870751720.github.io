@@ -17,6 +17,17 @@ import {
   getConstellationMaterialConfig
 } from './config/ships.js';
 
+// 重新导出配置，供其他模块使用
+export {
+  RANK_CONFIGS,
+  SHIP_CONFIGS,
+  CONSTELLATION_CONFIGS,
+  SHIP_STORIES,
+  MATERIAL_CONFIGS,
+  getConstellationMaterialId,
+  getConstellationMaterialConfig
+};
+
 // ========== 强化系统 ==========
 
 export function getShipEnhanceLevel(shipId) {
