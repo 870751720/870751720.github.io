@@ -333,9 +333,11 @@ function initCarousel() {
 
   // 获取当前选中项应居中的位置
   const getBaseX = () => {
-    const itemWidth = carouselState.itemWidth + carouselState.gap;
+    const firstCard = newContainer.querySelector('.ship-card');
+    const actualItemWidth = firstCard ? firstCard.offsetWidth : carouselState.itemWidth;
+    const itemWidth = actualItemWidth + carouselState.gap;
     const containerWidth = newContainer.parentElement.offsetWidth;
-    const centerOffset = containerWidth / 2 - carouselState.itemWidth / 2;
+    const centerOffset = containerWidth / 2 - actualItemWidth / 2;
     return centerOffset - carouselState.currentIndex * itemWidth;
   };
 
@@ -361,7 +363,9 @@ function initCarousel() {
     newContainer.style.transform = `translateX(${baseX + deltaX}px)`;
     
     // 只有当偏移超过阈值时才切换当前展示的飞机
-    const itemWidth = carouselState.itemWidth + carouselState.gap;
+    const firstCard = newContainer.querySelector('.ship-card');
+    const actualItemWidth = firstCard ? firstCard.offsetWidth : carouselState.itemWidth;
+    const itemWidth = actualItemWidth + carouselState.gap;
     const threshold = itemWidth / 2; // 超过半个卡片宽度才切换
     
     if (Math.abs(deltaX) > threshold) {
@@ -471,9 +475,13 @@ function updateCarousel() {
   const container = document.querySelector('.ship-carousel');
   if (!container) return;
   
-  const itemWidth = carouselState.itemWidth + carouselState.gap;
+  // 动态获取实际卡片宽度（响应式时可能不同）
+  const firstCard = container.querySelector('.ship-card');
+  const actualItemWidth = firstCard ? firstCard.offsetWidth : carouselState.itemWidth;
+  const itemWidth = actualItemWidth + carouselState.gap;
+  
   const containerWidth = container.parentElement.offsetWidth;
-  const centerOffset = containerWidth / 2 - carouselState.itemWidth / 2;
+  const centerOffset = containerWidth / 2 - actualItemWidth / 2;
   
   // 计算目标位置：让当前卡片居中
   const targetX = centerOffset - carouselState.currentIndex * itemWidth;
