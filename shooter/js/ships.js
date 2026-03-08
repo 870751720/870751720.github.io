@@ -276,7 +276,6 @@ export function renderShipShop() {
   initCarousel();
   updateCarousel();
 }
-}
 
 function createShipCard(ship, index) {
   const owned = hasShip(ship.id);
