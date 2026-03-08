@@ -507,6 +507,16 @@ function renderConstellationContent(shipId, config, container) {
                 }
             });
         });
+
+        // 绑定悬停提示
+        container.querySelectorAll('.constellation-hex').forEach((hex, i) => {
+            hex.addEventListener('mouseenter', () => {
+                showConstellationTooltip(hex, configs[i]);
+            });
+            hex.addEventListener('mouseleave', () => {
+                hideConstellationTooltip();
+            });
+        });
     });
 }
 
@@ -630,4 +640,36 @@ function renderUpgradeItems(shipId) {
 export function updateHangarCoinDisplay() {
     const el = document.getElementById('hangar-coin-display');
     if (el) el.textContent = GameState.coins || 0;
+}
+
+// 命座悬停提示
+let constellationTooltip = null;
+
+function showConstellationTooltip(hexElement, config) {
+    hideConstellationTooltip();
+    
+    const rect = hexElement.getBoundingClientRect();
+    
+    constellationTooltip = document.createElement('div');
+    constellationTooltip.className = 'constellation-tooltip';
+    constellationTooltip.innerHTML = `
+        <div class="tooltip-level">${config.level}命 · ${config.name}</div>
+        <div class="tooltip-desc">${config.desc}</div>
+    `;
+    
+    document.body.appendChild(constellationTooltip);
+    
+    const tooltipRect = constellationTooltip.getBoundingClientRect();
+    const left = rect.left + (rect.width - tooltipRect.width) / 2;
+    const top = rect.top - tooltipRect.height - 10;
+    
+    constellationTooltip.style.left = `${Math.max(10, left)}px`;
+    constellationTooltip.style.top = `${Math.max(10, top)}px`;
+}
+
+function hideConstellationTooltip() {
+    if (constellationTooltip) {
+        constellationTooltip.remove();
+        constellationTooltip = null;
+    }
 }
