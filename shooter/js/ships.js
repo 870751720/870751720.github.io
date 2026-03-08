@@ -211,7 +211,7 @@ export async function renderShipShop() {
   requestAnimationFrame(() => {
     carouselState.items.forEach((ship, index) => {
       const canvas = document.getElementById(`ship-preview-${index}`);
-      if (canvas) drawDynamicShip(canvas, ship);
+      if (canvas) drawDynamicShip(`ship-preview-${index}`, ship);
     });
   });
 
