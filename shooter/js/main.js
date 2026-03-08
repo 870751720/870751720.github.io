@@ -24,7 +24,7 @@ function setupUIManager() {
   registerUI('start-screen', {
     onOpen: () => updateCoinDisplays()
   });
-  
+
   registerUI('upgrade-screen', {
     onOpen: (params = {}) => {
       // 如果传入了 shipId，设置选中的飞机
@@ -40,12 +40,12 @@ function setupUIManager() {
     },
     onBack: () => 'start-screen'
   });
-  
+
   registerUI('inventory-screen', {
     onOpen: () => renderInventory(),
     onBack: () => 'start-screen'
   });
-  
+
   registerUI('ship-screen', {
     onOpen: () => {
       renderShipShop();
@@ -53,12 +53,12 @@ function setupUIManager() {
     },
     onBack: () => 'start-screen'
   });
-  
+
   registerUI('gacha-screen', {
     onOpen: () => renderGachaShop(),
     onBack: () => 'start-screen'
   });
-  
+
   registerUI('story-screen', {
     onOpen: () => renderStoryScreen(),
     onBack: () => 'upgrade-screen'
@@ -73,60 +73,39 @@ function bindRoutes() {
   document.getElementById('upgrade-btn')?.addEventListener('click', () => {
     pushUI('upgrade-screen');
   });
-  
+
   document.getElementById('inventory-btn')?.addEventListener('click', () => {
     pushUI('inventory-screen');
   });
-  
+
   document.getElementById('ship-btn')?.addEventListener('click', () => {
     pushUI('ship-screen');
   });
-  
+
   document.getElementById('gacha-btn')?.addEventListener('click', () => {
     pushUI('gacha-screen');
   });
-  
+
   document.getElementById('start-btn')?.addEventListener('click', startGame);
-  
+
   // 返回主菜单
   document.getElementById('back-btn')?.addEventListener('click', () => {
     backToMain();
   });
-  
+
   document.getElementById('ship-back-btn')?.addEventListener('click', () => {
     backToMain();
   });
-  
+
   document.getElementById('gacha-back-btn')?.addEventListener('click', () => {
     backToMain();
   });
-  
-  // 屏幕间跳转
-  document.getElementById('to-ship-btn')?.addEventListener('click', () => {
-    pushUI('ship-screen');
-  });
-  
-  document.getElementById('to-upgrade-btn')?.addEventListener('click', () => {
-    pushUI('upgrade-screen');
-  });
-  
-  document.getElementById('to-gacha-btn')?.addEventListener('click', () => {
-    pushUI('gacha-screen');
-  });
-  
-  document.getElementById('gacha-to-ship-btn')?.addEventListener('click', () => {
-    pushUI('ship-screen');
-  });
-  
-  document.getElementById('gacha-to-upgrade-btn')?.addEventListener('click', () => {
-    pushUI('upgrade-screen');
-  });
-  
+
   // 子屏幕
   document.getElementById('story-entry')?.addEventListener('click', () => {
     pushUI('story-screen');
   });
-  
+
   document.getElementById('story-back-btn')?.addEventListener('click', () => {
     popUI();
   });
@@ -138,7 +117,7 @@ function bindRoutes() {
 function initInputHandlers() {
   // 检测设备类型
   InputState.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
-  
+
   // PC 鼠标事件
   window.addEventListener('mousemove', e => {
     InputState.mouseX = e.clientX;
@@ -154,7 +133,7 @@ function initInputHandlers() {
   window.addEventListener('mouseup', () => {
     InputState.mouseDown = false;
   });
-  
+
   // 手机触摸事件
   if (InputState.isMobile && DOM.gameCanvas) {
     DOM.gameCanvas.addEventListener('touchstart', e => {
@@ -167,7 +146,7 @@ function initInputHandlers() {
         InputState.mouseY = touch.clientY;
       }
     }, { passive: false });
-    
+
     DOM.gameCanvas.addEventListener('touchmove', e => {
       e.preventDefault();
       if (GameState.running && InputState.touchActive) {
@@ -176,13 +155,13 @@ function initInputHandlers() {
         InputState.mouseY = touch.clientY;
       }
     }, { passive: false });
-    
+
     DOM.gameCanvas.addEventListener('touchend', e => {
       e.preventDefault();
       InputState.touchActive = false;
       InputState.mouseDown = false;
     });
-    
+
     DOM.gameCanvas.addEventListener('touchcancel', e => {
       e.preventDefault();
       InputState.touchActive = false;
@@ -210,7 +189,7 @@ function initGame() {
   DOM.comboCountEl = DOM.comboDisplay?.querySelector('.combo-count');
   DOM.hpDisplay = document.getElementById('hp-display');
   DOM.buffDisplay = document.getElementById('buff-display');
-  
+
   // 缓存所有屏幕元素
   screens['start-screen'] = document.getElementById('start-screen');
   screens['upgrade-screen'] = document.getElementById('upgrade-screen');
