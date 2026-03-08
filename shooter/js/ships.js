@@ -292,6 +292,9 @@ function initCarousel() {
   let startX = 0;
   let currentX = 0;
   let startTranslateX = 0;
+  let velocity = 0;
+  let lastX = 0;
+  let lastTime = 0;
 
   // 获取当前容器位置
   const getCurrentTranslateX = () => {
@@ -304,9 +307,12 @@ function initCarousel() {
   const startDrag = (e) => {
     isDragging = true;
     startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+    lastX = startX;
+    lastTime = Date.now();
     startTranslateX = getCurrentTranslateX();
+    velocity = 0;
     newContainer.style.cursor = 'grabbing';
-    newContainer.style.transition = 'none'; // 拖拽时移除过渡
+    newContainer.style.transition = 'none';
   };
 
   // 拖拽中
@@ -315,6 +321,16 @@ function initCarousel() {
     e.preventDefault();
     
     currentX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+    
+    // 计算速度
+    const now = Date.now();
+    const dt = now - lastTime;
+    if (dt > 0) {
+      velocity = (currentX - lastX) / dt;
+    }
+    lastX = currentX;
+    lastTime = now;
+    
     const deltaX = currentX - startX;
     newContainer.style.transform = `translateX(${startTranslateX + deltaX}px)`;
   };
@@ -324,18 +340,29 @@ function initCarousel() {
     if (!isDragging) return;
     isDragging = false;
     newContainer.style.cursor = 'grab';
-    newContainer.style.transition = 'transform 0.3s ease-out';
 
-    const deltaX = currentX - startX;
-    const threshold = 50; // 50px 阈值
-
-    if (deltaX > threshold && carouselState.currentIndex > 0) {
-      goToSlide(carouselState.currentIndex - 1);
-    } else if (deltaX < -threshold && carouselState.currentIndex < carouselState.items.length - 1) {
-      goToSlide(carouselState.currentIndex + 1);
-    } else {
-      updateCarousel(); // 回弹
+    const itemWidth = carouselState.itemWidth + carouselState.gap;
+    const currentTranslateX = getCurrentTranslateX();
+    
+    // 计算目标索引（基于位置和速度）
+    const containerWidth = newContainer.parentElement.offsetWidth;
+    const centerOffset = containerWidth / 2 - carouselState.itemWidth / 2;
+    const baseX = centerOffset - carouselState.currentIndex * itemWidth;
+    const deltaX = currentTranslateX - baseX;
+    
+    // 考虑速度和位移决定目标
+    let targetIndex = carouselState.currentIndex;
+    
+    if (Math.abs(deltaX) > itemWidth / 3 || Math.abs(velocity) > 0.5) {
+      // 根据方向切换
+      if (deltaX > 0 || velocity > 0.3) {
+        targetIndex = Math.max(0, carouselState.currentIndex - 1);
+      } else if (deltaX < 0 || velocity < -0.3) {
+        targetIndex = Math.min(carouselState.items.length - 1, carouselState.currentIndex + 1);
+      }
     }
+    
+    goToSlide(targetIndex);
   };
 
   // 绑定事件
@@ -362,7 +389,7 @@ function initCarousel() {
 
   // 卡片点击事件委托
   newContainer.addEventListener('click', (e) => {
-    if (isDragging) return; // 拖拽时不触发点击
+    if (isDragging) return;
     
     const btn = e.target.closest('.ship-btn');
     if (btn) {
