@@ -62,19 +62,10 @@ export function renderConstellationScreen() {
     let html = '<div class="constellation-grid">';
     
     ownedShips.forEach(ship => {
-        const constellations = CONSTELLATION_CONFIGS[ship.id];
         const level = getConstellationLevel(ship.id);
         
         html += `
             <div class="constellation-card" data-ship="${ship.id}">
-                <div class="constellation-header">
-                    <div class="constellation-ship-icon" style="background: ${ship.color}"></div>
-                    <div class="constellation-ship-info">
-                        <div class="constellation-ship-name">${ship.name}</div>
-                        <div class="constellation-ship-rank rank-${ship.rank.toLowerCase()}">${ship.rank}</div>
-                    </div>
-                    <div class="constellation-level">${level}/6</div>
-                </div>
                 <div class="constellation-nodes">
                     ${renderConstellationNodes(ship.id, level)}
                 </div>
