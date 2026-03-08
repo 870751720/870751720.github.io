@@ -216,6 +216,16 @@ export function renderShipShop() {
     carouselState.items.push(...groups[rank]);
   });
 
+  // 找到第一个未购买且品级最低的飞机作为默认选中
+  let defaultIndex = 0;
+  for (let i = 0; i < carouselState.items.length; i++) {
+    if (!hasShip(carouselState.items[i].id)) {
+      defaultIndex = i;
+      break;
+    }
+  }
+  carouselState.currentIndex = defaultIndex;
+
   container.innerHTML = carouselState.items.map((ship, index) => createShipCard(ship, index)).join('');
 
   // 绘制预览 - 动态
@@ -382,6 +392,10 @@ function initCarousel() {
       e.stopPropagation();
       const shipId = btn.dataset.shipId;
       const action = btn.dataset.action;
+      
+      // 获取当前点击的卡片索引
+      const card = btn.closest('.ship-card');
+      const cardIndex = parseInt(card?.dataset.index || '0');
 
       if (action === 'equip') {
         setCurrentShip(shipId).then(() => {
@@ -389,6 +403,12 @@ function initCarousel() {
           updateCarousel();
         });
       } else if (action === 'buy') {
+        // 只有当前选中的飞机才能购买
+        if (cardIndex !== carouselState.currentIndex) {
+          // 先切换到该飞机
+          goToSlide(cardIndex);
+          return;
+        }
         buyShip(shipId).then(result => {
           if (result.success) {
             renderShipShop();
