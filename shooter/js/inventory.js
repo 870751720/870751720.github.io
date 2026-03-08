@@ -170,7 +170,9 @@ function useConstellationMaterial(matKey) {
             hangarModule.setCurrentHangarTab('constellation');
         }
         // 渲染机库
-        hangarModule.renderHangar();
+        if (typeof hangarModule.renderHangarUpgrade === 'function') {
+            hangarModule.renderHangarUpgrade();
+        }
     });
 }
 
