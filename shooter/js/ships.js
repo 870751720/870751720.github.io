@@ -55,7 +55,7 @@ export function getEnhanceCost(config, currentLevel) {
   return { materials, coins: Math.floor(50 * baseMultiplier * Math.pow(1.5, currentLevel)) };
 }
 
-export function enhanceShip(shipId) {
+export async function enhanceShip(shipId) {
   const { SHIP_CONFIGS, RANK_CONFIGS, MATERIAL_CONFIGS } = await import('./config/ships.js');
   const config = SHIP_CONFIGS.find(s => s.id === shipId);
   if (!config) return { success: false, message: '飞机不存在' };
@@ -88,7 +88,7 @@ export function enhanceShip(shipId) {
 
 // ========== 数据查询 ==========
 
-export function getRankConfig(rank) {
+export async function getRankConfig(rank) {
   return (await import('./config/ships.js')).RANK_CONFIGS[rank] || { maxEnhance: 5 };
 }
 
