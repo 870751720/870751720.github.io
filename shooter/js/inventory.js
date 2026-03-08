@@ -26,15 +26,16 @@ export function renderInventory() {
     const mats = GameState.materials || {};
 
     container.innerHTML = `
-        <h2>🎒 我的背包</h2>
+        <div class="screen-header">
+            <button id="inventory-back-btn" class="back-btn">← 返回</button>
+            <h2>🎒 我的背包</h2>
+            <div class="inventory-coins-inline">💰 ${(GameState.coins || 0).toLocaleString()}</div>
+        </div>
 
         <div class="inventory-content">
             <!-- 左侧：材料格子 -->
             <div class="inventory-left">
                 <div class="inventory-section">
-                    <div class="inventory-header">
-                        <div class="inventory-coins-inline">💰 ${(GameState.coins || 0).toLocaleString()}</div>
-                    </div>
                     <div class="inventory-materials-container">
                         <div class="inventory-materials-grid">
                             ${renderMaterialsGrid(mats)}
@@ -49,10 +50,6 @@ export function renderInventory() {
                     <div class="detail-placeholder">点击材料查看详情</div>
                 </div>
             </div>
-        </div>
-
-        <div class="menu-buttons-row">
-            <button id="inventory-back-btn" class="back-btn">返回主菜单</button>
         </div>
     `;
 
