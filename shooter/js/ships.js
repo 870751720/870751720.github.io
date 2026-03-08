@@ -191,8 +191,8 @@ export function addMaterial(type, amount) {
 let carouselState = {
   items: [],
   currentIndex: 0,
-  itemWidth: 300,
-  gap: 40,
+  itemWidth: 280,
+  gap: 20,
   isDragging: false,
   startX: 0,
   currentX: 0,
