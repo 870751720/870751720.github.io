@@ -2,9 +2,8 @@
  * Boss 子类实现 - 每个Boss都有独特的弹幕颜色方案
  */
 
-import { Boss } from './entities.js';
+import { Boss, Bullet, Particle } from './entities/index.js';
 import { GameState, PlayerState, GameObjects, ctx } from './state.js';
-import { Bullet, Particle } from './entities.js';
 
 // ==================== 毁灭者 - 火系（橙红渐变）====================
 export class Destroyer extends Boss {

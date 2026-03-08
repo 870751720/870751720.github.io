@@ -4,7 +4,7 @@
 
 import { PlayerState, GameObjects } from './state.js';
 import { showFloatingText, updateHpDisplay, updateBuffDisplay } from './ui.js';
-import { Particle, Wingman } from './entities.js';
+import { Particle, Wingman } from './entities/index.js';
 
 /**
  * 处理即时道具

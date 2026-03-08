@@ -7,7 +7,7 @@ import { BOSS_TYPES } from './config.js';
 import { checkCollision, showFloatingText } from './utils.js';
 import { updateHpDisplay, updateBuffDisplay, updateCombo } from './ui.js';
 import { collectItem, spawnItem, updateBuffs } from './items.js';
-import { Player, Wingman, Bullet, Enemy, Item, Particle } from './entities.js';
+import { Player, Wingman, Bullet, Enemy, Item, Particle } from './entities/index.js';
 import { Destroyer, FrostGiant, LightningRider, MechSpider, ShadowAssassin, ChaosEye } from './bosses.js';
 import { addCoins, updateCoinDisplays, applyUpgrades } from './upgrades.js';
 import { applyShipStats, addMaterial, MATERIAL_CONFIGS } from './ships.js';
