@@ -109,6 +109,13 @@ function initGame() {
   DOM.comboCountEl = DOM.comboDisplay?.querySelector('.combo-count');
   DOM.hpDisplay = document.getElementById('hp-display');
   DOM.buffDisplay = document.getElementById('buff-display');
+  
+  // 缓存屏幕元素
+  DOM['upgrade-screen'] = document.getElementById('upgrade-screen');
+  DOM['inventory-screen'] = document.getElementById('inventory-screen');
+  DOM['ship-screen'] = document.getElementById('ship-screen');
+  DOM['gacha-screen'] = document.getElementById('gacha-screen');
+  DOM['story-screen'] = document.getElementById('story-screen');
 
   // 加载存档
   loadProgress();
