@@ -200,9 +200,36 @@ let carouselState = {
 };
 
 export function renderShipShop() {
+  const screen = document.getElementById('ship-screen');
+  if (!screen) return;
+  
+  // 生成完整界面
+  screen.innerHTML = `
+    <button id="ship-back-btn" class="back-btn-fixed">← 返回</button>
+    
+    <div class="ship-content">
+      <div class="ship-header">
+        <div class="ship-coins">💰 <span id="ship-coin-display">0</span></div>
+      </div>
+      
+      <div class="ship-carousel-container">
+        <button class="carousel-nav prev" id="ship-prev">◀</button>
+        <div class="ship-carousel" id="ship-grid"></div>
+        <button class="carousel-nav next" id="ship-next">▶</button>
+      </div>
+      
+      <div class="carousel-dots" id="carousel-dots"></div>
+    </div>
+  `;
+  
+  // 绑定返回按钮
+  document.getElementById('ship-back-btn')?.addEventListener('click', () => {
+    document.getElementById('ship-screen').classList.add('hidden');
+    document.getElementById('start-screen').classList.remove('hidden');
+  });
+  
   const container = document.getElementById('ship-grid');
   const dotsContainer = document.getElementById('carousel-dots');
-  if (!container) return;
 
   // 按等级分组并排序
   const groups = { 'SSR': [], 'A': [], 'B': [], 'C': [] };
@@ -245,8 +272,10 @@ export function renderShipShop() {
     ).join('');
   }
 
+  updateShipCoinDisplay();
   initCarousel();
   updateCarousel();
+}
 }
 
 function createShipCard(ship, index) {

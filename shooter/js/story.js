@@ -7,45 +7,63 @@ import { Modal } from './ui/index.js';
 
 // 渲染故事界面
 export function renderStoryScreen() {
-  const container = document.getElementById('story-container');
-  if (!container) return;
+  const screen = document.getElementById('story-screen');
+  if (!screen) return;
   
   const ownedShips = SHIP_CONFIGS.filter(ship => hasShip(ship.id));
   
+  let contentHtml = '';
+  
   if (ownedShips.length === 0) {
-    container.innerHTML = '<div class="empty-state">还没有拥有的飞机</div>';
-    return;
+    contentHtml = '<div class="empty-state">还没有拥有的飞机</div>';
+  } else {
+    contentHtml = '<div class="story-grid">';
+    
+    ownedShips.forEach(ship => {
+      const story = SHIP_STORIES[ship.id];
+      if (!story) return;
+      
+      contentHtml += `
+        <div class="story-card" data-ship="${ship.id}">
+          <div class="story-card-glow" style="background: ${ship.color}"></div>
+          <div class="story-card-content">
+            <div class="story-card-rank rank-${ship.rank.toLowerCase()}">${ship.rank}</div>
+            <div class="story-card-title">${story.title}</div>
+            <div class="story-card-subtitle">${story.subtitle}</div>
+            <div class="story-card-preview">${story.quote}</div>
+          </div>
+        </div>
+      `;
+    });
+    
+    contentHtml += '</div>';
   }
   
-  let html = '<div class="story-grid">';
-  
-  ownedShips.forEach(ship => {
-    const story = SHIP_STORIES[ship.id];
-    if (!story) return;
-    
-    html += `
-      <div class="story-card" data-ship="${ship.id}">
-        <div class="story-card-glow" style="background: ${ship.color}"></div>
-        <div class="story-card-content">
-          <div class="story-card-rank rank-${ship.rank.toLowerCase()}">${ship.rank}</div>
-          <div class="story-card-title">${story.title}</div>
-          <div class="story-card-subtitle">${story.subtitle}</div>
-          <div class="story-card-preview">${story.quote}</div>
-        </div>
+  screen.innerHTML = `
+    <button id="story-back-btn" class="back-btn-fixed">← 返回</button>
+    <div class="story-content">
+      <h2 style="color: #9d8df7; margin-bottom: 20px;">📖 飞机故事</h2>
+      <div class="story-container" id="story-container">
+        ${contentHtml}
       </div>
-    `;
-  });
+    </div>
+  `;
   
-  html += '</div>';
-  container.innerHTML = html;
+  // 绑定返回按钮
+  document.getElementById('story-back-btn')?.addEventListener('click', () => {
+    document.getElementById('story-screen').classList.add('hidden');
+    document.getElementById('upgrade-screen').classList.remove('hidden');
+  });
   
   // 绑定点击事件
-  container.querySelectorAll('.story-card').forEach(card => {
-    card.addEventListener('click', () => {
-      const shipId = card.dataset.ship;
-      showStoryDetail(shipId);
+  if (ownedShips.length > 0) {
+    document.getElementById('story-container').querySelectorAll('.story-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const shipId = card.dataset.ship;
+        showStoryDetail(shipId);
+      });
     });
-  });
+  }
 }
 
 // 显示故事详情

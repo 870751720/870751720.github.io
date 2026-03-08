@@ -203,43 +203,53 @@ export function doGacha(isTen = false) {
 
 // 渲染抽卡商店
 export function renderGachaShop() {
-    const container = document.getElementById('gacha-container');
-    if (!container) return;
+    const screen = document.getElementById('gacha-screen');
+    if (!screen) return;
     
-    container.innerHTML = `
-        <div class="gacha-header">
-            <div class="gacha-coins">💰 <span id="gacha-coin-display">${GameState.coins || 0}</span></div>
-            <div class="gacha-title">🎰 扭蛋机</div>
-            <div class="gacha-desc">抽取飞机和强化材料</div>
-        </div>
+    screen.innerHTML = `
+        <button id="gacha-back-btn" class="back-btn-fixed">← 返回</button>
         
-        <div class="gacha-machine">
-            <div class="gacha-ball">🎱</div>
-            <div class="gacha-light"></div>
-        </div>
-        
-        <div class="gacha-rates">
-            <div class="rate-title">卡池概率</div>
-            <div class="rate-list">
-                <div class="rate-item ssr">SSR飞机: 3%</div>
-                <div class="rate-item a">A飞机: 12%</div>
-                <div class="rate-item b">B飞机: 35%</div>
-                <div class="rate-item c">C飞机: 50%</div>
-                <div class="rate-item material">材料: 70% (每次)</div>
+        <div class="gacha-container" id="gacha-container">
+            <div class="gacha-header">
+                <div class="gacha-coins">💰 <span id="gacha-coin-display">${GameState.coins || 0}</span></div>
+                <div class="gacha-title">🎰 扭蛋机</div>
+                <div class="gacha-desc">抽取飞机和强化材料</div>
+            </div>
+            
+            <div class="gacha-machine">
+                <div class="gacha-ball">🎱</div>
+                <div class="gacha-light"></div>
+            </div>
+            
+            <div class="gacha-rates">
+                <div class="rate-title">卡池概率</div>
+                <div class="rate-list">
+                    <div class="rate-item ssr">SSR飞机: 3%</div>
+                    <div class="rate-item a">A飞机: 12%</div>
+                    <div class="rate-item b">B飞机: 35%</div>
+                    <div class="rate-item c">C飞机: 50%</div>
+                    <div class="rate-item material">材料: 70% (每次)</div>
+                </div>
+            </div>
+            
+            <div class="gacha-buttons">
+                <button class="gacha-btn single" id="gacha-single">
+                    <div class="btn-title">单抽</div>
+                    <div class="btn-cost">💰 ${GACHA_CONFIG.singleCost}</div>
+                </button>
+                <button class="gacha-btn ten" id="gacha-ten">
+                    <div class="btn-title">十连抽</div>
+                    <div class="btn-cost">💰 ${GACHA_CONFIG.tenCost} <span class="discount">9折</span></div>
+                </button>
             </div>
         </div>
-        
-        <div class="gacha-buttons">
-            <button class="gacha-btn single" id="gacha-single">
-                <div class="btn-title">单抽</div>
-                <div class="btn-cost">💰 ${GACHA_CONFIG.singleCost}</div>
-            </button>
-            <button class="gacha-btn ten" id="gacha-ten">
-                <div class="btn-title">十连抽</div>
-                <div class="btn-cost">💰 ${GACHA_CONFIG.tenCost} <span class="discount">9折</span></div>
-            </button>
-        </div>
     `;
+    
+    // 绑定返回按钮
+    document.getElementById('gacha-back-btn')?.addEventListener('click', () => {
+        document.getElementById('gacha-screen').classList.add('hidden');
+        document.getElementById('start-screen').classList.remove('hidden');
+    });
     
     // 绑定按钮
     document.getElementById('gacha-single').addEventListener('click', () => {

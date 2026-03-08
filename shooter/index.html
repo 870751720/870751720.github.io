@@ -39,64 +39,20 @@
         </div>
     </div>
     
-    <!-- 背包界面 -->
-    <div class="inventory-screen hidden" id="inventory-screen">
-        <!-- 内容由JS生成 -->
-    </div>
+    <!-- 背包界面 (动态生成) -->
+    <div class="inventory-screen hidden" id="inventory-screen"></div>
 
-    <!-- 升级商店 -->
-    <div class="upgrade-screen hidden" id="upgrade-screen">
-        <button id="back-btn" class="back-btn-fixed">← 返回</button>
-        
-        <div class="upgrade-content">
-            <!-- 功能入口 -->
-            <div class="upgrade-entries">
-                <button id="story-entry" class="upgrade-entry-btn">
-                    <span class="entry-icon">📖</span>
-                    <span class="entry-text">飞机故事</span>
-                </button>
-            </div>
-            
-            <div class="upgrade-grid" id="upgrade-grid">
-                <!-- 升级项目由JS生成 -->
-            </div>
-        </div>
-    </div>
+    <!-- 机库升级 (动态生成) -->
+    <div class="upgrade-screen hidden" id="upgrade-screen"></div>
 
-    <!-- 飞机故事界面 -->
-    <div class="story-screen hidden" id="story-screen">
-        <button id="story-back-btn" class="back-btn-fixed">← 返回</button>
-        
-        <div class="story-content">
-            <div class="story-container" id="story-container">
-                <!-- 故事内容由JS生成 -->
-            </div>
-        </div>
-    </div>
+    <!-- 飞机故事 (动态生成) -->
+    <div class="story-screen hidden" id="story-screen"></div>
 
-    <!-- 抽卡商店 -->
-    <div class="gacha-screen hidden" id="gacha-screen">
-        <button id="gacha-back-btn" class="back-btn-fixed">← 返回</button>
-        <div class="gacha-container" id="gacha-container">
-            <!-- 内容由JS生成 -->
-        </div>
-    </div>
+    <!-- 抽卡商店 (动态生成) -->
+    <div class="gacha-screen hidden" id="gacha-screen"></div>
     
-    <!-- 飞机商店 -->
-    <div class="ship-screen hidden" id="ship-screen">
-        <button id="ship-back-btn" class="back-btn-fixed">← 返回</button>
-        
-        <div class="ship-content">
-            <div class="ship-carousel-container">
-                <button class="carousel-nav prev" id="ship-prev">◀</button>
-                <div class="ship-carousel" id="ship-grid">
-                    <!-- 飞机由JS生成 -->
-                </div>
-                <button class="carousel-nav next" id="ship-next">▶</button>
-            </div>
-            <div class="carousel-dots" id="carousel-dots"></div>
-        </div>
-    </div>
+    <!-- 飞机商店 (动态生成) -->
+    <div class="ship-screen hidden" id="ship-screen"></div>
     
     <script type="module" src="js/main.js"></script>
 </body>
