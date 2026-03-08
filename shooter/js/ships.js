@@ -322,19 +322,21 @@ function initCarousel() {
     const baseX = getBaseX();
     newContainer.style.transform = `translateX(${baseX + deltaX}px)`;
     
-    // 实时计算应该展示哪个飞机（根据当前容器位置）
+    // 只有当偏移超过阈值时才切换当前展示的飞机
     const itemWidth = carouselState.itemWidth + carouselState.gap;
-    const containerWidth = newContainer.parentElement.offsetWidth;
-    const centerOffset = containerWidth / 2 - carouselState.itemWidth / 2;
-    const currentTranslateX = baseX + deltaX;
+    const threshold = itemWidth / 2; // 超过半个卡片宽度才切换
     
-    // 计算哪个卡片最接近中心
-    const newIndex = Math.round((centerOffset - currentTranslateX) / itemWidth);
-    const clampedIndex = Math.max(0, Math.min(carouselState.items.length - 1, newIndex));
-    
-    if (clampedIndex !== carouselState.currentIndex) {
-      carouselState.currentIndex = clampedIndex;
-      updateCarouselState(); // 只更新卡片状态，不移动容器
+    if (Math.abs(deltaX) > threshold) {
+      const direction = deltaX > 0 ? -1 : 1; // 向右拖->看左边的，向左拖->看右边的
+      const newIndex = carouselState.currentIndex + direction;
+      const clampedIndex = Math.max(0, Math.min(carouselState.items.length - 1, newIndex));
+      
+      if (clampedIndex !== carouselState.currentIndex) {
+        carouselState.currentIndex = clampedIndex;
+        // 重置起始点，避免连续快速切换
+        startX = currentX;
+        updateCarouselState();
+      }
     }
   };
 
