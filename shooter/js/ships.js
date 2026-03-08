@@ -404,51 +404,6 @@ function updateCarousel() {
     dot.classList.toggle('active', i === carouselState.currentIndex);
   });
 }
-  const rankClass = ship.rank.toLowerCase();
-
-  return `
-    <div class="ship-card rank-${rankClass} ${owned ? 'owned' : ''} ${current ? 'current' : ''}" data-ship-id="${ship.id}" data-index="${index}">
-      <div class="ship-rank-badge rank-${rankClass}">${ship.rank}</div>
-      <canvas id="ship-preview-${index}" class="ship-preview-canvas" width="200" height="200"></canvas>
-      <div class="ship-info">
-        <h3 class="ship-name">${ship.name}</h3>
-        <p class="ship-desc">${ship.desc}</p>
-        <div class="ship-stats">
-          <span>❤️ ${ship.stats.maxHp}</span>
-          <span>⚔️ ${ship.stats.damage}</span>
-          <span>⚡ ${(1000/ship.stats.fireRate).toFixed(1)}/s</span>
-        </div>
-        ${owned ?
-          (current ? '<button class="ship-btn equipped" disabled>当前使用</button>' :
-                     '<button class="ship-btn equip" onclick="window.equipShip(\'' + ship.id + '\')">装备</button>') :
-          `<button class="ship-btn buy" onclick="window.buyShip('${ship.id}')">💰 ${ship.price}</button>`
-        }
-      </div>
-    </div>
-  `;
-}
-
-function initCarousel() {
-  const container = document.querySelector('.ship-carousel');
-  if (!container) return;
-
-  const updatePosition = () => {
-    const totalWidth = carouselState.items.length * (carouselState.itemWidth + carouselState.gap);
-    const maxTranslate = Math.max(0, totalWidth - container.parentElement.offsetWidth);
-    carouselState.translateX = Math.max(-maxTranslate, Math.min(0, carouselState.translateX));
-    container.style.transform = `translateX(${carouselState.translateX}px)`;
-  };
-
-  document.getElementById('ship-prev')?.addEventListener('click', () => {
-    carouselState.translateX += carouselState.itemWidth + carouselState.gap;
-    updatePosition();
-  });
-
-  document.getElementById('ship-next')?.addEventListener('click', () => {
-    carouselState.translateX -= carouselState.itemWidth + carouselState.gap;
-    updatePosition();
-  });
-}
 
 // ========== UI 更新 ==========
 
