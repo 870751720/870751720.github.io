@@ -480,28 +480,6 @@ function renderConstellationContent(shipId, config, container) {
 
         container.innerHTML = `
             <div class="constellation-container">
-                <div class="constellation-header">
-                    <div class="constellation-material">
-                        <div class="material-icon-glow" style="background: ${config.color}"></div>
-                        <div class="material-info">
-                            <div class="material-label">命星材料</div>
-                            <div class="material-name">${config.name}·命星</div>
-                            <div class="material-count ${materialCount > 0 ? 'has' : ''}">× ${materialCount}</div>
-                        </div>
-                    </div>
-                    <div class="constellation-progress-ring">
-                        <div class="progress-text">
-                            <span class="current">${level}</span>
-                            <span class="total">/6</span>
-                        </div>
-                        <svg class="progress-svg" viewBox="0 0 100 100">
-                            <circle class="progress-bg" cx="50" cy="50" r="45"/>
-                            <circle class="progress-bar" cx="50" cy="50" r="45" 
-                                style="stroke-dasharray: 283; stroke-dashoffset: ${283 - (283 * level / 6)}"/>
-                        </svg>
-                    </div>
-                </div>
-                
                 <div class="constellation-nodes">
                     ${nodesHtml}
                 </div>
