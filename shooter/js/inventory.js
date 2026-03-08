@@ -31,6 +31,7 @@ export function renderInventory() {
         <div class="inventory-content">
             <!-- 左侧：材料格子 -->
             <div class="inventory-left">
+                <div class="inventory-coins">💰 ${(GameState.coins || 0).toLocaleString()}</div>
                 <div class="inventory-section">
                     <div class="inventory-materials-container">
                         <div class="inventory-materials-grid">
@@ -43,7 +44,6 @@ export function renderInventory() {
             <!-- 右侧：详情面板 -->
             <div class="inventory-right">
                 <div id="material-detail-panel" class="material-detail-panel">
-                    <div class="detail-coins">💰 ${(GameState.coins || 0).toLocaleString()}</div>
                     <div class="detail-placeholder">点击材料查看详情</div>
                 </div>
             </div>

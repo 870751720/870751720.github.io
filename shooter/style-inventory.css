@@ -10,19 +10,19 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 60px 20px 20px;
+    padding: 80px 20px 20px;
     box-sizing: border-box;
     overflow: hidden;
 }
 
-/* 详情面板内的金币显示 */
-.detail-coins {
+/* 左侧金币显示 */
+.inventory-left .inventory-coins {
     font-size: 16px;
     font-weight: bold;
     color: #ffd700;
     text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
-    margin-bottom: 15px;
-    text-align: center;
+    margin-bottom: 10px;
+    padding: 0 5px;
 }
 
 .inventory-content {
