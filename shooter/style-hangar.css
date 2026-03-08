@@ -612,6 +612,20 @@
         min-width: 200px;
     }
     
+    /* 手机端：飞机预览在上，属性信息在下 */
+    .upgrade-panel-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .panel-ship-info {
+        width: 100%;
+    }
+    
+    .panel-ship-stats {
+        justify-content: center;
+    }
+    
     .upgrade-items-grid {
         grid-template-columns: 1fr;
     }
