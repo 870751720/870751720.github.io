@@ -294,40 +294,41 @@
     .inventory-screen h2 {
         font-size: 24px;
     }
-    
+
     .inventory-content {
-        flex-direction: column;
+        flex-direction: column-reverse;
+        gap: 10px;
         max-width: 100%;
     }
-    
+
     .inventory-left .inventory-coins {
         margin-bottom: 15px;
     }
-    
+
     .inventory-right {
         width: 100%;
-        margin-top: 15px;
+        padding-top: 0;
+        margin-top: 0;
     }
-    }
-    
+
     .material-detail-panel {
-        min-height: 200px;
+        min-height: 180px;
         flex-direction: row;
         flex-wrap: wrap;
         justify-content: center;
         gap: 8px;
     }
-    
+
     .detail-icon {
         font-size: 48px;
     }
-    
+
     .detail-name {
         font-size: 18px;
         width: 100%;
         text-align: center;
     }
-    
+
     .inventory-materials-grid {
         grid-template-columns: repeat(5, 1fr);
     }
