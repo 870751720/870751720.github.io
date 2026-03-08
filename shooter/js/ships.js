@@ -398,6 +398,10 @@ function initCarousel() {
       const cardIndex = parseInt(card?.dataset.index || '0');
 
       if (action === 'equip') {
+        // 只有当前选中的飞机才能装备
+        if (cardIndex !== carouselState.currentIndex) {
+          return;
+        }
         setCurrentShip(shipId).then(() => {
           renderShipShop();
           updateCarousel();
