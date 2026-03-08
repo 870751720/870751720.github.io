@@ -10,7 +10,6 @@ import { loadShipData, renderShipShop, updateShipCoinDisplay } from './ships.js'
 import { renderGachaShop } from './gacha.js';
 import { loadShipUpgrades, renderHangarUpgrade, updateHangarCoinDisplay, loadFavoriteShips } from './hangar.js';
 import { renderInventory } from './inventory.js';
-import { renderConstellationScreen, updateConstellationCoinDisplay } from './constellation.js';
 import { renderStoryScreen } from './story.js';
 
 /**
@@ -166,27 +165,6 @@ function initGame() {
             upgradeScreen.classList.add('hidden');
             gachaScreen.classList.remove('hidden');
             renderGachaShop();
-        });
-    }
-
-    // 命座提升
-    const constellationEntry = document.getElementById('constellation-entry');
-    const constellationScreen = document.getElementById('constellation-screen');
-    const constellationBackBtn = document.getElementById('constellation-back-btn');
-
-    if (constellationEntry) {
-        constellationEntry.addEventListener('click', () => {
-            upgradeScreen.classList.add('hidden');
-            constellationScreen.classList.remove('hidden');
-            renderConstellationScreen();
-        });
-    }
-
-    if (constellationBackBtn) {
-        constellationBackBtn.addEventListener('click', () => {
-            constellationScreen.classList.add('hidden');
-            upgradeScreen.classList.remove('hidden');
-            updateHangarCoinDisplay();
         });
     }
 
