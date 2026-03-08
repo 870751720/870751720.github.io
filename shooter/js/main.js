@@ -11,17 +11,50 @@ import { renderGachaShop } from './gacha.js';
 import { loadShipUpgrades, renderHangarUpgrade, updateHangarCoinDisplay, loadFavoriteShips } from './hangar.js';
 import { renderInventory } from './inventory.js';
 import { renderStoryScreen } from './story.js';
+import { initUIManager, registerUI, pushUI, popUI, gotoUI, backToMain } from './ui-manager.js';
 
 // 缓存屏幕元素引用
 const screens = {};
 
 /**
- * 切换屏幕
+ * 初始化 UI 管理器（注册所有界面）
  */
-function switchScreen(fromId, toId, onSwitch) {
-  if (fromId && screens[fromId]) screens[fromId].classList.add('hidden');
-  if (toId && screens[toId]) screens[toId].classList.remove('hidden');
-  if (onSwitch) onSwitch();
+function setupUIManager() {
+  // 注册所有界面
+  registerUI('start-screen', {
+    onOpen: () => updateCoinDisplays()
+  });
+  
+  registerUI('upgrade-screen', {
+    onOpen: () => {
+      renderHangarUpgrade();
+      updateHangarCoinDisplay();
+    },
+    onBack: () => 'start-screen'
+  });
+  
+  registerUI('inventory-screen', {
+    onOpen: () => renderInventory(),
+    onBack: () => 'start-screen'
+  });
+  
+  registerUI('ship-screen', {
+    onOpen: () => {
+      renderShipShop();
+      updateShipCoinDisplay();
+    },
+    onBack: () => 'start-screen'
+  });
+  
+  registerUI('gacha-screen', {
+    onOpen: () => renderGachaShop(),
+    onBack: () => 'start-screen'
+  });
+  
+  registerUI('story-screen', {
+    onOpen: () => renderStoryScreen(),
+    onBack: () => 'upgrade-screen'
+  });
 }
 
 /**
@@ -30,86 +63,64 @@ function switchScreen(fromId, toId, onSwitch) {
 function bindRoutes() {
   // 主菜单按钮
   document.getElementById('upgrade-btn')?.addEventListener('click', () => {
-    switchScreen('start-screen', 'upgrade-screen', () => {
-      renderHangarUpgrade();
-      updateHangarCoinDisplay();
-    });
+    pushUI('upgrade-screen');
   });
   
   document.getElementById('inventory-btn')?.addEventListener('click', () => {
-    switchScreen('start-screen', 'inventory-screen', () => {
-      renderInventory();
-    });
+    pushUI('inventory-screen');
   });
   
   document.getElementById('ship-btn')?.addEventListener('click', () => {
-    switchScreen('start-screen', 'ship-screen', () => {
-      renderShipShop();
-      updateShipCoinDisplay();
-    });
+    pushUI('ship-screen');
   });
   
   document.getElementById('gacha-btn')?.addEventListener('click', () => {
-    switchScreen('start-screen', 'gacha-screen', () => {
-      renderGachaShop();
-    });
+    pushUI('gacha-screen');
   });
   
   document.getElementById('start-btn')?.addEventListener('click', startGame);
   
   // 返回主菜单
   document.getElementById('back-btn')?.addEventListener('click', () => {
-    switchScreen('upgrade-screen', 'start-screen', updateCoinDisplays);
+    backToMain();
   });
   
   document.getElementById('ship-back-btn')?.addEventListener('click', () => {
-    switchScreen('ship-screen', 'start-screen', updateCoinDisplays);
+    backToMain();
   });
   
   document.getElementById('gacha-back-btn')?.addEventListener('click', () => {
-    switchScreen('gacha-screen', 'start-screen', updateCoinDisplays);
+    backToMain();
   });
   
   // 屏幕间跳转
   document.getElementById('to-ship-btn')?.addEventListener('click', () => {
-    switchScreen('upgrade-screen', 'ship-screen', () => {
-      renderShipShop();
-      updateShipCoinDisplay();
-    });
+    pushUI('ship-screen');
   });
   
   document.getElementById('to-upgrade-btn')?.addEventListener('click', () => {
-    switchScreen('ship-screen', 'upgrade-screen', () => {
-      renderHangarUpgrade();
-      updateHangarCoinDisplay();
-    });
+    pushUI('upgrade-screen');
   });
   
   document.getElementById('to-gacha-btn')?.addEventListener('click', () => {
-    switchScreen('upgrade-screen', 'gacha-screen', renderGachaShop);
+    pushUI('gacha-screen');
   });
   
   document.getElementById('gacha-to-ship-btn')?.addEventListener('click', () => {
-    switchScreen('gacha-screen', 'ship-screen', () => {
-      renderShipShop();
-      updateShipCoinDisplay();
-    });
+    pushUI('ship-screen');
   });
   
   document.getElementById('gacha-to-upgrade-btn')?.addEventListener('click', () => {
-    switchScreen('gacha-screen', 'upgrade-screen', () => {
-      renderHangarUpgrade();
-      updateHangarCoinDisplay();
-    });
+    pushUI('upgrade-screen');
   });
   
   // 子屏幕
   document.getElementById('story-entry')?.addEventListener('click', () => {
-    switchScreen('upgrade-screen', 'story-screen', renderStoryScreen);
+    pushUI('story-screen');
   });
   
   document.getElementById('story-back-btn')?.addEventListener('click', () => {
-    switchScreen('story-screen', 'upgrade-screen', updateHangarCoinDisplay);
+    popUI();
   });
 }
 
@@ -167,6 +178,9 @@ function initGame() {
   loadShipUpgrades();
   loadFavoriteShips();
   updateCoinDisplays();
+
+  // 初始化 UI 管理器
+  setupUIManager();
 
   // 设置 Canvas
   if (DOM.gameCanvas) {

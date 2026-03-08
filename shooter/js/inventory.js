@@ -4,6 +4,7 @@
 
 import { GameState } from './state.js';
 import { MATERIAL_CONFIGS, getConstellationMaterialConfig, SHIP_CONFIGS } from './ships.js';
+import { gotoUI } from './ui-manager.js';
 
 // 品质颜色配置
 const TIER_COLORS = {
@@ -59,8 +60,7 @@ n                    </div>
     const backBtn = document.getElementById('inventory-back-btn');
     if (backBtn) {
         backBtn.addEventListener('click', () => {
-            container.classList.add('hidden');
-            document.getElementById('start-screen').classList.remove('hidden');
+            gotoUI('start-screen');
         });
     }
 
@@ -147,33 +147,8 @@ function useConstellationMaterial(matKey) {
     const shipId = matKey.replace('constellation_', '');
     if (!shipId) return;
 
-    // 隐藏背包
-    const inventoryScreen = document.getElementById('inventory-screen');
-    if (inventoryScreen) {
-        inventoryScreen.classList.add('hidden');
-    }
-
-    // 隐藏主菜单
-    const startScreen = document.getElementById('start-screen');
-    if (startScreen) {
-        startScreen.classList.add('hidden');
-    }
-
-    // 导入并渲染机库，选中对应飞机和命座标签
-    import('./hangar.js').then(hangarModule => {
-        // 设置选中的飞机
-        if (typeof hangarModule.setSelectedUpgradeShip === 'function') {
-            hangarModule.setSelectedUpgradeShip(shipId);
-        }
-        // 设置当前标签为命座
-        if (typeof hangarModule.setCurrentHangarTab === 'function') {
-            hangarModule.setCurrentHangarTab('constellation');
-        }
-        // 渲染机库
-        if (typeof hangarModule.renderHangarUpgrade === 'function') {
-            hangarModule.renderHangarUpgrade();
-        }
-    });
+    // 使用 gotoUI 跳转到机库，并传递参数
+    gotoUI('upgrade-screen', { shipId, tab: 'constellation' });
 }
 
 // 渲染材料格子
